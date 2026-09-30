@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCcw, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -44,13 +43,6 @@ export const Route = createFileRoute("/_authenticated/deadlines")({
   component: DeadlinesPage,
 });
 
-const STATUS_COPY: Record<string, { label: string; className: string }> = {
-  connected: { label: "Connected", className: "bg-success text-success-foreground" },
-  syncing: { label: "Refreshing…", className: "bg-secondary text-secondary-foreground" },
-  partial: { label: "Connected", className: "bg-success text-success-foreground" },
-  attention: { label: "Needs attention", className: "bg-destructive text-destructive-foreground" },
-};
-
 function DeadlinesPage() {
   const { user } = useSession();
   const queryClient = useQueryClient();
@@ -69,8 +61,6 @@ function DeadlinesPage() {
   const connection = useQuery({
     queryKey: ["connection-state"],
     queryFn: () => getConnectionState(),
-    refetchInterval: (query) =>
-      (query.state.data as { status?: string } | undefined)?.status === "syncing" ? 4000 : false,
   });
 
   const settings = useQuery({
