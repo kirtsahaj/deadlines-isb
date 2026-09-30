@@ -106,6 +106,14 @@ function timeParts(window: string): {
       precision: "explicit_12_hour",
     };
   }
+  const colon24 = TIME_24_COLON.exec(window);
+  if (colon24?.groups) {
+    return {
+      hour: Number(colon24.groups["hour"]),
+      minute: Number(colon24.groups["minute"]),
+      precision: "explicit_24_hour",
+    };
+  }
   return { hour: 23, minute: 59, precision: "assumed_end_of_day" };
 }
 
