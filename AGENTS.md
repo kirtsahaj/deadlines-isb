@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Derive deadline term/course filters at runtime from Moodle short names so existing rows need no migration.
+- Keep phone installability manifest-only; offline caching is intentionally excluded to protect fresh authenticated data.
