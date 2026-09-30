@@ -81,7 +81,9 @@ export async function runSync(
     ): Promise<Json | unknown[]> => {
       try {
         const value = await call();
-        sourceStatus[name] = { ok: true, count: Array.isArray(value) ? value.length : undefined };
+        sourceStatus[name] = Array.isArray(value)
+          ? { ok: true, count: value.length }
+          : { ok: true };
         return value;
       } catch (error) {
         sourceStatus[name] = {
