@@ -66,11 +66,12 @@ export async function connectElearnToken(userId: string, rawToken: string): Prom
 export async function purgeUserData(userId: string): Promise<void> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   for (const table of [
+    // Remove the encrypted credential first so it never outlives purge intent.
+    "elearn_connections",
     "sync_queue",
     "sync_runs",
     "deadline_items",
     "courses",
-    "elearn_connections",
   ] as const) {
     const { error } = await supabaseAdmin.from(table).delete().eq("user_id", userId);
     if (error) throw new Error("database");

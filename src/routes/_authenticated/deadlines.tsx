@@ -59,7 +59,12 @@ function DeadlinesPage() {
   const [selectedCourses, setSelectedCourses] = useState<Set<string> | null>(null);
   const [kindFilter, setKindFilter] = useState("all");
   const [view, setView] = useState<DeadlineView>("upcoming");
-  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [syncMessage, setSyncMessage] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const notice = window.sessionStorage.getItem("deadline-tracker-sync-notice");
+    window.sessionStorage.removeItem("deadline-tracker-sync-notice");
+    return notice;
+  });
 
   const connection = useQuery({
     queryKey: ["connection-state"],
