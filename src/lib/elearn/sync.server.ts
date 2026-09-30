@@ -8,13 +8,25 @@ type Json = Record<string, unknown>;
 type SourceStatus = Record<string, { ok: boolean; code?: string; count?: number }>;
 
 export type SyncResult =
-  | { ok: true; outcome: "success" | "partial"; itemCount: number; lastSyncedAt: string; sourceStatus: SourceStatus }
+  | {
+      ok: true;
+      outcome: "success" | "partial";
+      itemCount: number;
+      lastSyncedAt: string;
+      sourceStatus: SourceStatus;
+    }
   | { ok: false; error: string; retryAfterSeconds?: number };
 
 const asList = (value: unknown): Json[] =>
-  Array.isArray(value) ? value.filter((item): item is Json => !!item && typeof item === "object") : [];
+  Array.isArray(value)
+    ? value.filter((item): item is Json => !!item && typeof item === "object")
+    : [];
 
-async function limitedMap<T, R>(items: T[], limit: number, task: (item: T) => Promise<R>): Promise<R[]> {
+async function limitedMap<T, R>(
+  items: T[],
+  limit: number,
+  task: (item: T) => Promise<R>,
+): Promise<R[]> {
   const output: R[] = [];
   for (let i = 0; i < items.length; i += limit) {
     output.push(...(await Promise.all(items.slice(i, i + limit).map(task))));
@@ -44,9 +56,14 @@ export async function runSync(
 
     if (trigger === "manual" && connection.last_manual_sync_at) {
       const cooldown = manualCooldownSeconds() * 1000;
-      const remaining = cooldown - (Date.now() - new Date(connection.last_manual_sync_at).getTime());
+      const remaining =
+        cooldown - (Date.now() - new Date(connection.last_manual_sync_at).getTime());
       if (remaining > 0) {
-        return { ok: false, error: "sync_cooldown", retryAfterSeconds: Math.ceil(remaining / 1000) };
+        return {
+          ok: false,
+          error: "sync_cooldown",
+          retryAfterSeconds: Math.ceil(remaining / 1000),
+        };
       }
     }
 
@@ -205,16 +222,14 @@ export async function runSync(
       if (error) throw new Error("database");
     }
     if (deadlines.length) {
-      const { error } = await supabaseAdmin
-        .from("deadline_items")
-        .upsert(
-          deadlines.map((row) => ({
-            ...row,
-            user_id: userId,
-            source_evidence: row.source_evidence as unknown as DbJson,
-          })),
-          { onConflict: "user_id,external_key" },
-        );
+      const { error } = await supabaseAdmin.from("deadline_items").upsert(
+        deadlines.map((row) => ({
+          ...row,
+          user_id: userId,
+          source_evidence: row.source_evidence as unknown as DbJson,
+        })),
+        { onConflict: "user_id,external_key" },
+      );
       if (error) throw new Error("database");
     }
 

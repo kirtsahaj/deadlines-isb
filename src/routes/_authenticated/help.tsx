@@ -13,7 +13,8 @@ export const Route = createFileRoute("/_authenticated/help")({
       { title: "Help — ISB Deadline Tracker" },
       {
         name: "description",
-        content: "How the deadline tracker gets your dates, what it can and cannot do, and how to fix a broken connection.",
+        content:
+          "How the deadline tracker gets your dates, what it can and cannot do, and how to fix a broken connection.",
       },
       { property: "og:title", content: "Help — ISB Deadline Tracker" },
       {

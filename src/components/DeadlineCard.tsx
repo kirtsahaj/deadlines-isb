@@ -50,7 +50,9 @@ export function DeadlineCard({
   const isText = item.kind === "text";
   const tbd = !item.due_at;
   const overdue =
-    !!item.due_at && new Date(item.due_at).getTime() < Date.now() && item.submission_status !== "submitted";
+    !!item.due_at &&
+    new Date(item.due_at).getTime() < Date.now() &&
+    item.submission_status !== "submitted";
 
   return (
     <article className="surface-card p-4">

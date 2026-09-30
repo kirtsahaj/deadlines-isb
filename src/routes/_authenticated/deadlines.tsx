@@ -154,7 +154,10 @@ function DeadlinesPage() {
       if (hidden.has(item.moodle_course_id)) return false;
       if (courseFilter !== "all" && String(item.moodle_course_id) !== courseFilter) return false;
       if (kindFilter !== "all" && item.kind !== kindFilter) return false;
-      if (term && !`${item.title} ${courseName(item.moodle_course_id)}`.toLowerCase().includes(term))
+      if (
+        term &&
+        !`${item.title} ${courseName(item.moodle_course_id)}`.toLowerCase().includes(term)
+      )
         return false;
       return true;
     });

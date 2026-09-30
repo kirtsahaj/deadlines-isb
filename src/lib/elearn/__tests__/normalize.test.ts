@@ -8,7 +8,7 @@ const base = {
   assignments: { courses: [] as unknown[] },
   submissions: new Map<number, Record<string, unknown>>(),
   quizzes: { quizzes: [] as unknown[] },
-  forums: [] as unknown[],
+  forums: [] as Record<string, unknown>[],
   calendar: { events: [] as unknown[] },
   contents: new Map<number, Record<string, unknown>[]>(),
   nowSeconds: NOW,

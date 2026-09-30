@@ -25,7 +25,9 @@ export type DeadlineRow = {
 const num = (value: unknown): number | null =>
   typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
 const list = (value: unknown): Json[] =>
-  Array.isArray(value) ? value.filter((item): item is Json => !!item && typeof item === "object") : [];
+  Array.isArray(value)
+    ? value.filter((item): item is Json => !!item && typeof item === "object")
+    : [];
 const iso = (seconds: number | null) => (seconds ? new Date(seconds * 1000).toISOString() : null);
 const evidence = (source: string, timestamp: number | null): Json => ({ source, timestamp });
 
@@ -64,11 +66,9 @@ export function normalizeDeadlines(input: {
       if (!id) continue;
       const submission = input.submissions.get(id) ?? {};
       const attempt = (submission["lastattempt"] as Json | undefined) ?? {};
-      const submitted = (
-        (attempt["submission"] as Json | undefined) ??
+      const submitted = ((attempt["submission"] as Json | undefined) ??
         (attempt["teamsubmission"] as Json | undefined) ??
-        {}
-      )["status"];
+        {})["status"];
       const extension = num(attempt["extensionduedate"]);
       const due = Math.max(num(assignment["duedate"]) ?? 0, extension ?? 0) || null;
       const cutoffDate = num(assignment["cutoffdate"]);
@@ -183,7 +183,8 @@ export function normalizeDeadlines(input: {
     const courseId = num(event["courseid"]) ?? num((event["course"] as Json | undefined)?.["id"]);
     const due = num(event["timestart"]);
     if (!courseId || !due) continue;
-    const modul = event["modulename"] === "assign" ? "assignment" : String(event["modulename"] ?? "calendar");
+    const modul =
+      event["modulename"] === "assign" ? "assignment" : String(event["modulename"] ?? "calendar");
     const type = String(event["eventtype"] ?? "event");
     // Moodle labels the same activity event differently across versions, so try
     // the reported event type first and then the keys we generate ourselves.
@@ -275,9 +276,7 @@ export function normalizeDeadlines(input: {
               deadline_status: "dated_from_text",
               submission_status: "unknown",
               source_primary: "core_course_get_contents.description",
-              source_evidence: [
-                evidence("core_course_get_contents.description", parsed.timestamp),
-              ],
+              source_evidence: [evidence("core_course_get_contents.description", parsed.timestamp)],
               text_evidence: parsed.text,
               text_precision: parsed.precision,
               conflict: false,

@@ -69,7 +69,9 @@ export const getConnectionState = createServerFn({ method: "GET" })
 
 export const connectElearn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { token: string }) => z.object({ token: z.string().min(16).max(128) }).parse(data))
+  .inputValidator((data: { token: string }) =>
+    z.object({ token: z.string().min(16).max(128) }).parse(data),
+  )
   .handler(async ({ data, context }) => {
     await assertAllowed(context.claims);
     const { connectElearnToken } = await import("./elearn/connection.server");

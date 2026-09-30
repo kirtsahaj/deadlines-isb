@@ -1,500 +1,477 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.18"
-  }
+    PostgrestVersion: "14.18";
+  };
   public: {
     Tables: {
       courses: {
         Row: {
-          created_at: string
-          full_name: string
-          id: string
-          last_seen_at: string
-          moodle_course_id: number
-          raw_updated_at: string | null
-          short_name: string | null
-          updated_at: string
-          user_id: string
-          visible: boolean
-        }
+          created_at: string;
+          full_name: string;
+          id: string;
+          last_seen_at: string;
+          moodle_course_id: number;
+          raw_updated_at: string | null;
+          short_name: string | null;
+          updated_at: string;
+          user_id: string;
+          visible: boolean;
+        };
         Insert: {
-          created_at?: string
-          full_name: string
-          id?: string
-          last_seen_at?: string
-          moodle_course_id: number
-          raw_updated_at?: string | null
-          short_name?: string | null
-          updated_at?: string
-          user_id: string
-          visible?: boolean
-        }
+          created_at?: string;
+          full_name: string;
+          id?: string;
+          last_seen_at?: string;
+          moodle_course_id: number;
+          raw_updated_at?: string | null;
+          short_name?: string | null;
+          updated_at?: string;
+          user_id: string;
+          visible?: boolean;
+        };
         Update: {
-          created_at?: string
-          full_name?: string
-          id?: string
-          last_seen_at?: string
-          moodle_course_id?: number
-          raw_updated_at?: string | null
-          short_name?: string | null
-          updated_at?: string
-          user_id?: string
-          visible?: boolean
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          full_name?: string;
+          id?: string;
+          last_seen_at?: string;
+          moodle_course_id?: number;
+          raw_updated_at?: string | null;
+          short_name?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          visible?: boolean;
+        };
+        Relationships: [];
+      };
       deadline_items: {
         Row: {
-          active: boolean
-          activity_id: number | null
-          conflict: boolean
-          created_at: string
-          deadline_status: string
-          deadline_type: string
-          due_at: string | null
-          external_key: string
-          first_seen_at: string
-          id: string
-          kind: string
-          last_seen_at: string
-          moodle_course_id: number
-          removed_at: string | null
-          source_evidence: Json
-          source_primary: string
-          submission_status: string
-          text_evidence: string | null
-          text_precision: string | null
-          title: string
-          updated_at: string
-          user_id: string
-        }
+          active: boolean;
+          activity_id: number | null;
+          conflict: boolean;
+          created_at: string;
+          deadline_status: string;
+          deadline_type: string;
+          due_at: string | null;
+          external_key: string;
+          first_seen_at: string;
+          id: string;
+          kind: string;
+          last_seen_at: string;
+          moodle_course_id: number;
+          removed_at: string | null;
+          source_evidence: Json;
+          source_primary: string;
+          submission_status: string;
+          text_evidence: string | null;
+          text_precision: string | null;
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          active?: boolean
-          activity_id?: number | null
-          conflict?: boolean
-          created_at?: string
-          deadline_status?: string
-          deadline_type: string
-          due_at?: string | null
-          external_key: string
-          first_seen_at?: string
-          id?: string
-          kind: string
-          last_seen_at?: string
-          moodle_course_id: number
-          removed_at?: string | null
-          source_evidence?: Json
-          source_primary: string
-          submission_status?: string
-          text_evidence?: string | null
-          text_precision?: string | null
-          title: string
-          updated_at?: string
-          user_id: string
-        }
+          active?: boolean;
+          activity_id?: number | null;
+          conflict?: boolean;
+          created_at?: string;
+          deadline_status?: string;
+          deadline_type: string;
+          due_at?: string | null;
+          external_key: string;
+          first_seen_at?: string;
+          id?: string;
+          kind: string;
+          last_seen_at?: string;
+          moodle_course_id: number;
+          removed_at?: string | null;
+          source_evidence?: Json;
+          source_primary: string;
+          submission_status?: string;
+          text_evidence?: string | null;
+          text_precision?: string | null;
+          title: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          active?: boolean
-          activity_id?: number | null
-          conflict?: boolean
-          created_at?: string
-          deadline_status?: string
-          deadline_type?: string
-          due_at?: string | null
-          external_key?: string
-          first_seen_at?: string
-          id?: string
-          kind?: string
-          last_seen_at?: string
-          moodle_course_id?: number
-          removed_at?: string | null
-          source_evidence?: Json
-          source_primary?: string
-          submission_status?: string
-          text_evidence?: string | null
-          text_precision?: string | null
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          active?: boolean;
+          activity_id?: number | null;
+          conflict?: boolean;
+          created_at?: string;
+          deadline_status?: string;
+          deadline_type?: string;
+          due_at?: string | null;
+          external_key?: string;
+          first_seen_at?: string;
+          id?: string;
+          kind?: string;
+          last_seen_at?: string;
+          moodle_course_id?: number;
+          removed_at?: string | null;
+          source_evidence?: Json;
+          source_primary?: string;
+          submission_status?: string;
+          text_evidence?: string | null;
+          text_precision?: string | null;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       elearn_connections: {
         Row: {
-          base_url: string
-          connection_mode: string
-          consecutive_failures: number
-          created_at: string
-          exposed_functions: string[]
-          external_full_name: string | null
-          external_user_id: number | null
-          last_attempt_at: string | null
-          last_manual_sync_at: string | null
-          last_success_at: string | null
-          next_sync_at: string
-          provider: string
-          safe_error_code: string | null
-          status: Database["public"]["Enums"]["connection_status"]
-          token_ciphertext: string
-          token_iv: string
-          token_key_version: number
-          updated_at: string
-          user_id: string
-        }
+          base_url: string;
+          connection_mode: string;
+          consecutive_failures: number;
+          created_at: string;
+          exposed_functions: string[];
+          external_full_name: string | null;
+          external_user_id: number | null;
+          last_attempt_at: string | null;
+          last_manual_sync_at: string | null;
+          last_success_at: string | null;
+          next_sync_at: string;
+          provider: string;
+          safe_error_code: string | null;
+          status: Database["public"]["Enums"]["connection_status"];
+          token_ciphertext: string;
+          token_iv: string;
+          token_key_version: number;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          base_url: string
-          connection_mode?: string
-          consecutive_failures?: number
-          created_at?: string
-          exposed_functions?: string[]
-          external_full_name?: string | null
-          external_user_id?: number | null
-          last_attempt_at?: string | null
-          last_manual_sync_at?: string | null
-          last_success_at?: string | null
-          next_sync_at?: string
-          provider?: string
-          safe_error_code?: string | null
-          status?: Database["public"]["Enums"]["connection_status"]
-          token_ciphertext: string
-          token_iv: string
-          token_key_version: number
-          updated_at?: string
-          user_id: string
-        }
+          base_url: string;
+          connection_mode?: string;
+          consecutive_failures?: number;
+          created_at?: string;
+          exposed_functions?: string[];
+          external_full_name?: string | null;
+          external_user_id?: number | null;
+          last_attempt_at?: string | null;
+          last_manual_sync_at?: string | null;
+          last_success_at?: string | null;
+          next_sync_at?: string;
+          provider?: string;
+          safe_error_code?: string | null;
+          status?: Database["public"]["Enums"]["connection_status"];
+          token_ciphertext: string;
+          token_iv: string;
+          token_key_version: number;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          base_url?: string
-          connection_mode?: string
-          consecutive_failures?: number
-          created_at?: string
-          exposed_functions?: string[]
-          external_full_name?: string | null
-          external_user_id?: number | null
-          last_attempt_at?: string | null
-          last_manual_sync_at?: string | null
-          last_success_at?: string | null
-          next_sync_at?: string
-          provider?: string
-          safe_error_code?: string | null
-          status?: Database["public"]["Enums"]["connection_status"]
-          token_ciphertext?: string
-          token_iv?: string
-          token_key_version?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          base_url?: string;
+          connection_mode?: string;
+          consecutive_failures?: number;
+          created_at?: string;
+          exposed_functions?: string[];
+          external_full_name?: string | null;
+          external_user_id?: number | null;
+          last_attempt_at?: string | null;
+          last_manual_sync_at?: string | null;
+          last_success_at?: string | null;
+          next_sync_at?: string;
+          provider?: string;
+          safe_error_code?: string | null;
+          status?: Database["public"]["Enums"]["connection_status"];
+          token_ciphertext?: string;
+          token_iv?: string;
+          token_key_version?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
-          created_at: string
-          display_name: string | null
-          is_admin: boolean
-          updated_at: string
-          user_id: string
-        }
+          created_at: string;
+          display_name: string | null;
+          is_admin: boolean;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          display_name?: string | null
-          is_admin?: boolean
-          updated_at?: string
-          user_id: string
-        }
+          created_at?: string;
+          display_name?: string | null;
+          is_admin?: boolean;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          display_name?: string | null
-          is_admin?: boolean
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          display_name?: string | null;
+          is_admin?: boolean;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       sync_queue: {
         Row: {
-          attempts: number
-          created_at: string
-          locked_at: string | null
-          locked_by: string | null
-          priority: number
-          run_after: string
-          updated_at: string
-          user_id: string
-        }
+          attempts: number;
+          created_at: string;
+          locked_at: string | null;
+          locked_by: string | null;
+          priority: number;
+          run_after: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          attempts?: number
-          created_at?: string
-          locked_at?: string | null
-          locked_by?: string | null
-          priority?: number
-          run_after?: string
-          updated_at?: string
-          user_id: string
-        }
+          attempts?: number;
+          created_at?: string;
+          locked_at?: string | null;
+          locked_by?: string | null;
+          priority?: number;
+          run_after?: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          attempts?: number
-          created_at?: string
-          locked_at?: string | null
-          locked_by?: string | null
-          priority?: number
-          run_after?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          attempts?: number;
+          created_at?: string;
+          locked_at?: string | null;
+          locked_by?: string | null;
+          priority?: number;
+          run_after?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       sync_runs: {
         Row: {
-          created_at: string
-          duration_ms: number | null
-          finished_at: string | null
-          id: string
-          item_count: number
-          outcome: Database["public"]["Enums"]["sync_outcome"]
-          safe_error_code: string | null
-          source_status: Json
-          started_at: string
-          trigger: Database["public"]["Enums"]["sync_trigger"]
-          user_id: string
-        }
+          created_at: string;
+          duration_ms: number | null;
+          finished_at: string | null;
+          id: string;
+          item_count: number;
+          outcome: Database["public"]["Enums"]["sync_outcome"];
+          safe_error_code: string | null;
+          source_status: Json;
+          started_at: string;
+          trigger: Database["public"]["Enums"]["sync_trigger"];
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          duration_ms?: number | null
-          finished_at?: string | null
-          id?: string
-          item_count?: number
-          outcome?: Database["public"]["Enums"]["sync_outcome"]
-          safe_error_code?: string | null
-          source_status?: Json
-          started_at?: string
-          trigger: Database["public"]["Enums"]["sync_trigger"]
-          user_id: string
-        }
+          created_at?: string;
+          duration_ms?: number | null;
+          finished_at?: string | null;
+          id?: string;
+          item_count?: number;
+          outcome?: Database["public"]["Enums"]["sync_outcome"];
+          safe_error_code?: string | null;
+          source_status?: Json;
+          started_at?: string;
+          trigger: Database["public"]["Enums"]["sync_trigger"];
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          duration_ms?: number | null
-          finished_at?: string | null
-          id?: string
-          item_count?: number
-          outcome?: Database["public"]["Enums"]["sync_outcome"]
-          safe_error_code?: string | null
-          source_status?: Json
-          started_at?: string
-          trigger?: Database["public"]["Enums"]["sync_trigger"]
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          duration_ms?: number | null;
+          finished_at?: string | null;
+          id?: string;
+          item_count?: number;
+          outcome?: Database["public"]["Enums"]["sync_outcome"];
+          safe_error_code?: string | null;
+          source_status?: Json;
+          started_at?: string;
+          trigger?: Database["public"]["Enums"]["sync_trigger"];
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       user_settings: {
         Row: {
-          created_at: string
-          explicit_deadline_marker_only: boolean
-          hidden_course_ids: number[]
-          sort_order: string
-          timezone: string
-          updated_at: string
-          user_id: string
-        }
+          created_at: string;
+          explicit_deadline_marker_only: boolean;
+          hidden_course_ids: number[];
+          sort_order: string;
+          timezone: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          explicit_deadline_marker_only?: boolean
-          hidden_course_ids?: number[]
-          sort_order?: string
-          timezone?: string
-          updated_at?: string
-          user_id: string
-        }
+          created_at?: string;
+          explicit_deadline_marker_only?: boolean;
+          hidden_course_ids?: number[];
+          sort_order?: string;
+          timezone?: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          explicit_deadline_marker_only?: boolean
-          hidden_course_ids?: number[]
-          sort_order?: string
-          timezone?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-    }
+          created_at?: string;
+          explicit_deadline_marker_only?: boolean;
+          hidden_course_ids?: number[];
+          sort_order?: string;
+          timezone?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
       claim_sync_queue: {
-        Args: { p_batch?: number; p_worker: string }
+        Args: { p_batch?: number; p_worker: string };
         Returns: {
-          attempts: number
-          created_at: string
-          locked_at: string | null
-          locked_by: string | null
-          priority: number
-          run_after: string
-          updated_at: string
-          user_id: string
-        }[]
+          attempts: number;
+          created_at: string;
+          locked_at: string | null;
+          locked_by: string | null;
+          priority: number;
+          run_after: string;
+          updated_at: string;
+          user_id: string;
+        }[];
         SetofOptions: {
-          from: "*"
-          to: "sync_queue"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      ensure_current_user_bootstrapped: { Args: never; Returns: undefined }
-      is_allowed_isb_user: { Args: never; Returns: boolean }
-    }
+          from: "*";
+          to: "sync_queue";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      ensure_current_user_bootstrapped: { Args: never; Returns: undefined };
+      is_allowed_isb_user: { Args: never; Returns: boolean };
+    };
     Enums: {
-      connection_status:
-        | "connected"
-        | "syncing"
-        | "partial"
-        | "attention"
-        | "disconnected"
-      sync_outcome: "running" | "success" | "partial" | "failed"
-      sync_trigger: "first_connect" | "manual" | "scheduled" | "webhook"
-    }
+      connection_status: "connected" | "syncing" | "partial" | "attention" | "disconnected";
+      sync_outcome: "running" | "success" | "partial" | "failed";
+      sync_trigger: "first_connect" | "manual" | "scheduled" | "webhook";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["CompositeTypes"] | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
     Enums: {
-      connection_status: [
-        "connected",
-        "syncing",
-        "partial",
-        "attention",
-        "disconnected",
-      ],
+      connection_status: ["connected", "syncing", "partial", "attention", "disconnected"],
       sync_outcome: ["running", "success", "partial", "failed"],
       sync_trigger: ["first_connect", "manual", "scheduled", "webhook"],
     },
   },
-} as const
+} as const;

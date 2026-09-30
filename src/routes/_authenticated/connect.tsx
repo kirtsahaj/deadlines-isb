@@ -14,12 +14,14 @@ export const Route = createFileRoute("/_authenticated/connect")({
       { title: "Connect eLearn — ISB Deadline Tracker" },
       {
         name: "description",
-        content: "Five short steps to link your eLearn coursework, read-only and without a password.",
+        content:
+          "Five short steps to link your eLearn coursework, read-only and without a password.",
       },
       { property: "og:title", content: "Connect eLearn — ISB Deadline Tracker" },
       {
         property: "og:description",
-        content: "Five short steps to link your eLearn coursework, read-only and without a password.",
+        content:
+          "Five short steps to link your eLearn coursework, read-only and without a password.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

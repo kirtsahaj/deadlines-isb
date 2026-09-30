@@ -34,8 +34,10 @@ const MONTHS: Record<string, number> = {
   december: 11,
 };
 
-const DATE_DMY = /(?<day>\d{1,2})(?:st|nd|rd|th)?[\s,/-]+(?<month>[A-Za-z]{3,9})[\s,/-]+(?<year>20\d{2})/i;
-const DATE_MDY = /(?<month>[A-Za-z]{3,9})[\s,/-]+(?<day>\d{1,2})(?:st|nd|rd|th)?[\s,/-]+(?<year>20\d{2})/i;
+const DATE_DMY =
+  /(?<day>\d{1,2})(?:st|nd|rd|th)?[\s,/-]+(?<month>[A-Za-z]{3,9})[\s,/-]+(?<year>20\d{2})/i;
+const DATE_MDY =
+  /(?<month>[A-Za-z]{3,9})[\s,/-]+(?<day>\d{1,2})(?:st|nd|rd|th)?[\s,/-]+(?<year>20\d{2})/i;
 const DATE_ISO = /(?<year>20\d{2})-(?<month>0[1-9]|1[0-2])-(?<day>0[1-9]|[12]\d|3[01])/;
 const DATE_NUMERIC_IN = /(?<day>0?[1-9]|[12]\d|3[01])\/(?<month>0?[1-9]|1[0-2])\/(?<year>20\d{2})/;
 const TIME_12 = /(?<!\d)(?<hour>\d{1,2})(?::(?<minute>\d{2}))?\s*(?<ampm>am|pm)\b/i;

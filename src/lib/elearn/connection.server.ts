@@ -2,14 +2,9 @@ import { elearnBaseUrl } from "./config.server";
 import { encryptToken } from "./crypto.server";
 import { MoodleClient, MoodleError, readOnlyFunctions } from "./moodle.server";
 
-export type ConnectResult =
-  | { ok: true; accountName: string | null }
-  | { ok: false; error: string };
+export type ConnectResult = { ok: true; accountName: string | null } | { ok: false; error: string };
 
-export async function connectElearnToken(
-  userId: string,
-  rawToken: string,
-): Promise<ConnectResult> {
+export async function connectElearnToken(userId: string, rawToken: string): Promise<ConnectResult> {
   const token = rawToken.trim();
   if (!/^[A-Za-z0-9]{16,128}$/.test(token)) return { ok: false, error: "invalid_elearn_key" };
 

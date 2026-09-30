@@ -24,7 +24,8 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { title: "Settings — ISB Deadline Tracker" },
       {
         name: "description",
-        content: "Manage your eLearn connection, display preferences, hidden courses and your data.",
+        content:
+          "Manage your eLearn connection, display preferences, hidden courses and your data.",
       },
       { property: "og:title", content: "Settings — ISB Deadline Tracker" },
       {
@@ -47,7 +48,10 @@ function SettingsPage() {
   const [confirmation, setConfirmation] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
 
-  const connection = useQuery({ queryKey: ["connection-state"], queryFn: () => getConnectionState() });
+  const connection = useQuery({
+    queryKey: ["connection-state"],
+    queryFn: () => getConnectionState(),
+  });
   const courses = useQuery({
     queryKey: ["courses", user?.id],
     queryFn: async () => {
