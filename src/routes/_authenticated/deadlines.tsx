@@ -14,10 +14,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DeadlineCard, type DeadlineRow } from "@/components/DeadlineCard";
+import { InstallPrompt } from "@/components/InstallPrompt";
+import { MultiSelectFilter } from "@/components/MultiSelectFilter";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/useSession";
 import { getConnectionState, syncNow } from "@/lib/elearn.functions";
 import { DEFAULT_TIMEZONE, lastSyncedLabel } from "@/lib/format";
+import { firstPreferredName } from "@/lib/preferredName";
+import { parseCourseMetadata, selectedOrAll } from "@/lib/courseMetadata";
+import { isDeadlineInView, sortDeadlineView, type DeadlineView } from "@/lib/deadlineViews";
 
 export const Route = createFileRoute("/_authenticated/deadlines")({
   head: () => ({
@@ -42,27 +47,18 @@ export const Route = createFileRoute("/_authenticated/deadlines")({
 const STATUS_COPY: Record<string, { label: string; className: string }> = {
   connected: { label: "Connected", className: "bg-success text-success-foreground" },
   syncing: { label: "Refreshing…", className: "bg-secondary text-secondary-foreground" },
-  partial: { label: "Partly updated", className: "bg-warning text-warning-foreground" },
+  partial: { label: "Connected", className: "bg-success text-success-foreground" },
   attention: { label: "Needs attention", className: "bg-destructive text-destructive-foreground" },
 };
-
-function greeting() {
-  const hour = Number(
-    new Intl.DateTimeFormat("en-GB", { hour: "numeric", hour12: false, timeZone: DEFAULT_TIMEZONE })
-      .format(new Date())
-      .replace(/\D/g, ""),
-  );
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-}
 
 function DeadlinesPage() {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [courseFilter, setCourseFilter] = useState("all");
+  const [selectedTerms, setSelectedTerms] = useState<Set<string> | null>(null);
+  const [selectedCourses, setSelectedCourses] = useState<Set<string> | null>(null);
   const [kindFilter, setKindFilter] = useState("all");
+  const [view, setView] = useState<DeadlineView>("upcoming");
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   const connection = useQuery({
@@ -77,8 +73,17 @@ function DeadlinesPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("user_settings")
-        .select("timezone, sort_order, hidden_course_ids")
+        .select("timezone, hidden_course_ids")
         .maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const profile = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("display_name").maybeSingle();
       return data;
     },
     enabled: !!user,
@@ -117,7 +122,7 @@ function DeadlinesPage() {
       if (result.ok) {
         setSyncMessage(
           result.outcome === "partial"
-            ? "Updated, but eLearn didn't return everything this time."
+            ? "Refresh complete. Some eLearn sections were unavailable; your existing dates remain here."
             : `Updated — ${result.itemCount} deadline${result.itemCount === 1 ? "" : "s"} found.`,
         );
       } else if (result.error === "sync_cooldown") {
@@ -137,39 +142,53 @@ function DeadlinesPage() {
   });
 
   const timezone = settings.data?.timezone ?? DEFAULT_TIMEZONE;
-  const sortOrder = settings.data?.sort_order ?? "latest_first";
   const hidden = useMemo(
     () => new Set(settings.data?.hidden_course_ids ?? []),
     [settings.data?.hidden_course_ids],
   );
 
-  const courseName = (id: number) => {
+  const courseFor = (id: number) => {
     const course = courses.data?.find((item) => item.moodle_course_id === id);
-    return course?.short_name || course?.full_name || "Course";
+    const metadata = parseCourseMetadata(course?.short_name);
+    return {
+      name: course?.full_name || course?.short_name || "Course",
+      shortName: course?.short_name || course?.full_name || "Course",
+      ...metadata,
+    };
   };
+
+  const termOptions = useMemo(
+    () => [...new Set((courses.data ?? []).map((course) => parseCourseMetadata(course.short_name).term))].sort(),
+    [courses.data],
+  );
+  const activeTerms = selectedOrAll(termOptions, selectedTerms);
+  const courseOptions = useMemo(
+    () =>
+      (courses.data ?? [])
+        .filter((course) => activeTerms.has(parseCourseMetadata(course.short_name).term))
+        .map((course) => String(course.moodle_course_id)),
+    [courses.data, activeTerms],
+  );
+  const activeCourses = selectedOrAll(courseOptions, selectedCourses);
 
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase();
     const rows = (deadlines.data ?? []).filter((item) => {
       if (hidden.has(item.moodle_course_id)) return false;
-      if (courseFilter !== "all" && String(item.moodle_course_id) !== courseFilter) return false;
+      const course = courseFor(item.moodle_course_id);
+      if (!activeTerms.has(course.term) || !activeCourses.has(String(item.moodle_course_id))) return false;
       if (kindFilter !== "all" && item.kind !== kindFilter) return false;
+      if (!isDeadlineInView(item.due_at, view, Date.now(), timezone)) return false;
       if (
         term &&
-        !`${item.title} ${courseName(item.moodle_course_id)}`.toLowerCase().includes(term)
+        !`${item.title} ${course.name} ${course.shortName}`.toLowerCase().includes(term)
       )
         return false;
       return true;
     });
-    return rows.sort((a, b) => {
-      if (!a.due_at && !b.due_at) return a.title.localeCompare(b.title);
-      if (!a.due_at) return 1;
-      if (!b.due_at) return -1;
-      const diff = new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
-      return sortOrder === "earliest_first" ? diff : -diff;
-    });
+    return sortDeadlineView(rows, view);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deadlines.data, courses.data, hidden, courseFilter, kindFilter, search, sortOrder]);
+  }, [deadlines.data, courses.data, hidden, activeTerms, activeCourses, kindFilter, search, view, timezone]);
 
   if (connection.isLoading) {
     return (
@@ -203,8 +222,10 @@ function DeadlinesPage() {
       <header className="space-y-3">
         <div className="flex flex-wrap items-start gap-3">
           <div className="mr-auto">
-            <h1 className="text-2xl font-semibold">{greeting()}</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-3xl font-semibold">
+              Hello{firstPreferredName(user?.user_metadata, profile.data?.display_name) ? ` ${firstPreferredName(user?.user_metadata, profile.data?.display_name)}` : ""}!
+            </h1>
+            <p className="mt-1 text-sm font-medium text-muted-foreground">
               {lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null)}
             </p>
           </div>
@@ -242,6 +263,16 @@ function DeadlinesPage() {
         )}
       </header>
 
+      <InstallPrompt />
+
+      <div className="inline-flex rounded-lg bg-muted p-1" role="tablist" aria-label="Deadline view">
+        {(["upcoming", "past"] as DeadlineView[]).map((value) => (
+          <Button key={value} type="button" role="tab" aria-selected={view === value} variant={view === value ? "default" : "ghost"} size="sm" onClick={() => setView(value)}>
+            {value === "upcoming" ? "Upcoming" : "Past"}
+          </Button>
+        ))}
+      </div>
+
       <div className="flex flex-wrap gap-2">
         <div className="relative min-w-48 flex-1">
           <Search
@@ -256,19 +287,8 @@ function DeadlinesPage() {
             className="pl-9"
           />
         </div>
-        <Select value={courseFilter} onValueChange={setCourseFilter}>
-          <SelectTrigger className="w-40" aria-label="Filter by course">
-            <SelectValue placeholder="All courses" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All courses</SelectItem>
-            {(courses.data ?? []).map((course) => (
-              <SelectItem key={course.moodle_course_id} value={String(course.moodle_course_id)}>
-                {course.short_name || course.full_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <MultiSelectFilter label="Term" options={termOptions} selected={activeTerms} onChange={(next) => { setSelectedTerms(next); setSelectedCourses(null); }} />
+        <MultiSelectFilter label="Course" options={courseOptions} selected={activeCourses} onChange={setSelectedCourses} />
         <Select value={kindFilter} onValueChange={setKindFilter}>
           <SelectTrigger className="w-36" aria-label="Filter by type">
             <SelectValue placeholder="All types" />
@@ -291,7 +311,7 @@ function DeadlinesPage() {
         </div>
       ) : visible.length === 0 ? (
         <div className="surface-card p-6 text-center">
-          <h2 className="text-base font-semibold">Nothing to show here</h2>
+          <h2 className="text-base font-semibold">{view === "upcoming" ? "No upcoming deadlines" : "No past deadlines"}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {deadlines.data?.length
               ? "No deadlines match your current search or filters."
@@ -304,7 +324,8 @@ function DeadlinesPage() {
             <li key={item.id}>
               <DeadlineCard
                 item={item}
-                courseName={courseName(item.moodle_course_id)}
+                 courseName={courseFor(item.moodle_course_id).name}
+                 courseCode={courseFor(item.moodle_course_id).courseCode}
                 timezone={timezone}
               />
             </li>
