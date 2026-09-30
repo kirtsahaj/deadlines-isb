@@ -164,7 +164,7 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
   }
 
   :focus-visible {
@@ -179,6 +179,89 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-card);
+  }
+
+  .deadline-card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition:
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .deadline-card:hover {
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-1px);
+  }
+
+  .course-code {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-sm);
+    background-color: color-mix(in oklch, var(--color-accent) 14%, transparent);
+    color: var(--color-foreground);
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .connection-steps {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .connection-step {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .connection-step-number {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    font-weight: 700;
+  }
+
+  .guide-image {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-muted);
+  }
+
+  .install-prompt {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 1rem;
+    border: 1px solid color-mix(in oklch, var(--color-accent) 40%, var(--color-border));
+    border-radius: var(--radius-lg);
+    background: color-mix(in oklch, var(--color-accent) 8%, var(--color-card));
+    box-shadow: var(--shadow-card);
+  }
+
+  .install-prompt-icon {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: none;
+    place-items: center;
+    border-radius: var(--radius-md);
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
   }
 
   .tap-target {

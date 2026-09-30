@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ConnectionGuide } from "@/components/ConnectionGuide";
 import { parseElearnConnectionCode } from "@/lib/parseElearnConnectionCode";
 import { connectElearn } from "@/lib/elearn.functions";
+import { INSTALL_DISMISSED_KEY, INSTALL_READY_KEY } from "@/lib/installPrompt";
 
 export const Route = createFileRoute("/_authenticated/connect")({
   head: () => ({
@@ -58,6 +59,21 @@ function ConnectPage() {
         setError(MESSAGES[result.error ?? ""] ?? MESSAGES["request_failed"]!);
         return;
       }
+      if (result.firstSync === "success" || result.firstSync === "partial") {
+        window.localStorage.setItem(INSTALL_READY_KEY, "true");
+        window.localStorage.removeItem(INSTALL_DISMISSED_KEY);
+      }
+      if (result.firstSync === "failed") {
+        window.sessionStorage.setItem(
+          "deadline-tracker-sync-notice",
+          "eLearn could not complete the first refresh. Your connection is saved; use Refresh now shortly.",
+        );
+      } else if (result.firstSync === "partial") {
+        window.sessionStorage.setItem(
+          "deadline-tracker-sync-notice",
+          "Some eLearn sections were unavailable. Available dates are ready, and existing dates remain available.",
+        );
+      }
       await queryClient.invalidateQueries();
       void navigate({ to: "/deadlines" });
     },
@@ -88,7 +104,7 @@ function ConnectPage() {
           mutation.mutate(value);
         }}
       >
-        <Label htmlFor="connection-code">Paste your connection code</Label>
+        <Label htmlFor="connection-code">eLearn connection code</Label>
         <Textarea
           id="connection-code"
           value={value}
@@ -96,14 +112,16 @@ function ConnectPage() {
           rows={3}
           spellCheck={false}
           autoComplete="off"
-          placeholder="Failed to launch 'moodlemobile://token=…'"
+          placeholder="moodlemobile://token=…"
           className="font-mono text-xs"
           style={{ WebkitTextSecurity: "disc" } as React.CSSProperties}
           aria-describedby="connection-code-help"
         />
         <p id="connection-code-help" className="text-xs text-muted-foreground">
-          Hidden as you paste, used once in your browser, and cleared immediately. Only a read-only
-          key is sent on — the rest of the line is discarded.
+          This value is as sensitive as a password. Paste it only here. Never put it in chat, email,
+          screenshots, analytics, logs, or support messages. If you share it anywhere else, do not
+          use it—generate a fresh one. It is decoded only in browser memory, cleared immediately,
+          and only the read-only key is sent securely.
         </p>
         {error && (
           <p role="alert" className="text-sm text-destructive">

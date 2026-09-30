@@ -1,7 +1,14 @@
-import { useState } from "react";
-import { AlertTriangle, ChevronDown, Clock } from "lucide-react";
+import { AlertTriangle, Clock, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { formatDateTime, relativeTime } from "@/lib/format";
 
 export type DeadlineRow = {
@@ -40,13 +47,14 @@ const KIND_LABELS: Record<string, string> = {
 export function DeadlineCard({
   item,
   courseName,
+  courseCode,
   timezone,
 }: {
   item: DeadlineRow;
   courseName: string;
+  courseCode: string;
   timezone: string;
 }) {
-  const [open, setOpen] = useState(false);
   const isText = item.kind === "text";
   const tbd = !item.due_at;
   const overdue =
@@ -55,15 +63,79 @@ export function DeadlineCard({
     item.submission_status !== "submitted";
 
   return (
-    <article className="surface-card p-4">
+    <article className="deadline-card relative p-4 sm:p-5">
       <div className="flex flex-wrap items-start gap-2">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {courseName}
-          </p>
+          <div className="flex flex-wrap items-center gap-2 pr-8">
+            <span className="course-code">{courseCode}</span>
+            <span className="truncate text-xs text-muted-foreground">{courseName}</span>
+          </div>
           <h3 className="mt-0.5 text-base font-semibold leading-snug">{item.title}</h3>
         </div>
-        <Badge variant="secondary">{KIND_LABELS[item.kind] ?? item.kind}</Badge>
+        <div className="flex items-center gap-1">
+          <Badge variant="secondary">{KIND_LABELS[item.kind] ?? item.kind}</Badge>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-9"
+                aria-label={`Information about ${item.title}`}
+              >
+                <Info className="size-4" aria-hidden />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md rounded-lg">
+              <DialogHeader>
+                <DialogTitle>Deadline information</DialogTitle>
+                <DialogDescription>{item.title}</DialogDescription>
+              </DialogHeader>
+              <dl className="space-y-3 text-sm">
+                <div>
+                  <dt className="font-medium">Source</dt>
+                  <dd className="text-muted-foreground">
+                    {SOURCE_LABELS[item.source_primary] ?? "eLearn course data"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-medium">How this date was found</dt>
+                  <dd className="text-muted-foreground">
+                    {isText || item.deadline_status === "dated_from_text"
+                      ? "Mentioned in course text"
+                      : "Published as a structured eLearn deadline"}
+                  </dd>
+                </div>
+                {item.text_evidence && (
+                  <div>
+                    <dt className="font-medium">Evidence</dt>
+                    <dd className="text-muted-foreground">“{item.text_evidence}”</dd>
+                  </div>
+                )}
+                {item.conflict && (
+                  <div>
+                    <dt className="font-medium">Sources disagree</dt>
+                    <dd className="text-muted-foreground">
+                      The activity and calendar show different times. Check the activity in eLearn
+                      before relying on this date.
+                    </dd>
+                  </div>
+                )}
+                {(isText || item.deadline_status === "dated_from_text") && (
+                  <div className="rounded-md bg-warning/15 p-3 text-warning-foreground">
+                    This is not a confirmed eLearn due date. Check the activity before relying on
+                    it.
+                  </div>
+                )}
+                {item.deadline_status === "TBD" && (
+                  <div className="text-muted-foreground">
+                    eLearn has not published a date for this item.
+                  </div>
+                )}
+              </dl>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
@@ -102,37 +174,6 @@ export function DeadlineCard({
         <p className="mt-3 text-xs text-muted-foreground">
           Not an official due date. Confirm this one in eLearn before you rely on it.
         </p>
-      )}
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="mt-2 -ml-2 h-8 px-2 text-xs"
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <ChevronDown
-          className={`size-4 transition-transform ${open ? "rotate-180" : ""}`}
-          aria-hidden
-        />
-        Where this came from
-      </Button>
-
-      {open && (
-        <div className="mt-2 space-y-2 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-          <p>
-            <span className="font-medium text-foreground">Source:</span>{" "}
-            {SOURCE_LABELS[item.source_primary] ?? item.source_primary}
-          </p>
-          {item.text_evidence && (
-            <p>
-              <span className="font-medium text-foreground">Quoted text:</span> “
-              {item.text_evidence}”
-            </p>
-          )}
-          {item.deadline_status === "TBD" && <p>eLearn has not published a date for this item.</p>}
-        </div>
       )}
     </article>
   );

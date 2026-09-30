@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -17,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/useSession";
 import { deleteAccount, disconnectElearn, getConnectionState } from "@/lib/elearn.functions";
 import { DEFAULT_TIMEZONE, formatDateTime } from "@/lib/format";
+import { InstallInstructions } from "@/components/InstallPrompt";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -118,6 +120,13 @@ function SettingsPage() {
 
   const state = connection.data;
 
+  async function signOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    void navigate({ to: "/", replace: true });
+  }
+
   return (
     <div className="space-y-8">
       <header className="space-y-1">
@@ -216,6 +225,10 @@ function SettingsPage() {
         </div>
       </section>
 
+      <section className="surface-card p-4">
+        <InstallInstructions />
+      </section>
+
       <section className="surface-card space-y-3 p-4">
         <h2 className="text-lg font-semibold">Hide courses</h2>
         <p className="text-sm text-muted-foreground">
@@ -273,6 +286,16 @@ function SettingsPage() {
           {notice}
         </p>
       )}
+
+      <section className="border-t border-border pt-6">
+        <Button type="button" variant="outline" className="tap-target" onClick={signOut}>
+          <LogOut className="size-4" aria-hidden />
+          Sign out
+        </Button>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Signing out does not disconnect eLearn or remove your saved deadlines.
+        </p>
+      </section>
     </div>
   );
 }
