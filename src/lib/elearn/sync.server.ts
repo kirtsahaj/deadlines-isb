@@ -2,6 +2,7 @@ import { decryptToken } from "./crypto.server";
 import { MoodleClient, MoodleError } from "./moodle.server";
 import { normalizeDeadlines } from "./normalize";
 import { manualCooldownSeconds, syncConcurrency, syncIntervalMinutes } from "./config.server";
+import type { Json as DbJson } from "@/integrations/supabase/types";
 
 type Json = Record<string, unknown>;
 type SourceStatus = Record<string, { ok: boolean; code?: string; count?: number }>;
@@ -207,7 +208,11 @@ export async function runSync(
       const { error } = await supabaseAdmin
         .from("deadline_items")
         .upsert(
-          deadlines.map((row) => ({ ...row, user_id: userId })),
+          deadlines.map((row) => ({
+            ...row,
+            user_id: userId,
+            source_evidence: row.source_evidence as unknown as DbJson,
+          })),
           { onConflict: "user_id,external_key" },
         );
       if (error) throw new Error("database");
