@@ -243,15 +243,13 @@ function DeadlinesPage() {
               {lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null)}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge className={statusCopy.className}>{statusCopy.label}</Badge>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="tap-target"
-              onClick={() => refresh.mutate()}
-              disabled={refresh.isPending}
-            >
+          <Button
+            variant="secondary"
+            size="sm"
+            className="tap-target"
+            onClick={() => refresh.mutate()}
+            disabled={refresh.isPending}
+          >
               <RefreshCcw
                 className={`size-4 ${refresh.isPending ? "animate-spin" : ""}`}
                 aria-hidden
