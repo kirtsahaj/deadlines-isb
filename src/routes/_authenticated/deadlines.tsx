@@ -21,7 +21,7 @@ import { useSession } from "@/lib/useSession";
 import { getConnectionState, syncNow } from "@/lib/elearn.functions";
 import { DEFAULT_TIMEZONE, lastSyncedLabel } from "@/lib/format";
 import { firstPreferredName } from "@/lib/preferredName";
-import { parseCourseMetadata, selectedOrAll } from "@/lib/courseMetadata";
+import { courseIdsForTerms, parseCourseMetadata, selectedOrAll } from "@/lib/courseMetadata";
 import { isDeadlineInView, sortDeadlineView, type DeadlineView } from "@/lib/deadlineViews";
 
 export const Route = createFileRoute("/_authenticated/deadlines")({
@@ -173,10 +173,7 @@ function DeadlinesPage() {
   );
   const activeTerms = selectedOrAll(termOptions, selectedTerms);
   const courseOptions = useMemo(
-    () =>
-      (courses.data ?? [])
-        .filter((course) => activeTerms.has(parseCourseMetadata(course.short_name).term))
-        .map((course) => String(course.moodle_course_id)),
+    () => courseIdsForTerms(courses.data ?? [], activeTerms),
     [courses.data, activeTerms],
   );
   const activeCourses = selectedOrAll(courseOptions, selectedCourses);
@@ -234,6 +231,10 @@ function DeadlinesPage() {
 
   const status = connection.data?.connected ? connection.data.status : "connected";
   const statusCopy = STATUS_COPY[status ?? "connected"] ?? STATUS_COPY["connected"]!;
+
+  if (typeof window !== "undefined" && connection.data?.connected && connection.data.lastSuccessAt) {
+    window.localStorage.setItem("isb-deadline-tracker-install-ready", "true");
+  }
 
   return (
     <div className="space-y-6">
@@ -335,6 +336,7 @@ function DeadlinesPage() {
           options={courseOptions}
           selected={activeCourses}
           onChange={setSelectedCourses}
+          getLabel={(id) => courseFor(Number(id)).shortName}
         />
         <Select value={kindFilter} onValueChange={setKindFilter}>
           <SelectTrigger className="w-36" aria-label="Filter by type">

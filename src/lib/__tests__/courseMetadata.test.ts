@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { OTHER_FILTER_VALUE, parseCourseMetadata, selectedOrAll } from "../courseMetadata";
+import {
+  courseIdsForTerms,
+  OTHER_FILTER_VALUE,
+  parseCourseMetadata,
+  selectedOrAll,
+} from "../courseMetadata";
 
 describe("parseCourseMetadata", () => {
   it.each([
@@ -19,5 +24,15 @@ describe("parseCourseMetadata", () => {
 
   it("selects every available value by default", () => {
     expect([...selectedOrAll(["T1", "T4"], null)]).toEqual(["T1", "T4"]);
+  });
+
+  it("narrows course choices to selected terms", () => {
+    const courses = [
+      { moodle_course_id: 1, short_name: "FIN_2026_T1" },
+      { moodle_course_id: 2, short_name: "OPS_2026_T4" },
+      { moodle_course_id: 3, short_name: "Malformed" },
+    ];
+    expect(courseIdsForTerms(courses, new Set(["T4"]))).toEqual(["2"]);
+    expect(courseIdsForTerms(courses, new Set([OTHER_FILTER_VALUE]))).toEqual(["3"]);
   });
 });

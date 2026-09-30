@@ -14,11 +14,13 @@ export function MultiSelectFilter({
   options,
   selected,
   onChange,
+  getLabel = (value) => value,
 }: {
   label: string;
   options: string[];
   selected: Set<string>;
   onChange: (next: Set<string>) => void;
+  getLabel?: (value: string) => string;
 }) {
   const allSelected =
     options.length === selected.size && options.every((value) => selected.has(value));
@@ -49,7 +51,7 @@ export function MultiSelectFilter({
               onChange(next);
             }}
           >
-            {option}
+            {getLabel(option)}
           </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>
