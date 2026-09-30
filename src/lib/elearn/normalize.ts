@@ -185,8 +185,17 @@ export function normalizeDeadlines(input: {
     if (!courseId || !due) continue;
     const modul = event["modulename"] === "assign" ? "assignment" : String(event["modulename"] ?? "calendar");
     const type = String(event["eventtype"] ?? "event");
-    const key = activity ? `${modul}:${courseId}:${activity}:${type}` : "";
-    const matching = key ? rows.get(key) : undefined;
+    // Moodle labels the same activity event differently across versions, so try
+    // the reported event type first and then the keys we generate ourselves.
+    const candidateKeys = activity
+      ? [
+          `${modul}:${courseId}:${activity}:${type}`,
+          `${modul}:${courseId}:${activity}:due`,
+          `${modul}:${courseId}:${activity}:close`,
+          `${modul}:${courseId}:${activity}:tbd`,
+        ]
+      : [];
+    const matching = candidateKeys.map((candidate) => rows.get(candidate)).find(Boolean);
     if (matching) {
       const structured = matching.due_at
         ? Math.floor(new Date(matching.due_at).getTime() / 1000)
