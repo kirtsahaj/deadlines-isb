@@ -1,4 +1,4 @@
-export type ParsedElearnConnection = { token: string };
+export type ParsedElearnConnection = string;
 
 /**
  * Decode the Moodle mobile launch redirect entirely in the student's browser.
