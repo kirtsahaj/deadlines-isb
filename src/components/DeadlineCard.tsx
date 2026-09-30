@@ -76,7 +76,13 @@ export function DeadlineCard({
           <Badge variant="secondary">{KIND_LABELS[item.kind] ?? item.kind}</Badge>
           <Dialog>
             <DialogTrigger asChild>
-              <Button type="button" variant="ghost" size="icon" className="size-9" aria-label={`Information about ${item.title}`}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-9"
+                aria-label={`Information about ${item.title}`}
+              >
                 <Info className="size-4" aria-hidden />
               </Button>
             </DialogTrigger>
@@ -88,11 +94,17 @@ export function DeadlineCard({
               <dl className="space-y-3 text-sm">
                 <div>
                   <dt className="font-medium">Source</dt>
-                  <dd className="text-muted-foreground">{SOURCE_LABELS[item.source_primary] ?? "eLearn course data"}</dd>
+                  <dd className="text-muted-foreground">
+                    {SOURCE_LABELS[item.source_primary] ?? "eLearn course data"}
+                  </dd>
                 </div>
                 <div>
                   <dt className="font-medium">How this date was found</dt>
-                  <dd className="text-muted-foreground">{isText || item.deadline_status === "dated_from_text" ? "Mentioned in course text" : "Published as a structured eLearn deadline"}</dd>
+                  <dd className="text-muted-foreground">
+                    {isText || item.deadline_status === "dated_from_text"
+                      ? "Mentioned in course text"
+                      : "Published as a structured eLearn deadline"}
+                  </dd>
                 </div>
                 {item.text_evidence && (
                   <div>
@@ -100,9 +112,26 @@ export function DeadlineCard({
                     <dd className="text-muted-foreground">“{item.text_evidence}”</dd>
                   </div>
                 )}
-                {item.conflict && <div><dt className="font-medium">Sources disagree</dt><dd className="text-muted-foreground">The activity and calendar show different times. Check the activity in eLearn before relying on this date.</dd></div>}
-                {(isText || item.deadline_status === "dated_from_text") && <div className="rounded-md bg-warning/15 p-3 text-warning-foreground">This is not a confirmed eLearn due date. Check the activity before relying on it.</div>}
-                {item.deadline_status === "TBD" && <div className="text-muted-foreground">eLearn has not published a date for this item.</div>}
+                {item.conflict && (
+                  <div>
+                    <dt className="font-medium">Sources disagree</dt>
+                    <dd className="text-muted-foreground">
+                      The activity and calendar show different times. Check the activity in eLearn
+                      before relying on this date.
+                    </dd>
+                  </div>
+                )}
+                {(isText || item.deadline_status === "dated_from_text") && (
+                  <div className="rounded-md bg-warning/15 p-3 text-warning-foreground">
+                    This is not a confirmed eLearn due date. Check the activity before relying on
+                    it.
+                  </div>
+                )}
+                {item.deadline_status === "TBD" && (
+                  <div className="text-muted-foreground">
+                    eLearn has not published a date for this item.
+                  </div>
+                )}
               </dl>
             </DialogContent>
           </Dialog>
@@ -146,7 +175,6 @@ export function DeadlineCard({
           Not an official due date. Confirm this one in eLearn before you rely on it.
         </p>
       )}
-
     </article>
   );
 }

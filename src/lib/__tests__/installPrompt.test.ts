@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { INSTALL_DISMISSED_KEY, INSTALL_READY_KEY, shouldShowInstallPrompt } from "../installPrompt";
+import {
+  INSTALL_DISMISSED_KEY,
+  INSTALL_READY_KEY,
+  shouldShowInstallPrompt,
+} from "../installPrompt";
 
 function storage(values: Record<string, string>) {
   return { getItem: (key: string) => values[key] ?? null };
@@ -12,6 +16,10 @@ describe("install prompt", () => {
   });
 
   it("does not return after dismissal", () => {
-    expect(shouldShowInstallPrompt(storage({ [INSTALL_READY_KEY]: "true", [INSTALL_DISMISSED_KEY]: "true" }) as Storage)).toBe(false);
+    expect(
+      shouldShowInstallPrompt(
+        storage({ [INSTALL_READY_KEY]: "true", [INSTALL_DISMISSED_KEY]: "true" }) as Storage,
+      ),
+    ).toBe(false);
   });
 });

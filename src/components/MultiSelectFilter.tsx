@@ -20,8 +20,11 @@ export function MultiSelectFilter({
   selected: Set<string>;
   onChange: (next: Set<string>) => void;
 }) {
-  const allSelected = options.length === selected.size && options.every((value) => selected.has(value));
-  const summary = allSelected ? `All ${label.toLowerCase()}s` : `${selected.size} ${label.toLowerCase()}${selected.size === 1 ? "" : "s"}`;
+  const allSelected =
+    options.length === selected.size && options.every((value) => selected.has(value));
+  const summary = allSelected
+    ? `All ${label.toLowerCase()}s`
+    : `${selected.size} ${label.toLowerCase()}${selected.size === 1 ? "" : "s"}`;
 
   return (
     <DropdownMenu>

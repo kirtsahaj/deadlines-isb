@@ -187,7 +187,9 @@
     border-left: 3px solid var(--color-accent);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
-    transition: box-shadow 160ms ease, transform 160ms ease;
+    transition:
+      box-shadow 160ms ease,
+      transform 160ms ease;
   }
 
   .deadline-card:hover {

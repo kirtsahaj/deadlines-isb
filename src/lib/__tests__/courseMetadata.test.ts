@@ -11,7 +11,10 @@ describe("parseCourseMetadata", () => {
   });
 
   it.each([null, "", "MALFORMED", "___"])("keeps malformed %s under Other", (value) => {
-    expect(parseCourseMetadata(value)).toEqual({ courseCode: OTHER_FILTER_VALUE, term: OTHER_FILTER_VALUE });
+    expect(parseCourseMetadata(value)).toEqual({
+      courseCode: OTHER_FILTER_VALUE,
+      term: OTHER_FILTER_VALUE,
+    });
   });
 
   it("selects every available value by default", () => {

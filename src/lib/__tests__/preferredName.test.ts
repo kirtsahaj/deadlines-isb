@@ -3,7 +3,9 @@ import { firstPreferredName } from "../preferredName";
 
 describe("firstPreferredName", () => {
   it("prefers Microsoft's verified given name", () => {
-    expect(firstPreferredName({ given_name: "Kirt", full_name: "Kirt Singh" }, "Stored Name")).toBe("Kirt");
+    expect(firstPreferredName({ given_name: "Kirt", full_name: "Kirt Singh" }, "Stored Name")).toBe(
+      "Kirt",
+    );
   });
 
   it("falls back to a stored profile name", () => {

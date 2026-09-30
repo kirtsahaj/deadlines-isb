@@ -158,7 +158,12 @@ function DeadlinesPage() {
   };
 
   const termOptions = useMemo(
-    () => [...new Set((courses.data ?? []).map((course) => parseCourseMetadata(course.short_name).term))].sort(),
+    () =>
+      [
+        ...new Set(
+          (courses.data ?? []).map((course) => parseCourseMetadata(course.short_name).term),
+        ),
+      ].sort(),
     [courses.data],
   );
   const activeTerms = selectedOrAll(termOptions, selectedTerms);
@@ -176,19 +181,27 @@ function DeadlinesPage() {
     const rows = (deadlines.data ?? []).filter((item) => {
       if (hidden.has(item.moodle_course_id)) return false;
       const course = courseFor(item.moodle_course_id);
-      if (!activeTerms.has(course.term) || !activeCourses.has(String(item.moodle_course_id))) return false;
+      if (!activeTerms.has(course.term) || !activeCourses.has(String(item.moodle_course_id)))
+        return false;
       if (kindFilter !== "all" && item.kind !== kindFilter) return false;
       if (!isDeadlineInView(item.due_at, view, Date.now(), timezone)) return false;
-      if (
-        term &&
-        !`${item.title} ${course.name} ${course.shortName}`.toLowerCase().includes(term)
-      )
+      if (term && !`${item.title} ${course.name} ${course.shortName}`.toLowerCase().includes(term))
         return false;
       return true;
     });
     return sortDeadlineView(rows, view);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deadlines.data, courses.data, hidden, activeTerms, activeCourses, kindFilter, search, view, timezone]);
+  }, [
+    deadlines.data,
+    courses.data,
+    hidden,
+    activeTerms,
+    activeCourses,
+    kindFilter,
+    search,
+    view,
+    timezone,
+  ]);
 
   if (connection.isLoading) {
     return (
@@ -223,7 +236,11 @@ function DeadlinesPage() {
         <div className="flex flex-wrap items-start gap-3">
           <div className="mr-auto">
             <h1 className="text-3xl font-semibold">
-              Hello{firstPreferredName(user?.user_metadata, profile.data?.display_name) ? ` ${firstPreferredName(user?.user_metadata, profile.data?.display_name)}` : ""}!
+              Hello
+              {firstPreferredName(user?.user_metadata, profile.data?.display_name)
+                ? ` ${firstPreferredName(user?.user_metadata, profile.data?.display_name)}`
+                : ""}
+              !
             </h1>
             <p className="mt-1 text-sm font-medium text-muted-foreground">
               {lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null)}
@@ -265,9 +282,21 @@ function DeadlinesPage() {
 
       <InstallPrompt />
 
-      <div className="inline-flex rounded-lg bg-muted p-1" role="tablist" aria-label="Deadline view">
+      <div
+        className="inline-flex rounded-lg bg-muted p-1"
+        role="tablist"
+        aria-label="Deadline view"
+      >
         {(["upcoming", "past"] as DeadlineView[]).map((value) => (
-          <Button key={value} type="button" role="tab" aria-selected={view === value} variant={view === value ? "default" : "ghost"} size="sm" onClick={() => setView(value)}>
+          <Button
+            key={value}
+            type="button"
+            role="tab"
+            aria-selected={view === value}
+            variant={view === value ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setView(value)}
+          >
             {value === "upcoming" ? "Upcoming" : "Past"}
           </Button>
         ))}
@@ -287,8 +316,21 @@ function DeadlinesPage() {
             className="pl-9"
           />
         </div>
-        <MultiSelectFilter label="Term" options={termOptions} selected={activeTerms} onChange={(next) => { setSelectedTerms(next); setSelectedCourses(null); }} />
-        <MultiSelectFilter label="Course" options={courseOptions} selected={activeCourses} onChange={setSelectedCourses} />
+        <MultiSelectFilter
+          label="Term"
+          options={termOptions}
+          selected={activeTerms}
+          onChange={(next) => {
+            setSelectedTerms(next);
+            setSelectedCourses(null);
+          }}
+        />
+        <MultiSelectFilter
+          label="Course"
+          options={courseOptions}
+          selected={activeCourses}
+          onChange={setSelectedCourses}
+        />
         <Select value={kindFilter} onValueChange={setKindFilter}>
           <SelectTrigger className="w-36" aria-label="Filter by type">
             <SelectValue placeholder="All types" />
@@ -311,7 +353,9 @@ function DeadlinesPage() {
         </div>
       ) : visible.length === 0 ? (
         <div className="surface-card p-6 text-center">
-          <h2 className="text-base font-semibold">{view === "upcoming" ? "No upcoming deadlines" : "No past deadlines"}</h2>
+          <h2 className="text-base font-semibold">
+            {view === "upcoming" ? "No upcoming deadlines" : "No past deadlines"}
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {deadlines.data?.length
               ? "No deadlines match your current search or filters."
@@ -324,8 +368,8 @@ function DeadlinesPage() {
             <li key={item.id}>
               <DeadlineCard
                 item={item}
-                 courseName={courseFor(item.moodle_course_id).name}
-                 courseCode={courseFor(item.moodle_course_id).courseCode}
+                courseName={courseFor(item.moodle_course_id).name}
+                courseCode={courseFor(item.moodle_course_id).courseCode}
                 timezone={timezone}
               />
             </li>

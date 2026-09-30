@@ -60,7 +60,9 @@ export function InstallPrompt() {
         <p className="mt-1 text-sm text-muted-foreground">
           Your laptop setup is complete. You can now check deadlines from your phone.
         </p>
-        {!installEvent && <p className="mt-2 text-xs text-muted-foreground">{platformGuidance()}</p>}
+        {!installEvent && (
+          <p className="mt-2 text-xs text-muted-foreground">{platformGuidance()}</p>
+        )}
         {installEvent && (
           <Button
             type="button"
@@ -78,7 +80,13 @@ export function InstallPrompt() {
           </Button>
         )}
       </div>
-      <Button type="button" variant="ghost" size="icon" onClick={dismiss} aria-label="Dismiss phone prompt">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={dismiss}
+        aria-label="Dismiss phone prompt"
+      >
         <X className="size-4" aria-hidden />
       </Button>
     </aside>
