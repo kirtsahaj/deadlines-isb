@@ -142,9 +142,31 @@ export function extractDeadlines(
   value: string | null | undefined,
   markerOnly = false,
 ): ParsedDeadline[] {
-  const text = stripApiMarkup(value);
-  if (markerOnly && !text.toLowerCase().includes("#deadline#")) return [];
+  const stripped = stripApiMarkup(value);
   const found = new Map<number, ParsedDeadline>();
+
+  // Marker-only mode trusts nothing except text a teacher wrapped in #deadline#.
+  if (markerOnly) {
+    MARKER_SEGMENT.lastIndex = 0;
+    for (const segment of stripped.matchAll(MARKER_SEGMENT)) {
+      const window = (segment[1] ?? "").trim();
+      const date = dateParts(window);
+      if (!date) continue;
+      const time = timeParts(window);
+      const timestamp = istTimestamp(date.year, date.month, date.day, time.hour, time.minute);
+      if (timestamp === null || found.has(timestamp)) continue;
+      found.set(timestamp, {
+        timestamp,
+        dueIso: new Date(timestamp * 1000).toISOString(),
+        keyword: "#deadline#",
+        precision: time.precision,
+        text: window,
+      });
+    }
+    return [...found.values()];
+  }
+
+  const text = stripped;
   KEYWORD.lastIndex = 0;
   for (const match of text.matchAll(KEYWORD)) {
     const index = match.index ?? 0;
