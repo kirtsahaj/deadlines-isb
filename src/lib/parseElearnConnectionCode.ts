@@ -12,7 +12,7 @@ export function parseElearnConnectionCode(input: string): ParsedElearnConnection
     text.match(/(?:^|[?&\s])token=([A-Za-z0-9+/_=-]+)/i);
   if (!match) throw new Error("invalid_connection_code");
 
-  let encoded = match[1].replace(/-/g, "+").replace(/_/g, "/");
+  let encoded = (match[1] ?? "").replace(/-/g, "+").replace(/_/g, "/");
   encoded += "=".repeat((4 - (encoded.length % 4)) % 4);
   let decoded: string;
   try {
@@ -23,5 +23,6 @@ export function parseElearnConnectionCode(input: string): ParsedElearnConnection
   const parts = decoded.split(":::");
   const token = parts[1] ?? "";
   if (!/^[A-Za-z0-9]{16,128}$/.test(token)) throw new Error("invalid_connection_code");
-  return { token };
+  // Only the REST token leaves this function; the private autologin token is dropped.
+  return token;
 }
