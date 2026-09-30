@@ -1,9 +1,7 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, LifeBuoy, LogOut, Settings } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { CalendarClock, LifeBuoy, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 
 const NAV = [
   { to: "/deadlines", label: "Deadlines", icon: CalendarClock },
@@ -20,16 +18,7 @@ export function AppFooter() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-
-  async function handleSignOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    void navigate({ to: "/", replace: true });
-  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -53,10 +42,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Button>
             ))}
           </nav>
-          <Button variant="ghost" size="sm" onClick={handleSignOut} className="tap-target">
-            <LogOut className="size-4" aria-hidden />
-            <span className="sr-only sm:not-sr-only sm:ml-1">Sign out</span>
-          </Button>
         </div>
       </header>
 

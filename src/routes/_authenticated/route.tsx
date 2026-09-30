@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/AppShell";
 import { useSession } from "@/lib/useSession";
@@ -23,6 +23,7 @@ function Centered({ children }: { children: React.ReactNode }) {
 function AuthenticatedLayout() {
   const navigate = useNavigate();
   const { session, loading } = useSession();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!loading && !session) void navigate({ to: "/", replace: true });
@@ -53,6 +54,8 @@ function AuthenticatedLayout() {
         </p>
         <Button
           onClick={async () => {
+            await queryClient.cancelQueries();
+            queryClient.clear();
             await supabase.auth.signOut();
             void navigate({ to: "/", replace: true });
           }}

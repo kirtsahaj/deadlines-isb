@@ -54,6 +54,10 @@ export async function runSync(
       .maybeSingle();
     if (connectionError || !connection) return { ok: false, error: "not_connected" };
 
+    if (connection.status === "syncing") {
+      return { ok: false, error: "sync_cooldown", retryAfterSeconds: 30 };
+    }
+
     if (trigger === "manual" && connection.last_manual_sync_at) {
       const cooldown = manualCooldownSeconds() * 1000;
       const remaining =

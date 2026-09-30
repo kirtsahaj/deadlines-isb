@@ -8,53 +8,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import dashboardImage from "@/assets/01-real-elearn-dashboard.png.asset.json";
+import locationImage from "@/assets/02-real-devtools-location-header.png.asset.json";
 
 export const LAUNCH_URL =
   "https://elearn.isb.edu/admin/tool/mobile/launch.php?service=moodle_mobile_app&passport=12345&urlscheme=moodlemobile";
 
-const STEPS = [
-  {
-    title: "No password, ever",
-    body: "The tracker uses the same read-only web-service key that eLearn issues to Moodle's official mobile app. It never asks for your eLearn password and can only read your coursework.",
-    image: "/help/elearn-connect/01-sign-in-to-elearn.png",
-    alt: "The eLearn sign-in page in a browser.",
-  },
-  {
-    title: "Sign in to eLearn and stay in that tab",
-    body: "Open https://elearn.isb.edu in Chrome or Edge on a laptop and sign in normally. Keep that tab open — every remaining step happens there.",
-    image: "/help/elearn-connect/01-sign-in-to-elearn.png",
-    alt: "A signed-in eLearn dashboard.",
-  },
-  {
-    title: "Open the developer console",
-    body: null,
-    image: "/help/elearn-connect/02-open-developer-console.png",
-    alt: "Browser developer tools open on the Console tab.",
-  },
-  {
-    title: "Open the connection URL in the same tab",
-    body: "Paste the connection URL into the address bar of that same signed-in tab and press Enter. If the browser offers to open the Moodle app, choose Cancel.",
-    image: "/help/elearn-connect/03-open-mobile-connection-url.png",
-    alt: "The Moodle mobile launch URL typed into the address bar.",
-  },
-  {
-    title: "Copy the red line from the Console",
-    body: "In the Console, copy the whole red line that begins “Failed to launch 'moodlemobile://token=…”. That entire line is your connection code.",
-    image: "/help/elearn-connect/04-copy-connection-code.png",
-    alt: "A red console error containing the moodlemobile token line.",
-  },
-] as const;
-
-function useAppleKeys() {
-  const [isApple, setIsApple] = useState(false);
-  useEffect(() => {
-    setIsApple(/Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent));
-  }, []);
-  return isApple;
-}
-
 export function ConnectionGuide() {
-  const isApple = useAppleKeys();
   const [copied, setCopied] = useState(false);
 
   async function copyLaunchUrl() {
@@ -68,87 +28,99 @@ export function ConnectionGuide() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
+        <p className="font-medium">
+          You only need a laptop once to connect eLearn. After setup, you can use the Deadline
+          Tracker from your phone without repeating these steps.
+        </p>
+      </div>
       <Alert>
         <ShieldAlert className="size-4" aria-hidden />
         <AlertTitle>Treat your connection code like a password</AlertTitle>
         <AlertDescription>
-          Never paste it into chat, email, or a support message. Paste it only into the connection
-          field in this app. It is read once in your browser and never saved on your device.
+          This value is as sensitive as a password. Paste it only here. Never put it in chat, email,
+          screenshots, analytics, logs, or support messages. If you share it anywhere else, do not
+          use it—generate a fresh one.
         </AlertDescription>
       </Alert>
 
-      <ol className="space-y-6">
-        {STEPS.map((step, index) => (
-          <li key={step.title} className="surface-card overflow-hidden">
-            <div className="flex gap-3 p-4">
-              <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                {index + 1}
-              </span>
-              <div className="space-y-2">
-                <h3 className="text-base font-semibold">{step.title}</h3>
-                {step.body ? (
-                  <p className="text-sm text-muted-foreground">{step.body}</p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Press{" "}
-                    <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs">
-                      {isApple ? "Cmd + Option + J" : "Ctrl + Shift + J"}
-                    </kbd>{" "}
-                    to open the Console. Leave it open.
-                  </p>
-                )}
-                {index === 3 && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={copyLaunchUrl}
-                    className="tap-target"
-                  >
-                    {copied ? (
-                      <Check className="size-4" aria-hidden />
-                    ) : (
-                      <Copy className="size-4" aria-hidden />
-                    )}
-                    {copied ? "Connection URL copied" : "Copy connection URL"}
-                  </Button>
-                )}
-              </div>
+      <ol className="connection-steps">
+        <li className="connection-step">
+          <span className="connection-step-number">1</span>
+          <div className="min-w-0 space-y-3">
+            <h3 className="text-lg font-semibold">Sign in on a laptop</h3>
+            <p className="text-sm text-muted-foreground">
+              Open Chrome or Edge on a laptop or desktop and sign in normally at{" "}
+              <a className="font-medium text-foreground underline" href="https://elearn.isb.edu" target="_blank" rel="noreferrer">elearn.isb.edu</a>.
+              Stay in the signed-in eLearn tab. Your courses may look different from this example.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <img src="/help/elearn-connect/01-sign-in-to-elearn.png" alt="The eLearn Microsoft sign-in page." loading="lazy" className="guide-image" />
+              <img src={dashboardImage.url} alt="A privacy-redacted signed-in ISB eLearn dashboard." loading="lazy" className="guide-image" />
             </div>
-            <img
-              src={step.image}
-              alt={step.alt}
-              loading="lazy"
-              className="w-full border-t border-border bg-muted object-cover"
-            />
-          </li>
-        ))}
+          </div>
+        </li>
+        <li className="connection-step">
+          <span className="connection-step-number">2</span>
+          <div className="min-w-0 space-y-3">
+            <h3 className="text-lg font-semibold">Open Network tools</h3>
+            <p className="text-sm text-muted-foreground">
+              Open Developer Tools with <kbd>F12</kbd> or <kbd>Ctrl + Shift + I</kbd> on Windows,
+              or <kbd>Cmd + Option + I</kbd> on Mac. Select <strong>Network</strong>, make sure
+              recording is active, and enable <strong>Keep log</strong> or <strong>Preserve log</strong>.
+              The tools may appear on the right or bottom of your browser.
+            </p>
+          </div>
+        </li>
+        <li className="connection-step">
+          <span className="connection-step-number">3</span>
+          <div className="min-w-0 space-y-3">
+            <h3 className="text-lg font-semibold">Open the eLearn connection URL</h3>
+            <p className="text-sm text-muted-foreground">
+              Copy the URL, paste it into the address bar of the same signed-in eLearn tab, and press Enter.
+            </p>
+            <Button type="button" onClick={copyLaunchUrl} className="tap-target">
+              {copied ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />}
+              {copied ? "Connection URL copied" : "Copy connection URL"}
+            </Button>
+            <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+              On a PC, the browser may remain on the eLearn dashboard, show an external-app error,
+              or say it cannot open the Moodle app. That is expected. Keep Developer Tools open and continue below.
+            </p>
+          </div>
+        </li>
+        <li className="connection-step">
+          <span className="connection-step-number">4</span>
+          <div className="min-w-0 space-y-3">
+            <h3 className="text-lg font-semibold">Find the connection value</h3>
+            <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+              <li>Find and select the request beginning <code>launch.php</code>. It normally has status 302.</li>
+              <li>Open <strong>Headers</strong>.</li>
+              <li>Under <strong>Response Headers</strong>, find <strong>Location</strong>.</li>
+            </ol>
+            <img src={locationImage.url} alt="Privacy-redacted Chrome Network tools showing the Location response header." loading="lazy" className="guide-image" />
+            <p className="text-sm text-muted-foreground">
+              Copy the complete Location value, starting with <code>moodlemobile://token=</code> and
+              continuing through its final character. If quotation marks appear around it, exclude
+              only the surrounding quotation marks and spaces. Do not shorten, edit, or decode the value.
+            </p>
+          </div>
+        </li>
       </ol>
 
       <Accordion type="single" collapsible>
-        <AccordionItem value="fallback">
-          <AccordionTrigger>Nothing appeared in the Console?</AccordionTrigger>
+        <AccordionItem value="troubleshooting">
+          <AccordionTrigger>Troubleshooting</AccordionTrigger>
           <AccordionContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Open the Network tab instead, tick “Preserve log”, open the connection URL again,
-              select the <code>launch.php</code> request, and copy the <code>Location</code>{" "}
-              response header. That header is also a valid connection code.
-            </p>
-            <img
-              src="/help/elearn-connect/05-network-location-fallback.png"
-              alt="The Network tab showing the Location response header for launch.php."
-              loading="lazy"
-              className="w-full rounded-lg border border-border"
-            />
+            <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+              <li>If <code>launch.php</code> is missing, confirm recording is active, Keep/Preserve log is enabled, and the URL was opened in the signed-in eLearn tab; then try again.</li>
+              <li>If connection fails, generate a fresh Location value and retry. The submitted value is never displayed or echoed.</li>
+              <li>Browsers isolate tabs, so the tracker cannot automatically read eLearn. This one-time copy-and-paste is required.</li>
+            </ul>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-
-      <p className="text-xs text-muted-foreground">
-        This app cannot read your eLearn tab, cookies, or console for you — browsers keep sites
-        isolated from each other. That is why this one copy step is manual.
-      </p>
     </div>
   );
 }

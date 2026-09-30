@@ -6,6 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ConnectionGuide } from "@/components/ConnectionGuide";
+import { InstallInstructions } from "@/components/InstallPrompt";
 
 export const Route = createFileRoute("/_authenticated/help")({
   head: () => ({
@@ -82,6 +83,10 @@ function HelpPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Connection steps</h2>
         <ConnectionGuide />
+      </section>
+
+      <section className="surface-card p-4">
+        <InstallInstructions />
       </section>
     </div>
   );
