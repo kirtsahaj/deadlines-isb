@@ -232,7 +232,11 @@ function DeadlinesPage() {
   const status = connection.data?.connected ? connection.data.status : "connected";
   const statusCopy = STATUS_COPY[status ?? "connected"] ?? STATUS_COPY["connected"]!;
 
-  if (typeof window !== "undefined" && connection.data?.connected && connection.data.lastSuccessAt) {
+  if (
+    typeof window !== "undefined" &&
+    connection.data?.connected &&
+    connection.data.lastSuccessAt
+  ) {
     window.localStorage.setItem("isb-deadline-tracker-install-ready", "true");
   }
 
