@@ -40,6 +40,8 @@ const DATE_ISO = /(?<year>20\d{2})-(?<month>0[1-9]|1[0-2])-(?<day>0[1-9]|[12]\d|
 const DATE_NUMERIC_IN = /(?<day>0?[1-9]|[12]\d|3[01])\/(?<month>0?[1-9]|1[0-2])\/(?<year>20\d{2})/;
 const TIME_12 = /(?<!\d)(?<hour>\d{1,2})(?::(?<minute>\d{2}))?\s*(?<ampm>am|pm)\b/i;
 const TIME_24 = /(?<!\d)(?<hhmm>[01]?\d[0-5]\d)\s*(?:hrs?|hours?)\b/i;
+const TIME_24_COLON = /(?<!\d)(?<hour>[01]?\d|2[0-3]):(?<minute>[0-5]\d)(?!\s*(?:am|pm))/i;
+const MARKER_SEGMENT = /#deadline#([\s\S]*?)(?:#deadline#|$)/gi;
 
 export function stripApiMarkup(value: string | null | undefined): string {
   return (value ?? "")
