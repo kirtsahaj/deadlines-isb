@@ -129,7 +129,7 @@ export function DeadlineCard({
               {item.text_evidence}”
             </p>
           )}
-          {item.deadline_status === "tbd" && <p>eLearn has not published a date for this item.</p>}
+          {item.deadline_status === "TBD" && <p>eLearn has not published a date for this item.</p>}
         </div>
       )}
     </article>
