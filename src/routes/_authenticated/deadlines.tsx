@@ -250,16 +250,15 @@ function DeadlinesPage() {
             onClick={() => refresh.mutate()}
             disabled={refresh.isPending}
           >
-              <RefreshCcw
-                className={`size-4 ${refresh.isPending ? "animate-spin" : ""}`}
-                aria-hidden
-              />
-              {refresh.isPending ? "Refreshing…" : "Refresh now"}
-            </Button>
-          </div>
+            <RefreshCcw
+              className={`size-4 ${refresh.isPending ? "animate-spin" : ""}`}
+              aria-hidden
+            />
+            {refresh.isPending ? "Refreshing…" : "Refresh now"}
+          </Button>
         </div>
 
-        {status === "attention" && (
+        {connection.data?.status === "attention" && (
           <div className="surface-card border-destructive/40 p-3 text-sm">
             eLearn has refused the last few refreshes. Your code has most likely expired —{" "}
             <Link to="/settings" className="font-medium underline">
