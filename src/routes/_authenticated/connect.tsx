@@ -59,24 +59,16 @@ function ConnectPage() {
         setError(MESSAGES[result.error ?? ""] ?? MESSAGES["request_failed"]!);
         return;
       }
-      if (result.firstSync === "success" || result.firstSync === "partial") {
-        window.localStorage.setItem(INSTALL_READY_KEY, "true");
-        window.localStorage.removeItem(INSTALL_DISMISSED_KEY);
-      }
-      if (result.firstSync === "failed") {
-        window.sessionStorage.setItem(
-          "deadline-tracker-sync-notice",
-          "eLearn could not complete the first refresh. Your connection is saved; use Refresh now shortly.",
-        );
-      } else if (result.firstSync === "partial") {
-        window.sessionStorage.setItem(
-          "deadline-tracker-sync-notice",
-          "Some eLearn sections were unavailable. Available dates are ready, and existing dates remain available.",
-        );
-      }
+      window.localStorage.setItem(INSTALL_READY_KEY, "true");
+      window.localStorage.removeItem(INSTALL_DISMISSED_KEY);
+      window.sessionStorage.setItem(
+        "deadline-tracker-sync-notice",
+        "Connected. Fetching your coursework now — this takes a few seconds.",
+      );
       await queryClient.invalidateQueries();
       void navigate({ to: "/deadlines" });
     },
+
     onError: (caught: unknown) => {
       setValue("");
       const code = caught instanceof Error ? caught.message : "request_failed";
