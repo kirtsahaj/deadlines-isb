@@ -140,47 +140,53 @@ export async function runSync(
       .filter((id) => Number.isInteger(id) && id > 0);
     if (!courseIds.length && !sourceStatus["courses"]?.ok) throw new Error("courses_unavailable");
 
-    const assignments = (await safe(
-      "assignments",
-      () => client.call("mod_assign_get_assignments", { courseids: courseIds }),
-      { courses: [] },
-    )) as Json;
-    const quizzes = (await safe(
-      "quizzes",
-      () => client.call("mod_quiz_get_quizzes_by_courses", { courseids: courseIds }),
-      { quizzes: [] },
-    )) as Json;
-    const forums = await safe(
-      "forums",
-      () => client.call("mod_forum_get_forums_by_courses", { courseids: courseIds }),
-      [],
-    );
-    const calendar = (await safe(
-      "calendar",
-      () =>
-        client.call("core_calendar_get_calendar_events", {
-          events: { courseids: courseIds },
-          options: {
-            timestart: 0,
-            timeend: 0,
-            userevents: true,
-            siteevents: false,
-            ignorehidden: true,
-          },
-        }),
-      { events: [] },
-    )) as Json;
-
     const concurrency = syncConcurrency();
-    const contentPairs = await limitedMap(courseIds, concurrency, async (courseId) => {
-      const value = await safe(
-        `contents:${courseId}`,
-        () => client.call("core_course_get_contents", { courseid: courseId }),
+
+    // The four course-wide sources are independent: fetch them together, and
+    // fetch per-course contents at the same time, instead of one after another.
+    const [assignmentsRaw, quizzesRaw, forums, calendarRaw, contentPairs] = await Promise.all([
+      safe("assignments", () => client.call("mod_assign_get_assignments", { courseids: courseIds }), {
+        courses: [],
+      }),
+      safe(
+        "quizzes",
+        () => client.call("mod_quiz_get_quizzes_by_courses", { courseids: courseIds }),
+        { quizzes: [] },
+      ),
+      safe(
+        "forums",
+        () => client.call("mod_forum_get_forums_by_courses", { courseids: courseIds }),
         [],
-      );
-      return [courseId, asList(value)] as const;
-    });
+      ),
+      safe(
+        "calendar",
+        () =>
+          client.call("core_calendar_get_calendar_events", {
+            events: { courseids: courseIds },
+            options: {
+              timestart: 0,
+              timeend: 0,
+              userevents: true,
+              siteevents: false,
+              ignorehidden: true,
+            },
+          }),
+        { events: [] },
+      ),
+      limitedMap(courseIds, concurrency, async (courseId) => {
+        const value = await safe(
+          `contents:${courseId}`,
+          () => client.call("core_course_get_contents", { courseid: courseId }),
+          [],
+        );
+        return [courseId, asList(value)] as const;
+      }),
+    ]);
+    const assignments = assignmentsRaw as Json;
+    const quizzes = quizzesRaw as Json;
+    const calendar = calendarRaw as Json;
     const contents = new Map<number, Json[]>(contentPairs);
+
 
     const assignmentObjects = asList(assignments["courses"]).flatMap((course) =>
       asList(course["assignments"]),
