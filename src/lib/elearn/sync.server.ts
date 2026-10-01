@@ -54,9 +54,18 @@ export async function runSync(
       .maybeSingle();
     if (connectionError || !connection) return { ok: false, error: "not_connected" };
 
+    // A sync that was interrupted (serverless timeout, deploy, crash) can leave
+    // the row stuck on "syncing". Treat anything older than 2 minutes as stale
+    // so the user is never locked out of refreshing.
     if (connection.status === "syncing") {
-      return { ok: false, error: "sync_cooldown", retryAfterSeconds: 30 };
+      const attemptedAt = connection.last_attempt_at
+        ? new Date(connection.last_attempt_at).getTime()
+        : 0;
+      if (Date.now() - attemptedAt < 120_000) {
+        return { ok: false, error: "sync_cooldown", retryAfterSeconds: 30 };
+      }
     }
+
 
     if (trigger === "manual" && connection.last_manual_sync_at) {
       const cooldown = manualCooldownSeconds() * 1000;
