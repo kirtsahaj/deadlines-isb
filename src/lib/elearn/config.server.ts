@@ -28,5 +28,6 @@ export function syncBatchSize(): number {
 }
 
 export function syncConcurrency(): number {
-  return Math.min(5, Math.max(1, Number(process.env["SYNC_CONCURRENCY"] ?? 3)));
+  return Math.min(12, Math.max(1, Number(process.env["SYNC_CONCURRENCY"] ?? 8)));
 }
+

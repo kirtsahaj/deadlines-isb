@@ -77,14 +77,11 @@ export const connectElearn = createServerFn({ method: "POST" })
     const { connectElearnToken } = await import("./elearn/connection.server");
     const result = await connectElearnToken(context.userId, data.token);
     if (!result.ok) return { connected: false as const, error: result.error };
-    const { runSync } = await import("./elearn/sync.server");
-    const sync = await runSync(context.userId, "first_connect");
-    return {
-      connected: true as const,
-      accountName: result.accountName,
-      firstSync: sync.ok ? sync.outcome : "failed",
-    };
+    // The first full sync is queued, not awaited: the connection is already
+    // saved, so the user goes straight to their deadlines while it runs.
+    return { connected: true as const, accountName: result.accountName, firstSync: "pending" };
   });
+
 
 export const syncNow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

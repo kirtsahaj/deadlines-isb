@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCcw, Search } from "lucide-react";
@@ -121,8 +121,11 @@ function DeadlinesPage() {
             : `Updated — ${result.itemCount} deadline${result.itemCount === 1 ? "" : "s"} found.`,
         );
       } else if (result.error === "sync_cooldown") {
+        const seconds = result.retryAfterSeconds ?? 60;
         setSyncMessage(
-          `Just refreshed. Try again in about ${Math.ceil((result.retryAfterSeconds ?? 60) / 60)} minute(s).`,
+          seconds < 90
+            ? `Just refreshed. Try again in ${seconds} seconds.`
+            : `Just refreshed. Try again in about ${Math.ceil(seconds / 60)} minutes.`,
         );
       } else if (result.error === "reconnect_required") {
         setSyncMessage("Your eLearn connection expired. Reconnect from Settings.");
@@ -135,6 +138,19 @@ function DeadlinesPage() {
     },
     onError: () => setSyncMessage("We couldn't reach eLearn just now. Please try again shortly."),
   });
+
+  // A freshly connected account has no deadlines yet: start the first fetch
+  // automatically so the page fills in without the user pressing Refresh.
+  const autoSyncStarted = useRef(false);
+  const refreshMutate = refresh.mutate;
+  useEffect(() => {
+    if (autoSyncStarted.current) return;
+    const state = connection.data;
+    if (!state?.connected || state.lastSuccessAt) return;
+    autoSyncStarted.current = true;
+    refreshMutate();
+  }, [connection.data, refreshMutate]);
+
 
   const timezone = settings.data?.timezone ?? DEFAULT_TIMEZONE;
   const hidden = useMemo(
