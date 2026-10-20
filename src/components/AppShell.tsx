@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarClock, LifeBuoy, Settings } from "lucide-react";
+import { CalendarClock, LifeBuoy, Settings, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -9,6 +9,8 @@ const NAV = [
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
+const ADMIN_ITEM = { to: "/admin", label: "Admin", icon: ShieldCheck } as const;
+
 export function AppFooter() {
   return (
     <p className="text-xs text-muted-foreground">
@@ -17,7 +19,8 @@ export function AppFooter() {
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, isAdmin = false }: { children: ReactNode; isAdmin?: boolean }) {
+  const items = isAdmin ? [...NAV, ADMIN_ITEM] : NAV;
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   return (
@@ -31,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="font-display text-base font-semibold">ISB Deadline Tracker</span>
           </Link>
           <nav className="hidden items-center gap-1 sm:flex" aria-label="Main">
-            {NAV.map((item) => (
+            {items.map((item) => (
               <Button
                 key={item.to}
                 asChild
@@ -56,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         aria-label="Main"
       >
         <div className="flex">
-          {NAV.map((item) => {
+          {items.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.to;
             return (
