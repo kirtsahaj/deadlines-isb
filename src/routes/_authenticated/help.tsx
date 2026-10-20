@@ -1,12 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ConnectionGuide } from "@/components/ConnectionGuide";
-import { InstallInstructions } from "@/components/InstallPrompt";
+
+import { Button } from "@/components/ui/button";
+import { ConnectionTroubleshooting } from "@/components/ConnectionGuide";
 
 export const Route = createFileRoute("/_authenticated/help")({
   head: () => ({
