@@ -15,6 +15,7 @@ import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDeadlinesRouteImport } from './routes/_authenticated/deadlines'
 import { Route as AuthenticatedHelpRouteImport } from './routes/_authenticated/help'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as ApiPublicDeadlineRemindersRouteImport } from './routes/api/public/deadline-reminders'
 import { Route as ApiPublicScheduledAccountRouteImport } from './routes/api/public/scheduled-account'
 import { Route as ApiPublicScheduledSyncRouteImport } from './routes/api/public/scheduled-sync'
 
@@ -47,6 +48,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicDeadlineRemindersRoute =
+  ApiPublicDeadlineRemindersRouteImport.update({
+    id: '/api/public/deadline-reminders',
+    path: '/api/public/deadline-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicScheduledAccountRoute =
   ApiPublicScheduledAccountRouteImport.update({
     id: '/api/public/scheduled-account',
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/help': typeof AuthenticatedHelpRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
   '/api/public/scheduled-sync': typeof ApiPublicScheduledSyncRoute
 }
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/help': typeof AuthenticatedHelpRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
   '/api/public/scheduled-sync': typeof ApiPublicScheduledSyncRoute
 }
@@ -85,6 +94,7 @@ export interface FileRoutesById {
   '/_authenticated/deadlines': typeof AuthenticatedDeadlinesRoute
   '/_authenticated/help': typeof AuthenticatedHelpRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
   '/api/public/scheduled-sync': typeof ApiPublicScheduledSyncRoute
 }
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/deadlines'
     | '/help'
     | '/settings'
+    | '/api/public/deadline-reminders'
     | '/api/public/scheduled-account'
     | '/api/public/scheduled-sync'
   fileRoutesByTo: FileRoutesByTo
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/deadlines'
     | '/help'
     | '/settings'
+    | '/api/public/deadline-reminders'
     | '/api/public/scheduled-account'
     | '/api/public/scheduled-sync'
   id:
@@ -115,6 +127,7 @@ export interface FileRouteTypes {
     | '/_authenticated/deadlines'
     | '/_authenticated/help'
     | '/_authenticated/settings'
+    | '/api/public/deadline-reminders'
     | '/api/public/scheduled-account'
     | '/api/public/scheduled-sync'
   fileRoutesById: FileRoutesById
@@ -122,6 +135,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ApiPublicDeadlineRemindersRoute: typeof ApiPublicDeadlineRemindersRoute
   ApiPublicScheduledAccountRoute: typeof ApiPublicScheduledAccountRoute
   ApiPublicScheduledSyncRoute: typeof ApiPublicScheduledSyncRoute
 }
@@ -170,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/deadline-reminders': {
+      id: '/api/public/deadline-reminders'
+      path: '/api/public/deadline-reminders'
+      fullPath: '/api/public/deadline-reminders'
+      preLoaderRoute: typeof ApiPublicDeadlineRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/scheduled-account': {
       id: '/api/public/scheduled-account'
       path: '/api/public/scheduled-account'
@@ -207,6 +228,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ApiPublicDeadlineRemindersRoute: ApiPublicDeadlineRemindersRoute,
   ApiPublicScheduledAccountRoute: ApiPublicScheduledAccountRoute,
   ApiPublicScheduledSyncRoute: ApiPublicScheduledSyncRoute,
 }
