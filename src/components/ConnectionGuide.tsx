@@ -3,7 +3,7 @@ import { ArrowUpRight, Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { createElearnLaunchUrl } from "@/lib/elearnLaunch";
-import copyLinkAsset from "@/assets/elearn-copy-link.png.asset.json";
+import copyLinkAsset from "@/assets/01-elearn-copy-link-overlay.png.asset.json";
 
 export function ConnectionGuide() {
   return (
@@ -25,14 +25,15 @@ export function ConnectionGuide() {
           <p className="text-sm text-muted-foreground">
             Right-click <strong>“Click here if the app does not open automatically.”</strong> and choose <strong>Copy Link Address</strong>. If a Moodle app prompt appears, cancel it.
           </p>
-          <img src={copyLinkAsset.url} alt="eLearn page showing the link “Click here if the app does not open automatically.” to right-click" width={1000} height={265} loading="lazy" className="guide-image" />
+          <p className="text-sm text-muted-foreground">Copy the link’s address — not its words or the browser’s page URL.</p>
+          <img src={copyLinkAsset.url} alt="Desktop Chrome example: right-click the eLearn launch link and choose Copy Link Address. The instructional menu is an added overlay." width={988} height={454} loading="lazy" className="guide-image" />
         </div>
       </li>
       <li className="connection-step">
         <span className="connection-step-number">3</span>
         <div className="min-w-0 space-y-2">
-          <h3 className="text-lg font-semibold">Paste it and connect</h3>
-          <p className="text-sm text-muted-foreground">Come back here and paste the link below.</p>
+          <h3 className="text-lg font-semibold">Paste and connect</h3>
+          <p className="text-sm text-muted-foreground">Return here and tap Paste and connect. Allow pasting if asked.</p>
         </div>
       </li>
     </ol>
@@ -55,7 +56,7 @@ export function ConnectionTroubleshooting() {
       <AccordionItem value="phone">
         <AccordionTrigger>On a phone?</AccordionTrigger>
         <AccordionContent className="space-y-2 text-sm text-muted-foreground">
-          <p>Long-press the same link and choose Copy Link. If that doesn't work, do this one-time setup on a laptop — you can then use the tracker on your phone.</p>
+          <p>Try long-pressing the same link and choosing Copy Link (the menu varies by browser). Cancel any Moodle app prompt. If that doesn't work, complete setup on a laptop — then use the tracker on your phone.</p>
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="troubleshooting">
