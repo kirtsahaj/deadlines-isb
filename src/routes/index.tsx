@@ -80,56 +80,21 @@ function Landing() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-4 py-12">
-        <div className="grid gap-10 md:grid-cols-[1.1fr_1fr] md:items-center">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
-              Unofficial student tool
-            </span>
-            <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-              Every coursework deadline, in one calm list.
-            </h1>
-            <p className="mt-4 max-w-prose text-base text-muted-foreground">
-              Connect your eLearn account once and see assignments, quizzes, forums and calendar
-              dates together — with the source of every date shown, so you can trust what you see.
-            </p>
-
-            <div className="mt-8 space-y-3">
-              <Button
-                size="lg"
-                className="tap-target w-full sm:w-auto"
-                onClick={signIn}
-                disabled={signingIn || loading}
-              >
-                {signingIn ? "Opening Microsoft…" : "Continue with Microsoft"}
-              </Button>
-              {domains.length > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  Sign in with your school account
-                  {` (${domains.map((domain) => `@${domain}`).join(" or ")})`}.
-                </p>
-              )}
-              {error && <p className="text-sm text-destructive">{error}</p>}
-            </div>
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 py-16">
+        <div className="max-w-2xl">
+          <CalendarClock className="mb-8 size-12 text-foreground" aria-hidden />
+          <p className="text-xs font-semibold uppercase text-muted-foreground">For ISB students</p>
+          <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">ISB Deadline Tracker<span className="text-accent">.</span></h1>
+          <p className="mt-5 max-w-lg text-lg text-muted-foreground">Less tab-hopping. More headspace. Your eLearn deadlines, together.</p>
+          <div className="mt-8 space-y-3">
+            <Button size="lg" className="tap-target w-full sm:w-auto" onClick={signIn} disabled={signingIn || loading}>{signingIn ? "Opening Microsoft…" : "Continue with Microsoft"}</Button>
+            {domains.length > 0 && <p className="text-xs text-muted-foreground">Use your {domains.map((domain) => `@${domain}`).join(" or ")} account.</p>}
+            {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
-
-          <ul className="space-y-3">
-            {FEATURES.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <li key={feature.title} className="surface-card flex gap-3 p-4">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-secondary text-secondary-foreground">
-                    <Icon className="size-4" aria-hidden />
-                  </span>
-                  <div>
-                    <h2 className="text-sm font-semibold">{feature.title}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">{feature.body}</p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
         </div>
+        <ul className="mt-16 grid gap-6 border-t border-border pt-8 sm:grid-cols-3">
+          {FEATURES.map((feature) => { const Icon = feature.icon; return <li key={feature.title}><Icon className="mb-3 size-5 text-foreground" aria-hidden /><h2 className="text-sm font-semibold">{feature.title}</h2><p className="mt-2 text-sm text-muted-foreground">{feature.body}</p></li>; })}
+        </ul>
       </main>
       <footer className="mx-auto w-full max-w-5xl px-4 pb-8">
         <AppFooter />

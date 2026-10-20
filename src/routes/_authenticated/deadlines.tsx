@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCcw, Search } from "lucide-react";
@@ -51,16 +51,17 @@ function DeadlinesPage() {
   const [selectedCourses, setSelectedCourses] = useState<Set<string> | null>(null);
   const [kindFilter, setKindFilter] = useState("all");
   const [view, setView] = useState<DeadlineView>("upcoming");
-  const [syncMessage, setSyncMessage] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  useEffect(() => {
     const notice = window.sessionStorage.getItem("deadline-tracker-sync-notice");
     window.sessionStorage.removeItem("deadline-tracker-sync-notice");
-    return notice;
-  });
+    setSyncMessage(notice);
+  }, []);
 
   const connection = useQuery({
     queryKey: ["connection-state"],
     queryFn: () => getConnectionState(),
+    refetchInterval: (query) => query.state.data?.status === "syncing" ? 3000 : false,
   });
 
   const settings = useQuery({
@@ -139,18 +140,12 @@ function DeadlinesPage() {
     onError: () => setSyncMessage("We couldn't reach eLearn just now. Please try again shortly."),
   });
 
-  // A freshly connected account has no deadlines yet: start the first fetch
-  // automatically so the page fills in without the user pressing Refresh.
-  const autoSyncStarted = useRef(false);
-  const refreshMutate = refresh.mutate;
   useEffect(() => {
-    if (autoSyncStarted.current) return;
-    const state = connection.data;
-    if (!state?.connected || state.lastSuccessAt) return;
-    autoSyncStarted.current = true;
-    refreshMutate();
-  }, [connection.data, refreshMutate]);
-
+    if (!connection.data?.connected || !connection.data.lastSuccessAt) return;
+    window.localStorage.setItem("isb-deadline-tracker-install-ready", "true");
+    void queryClient.invalidateQueries({ queryKey: ["deadlines"] });
+    void queryClient.invalidateQueries({ queryKey: ["courses"] });
+  }, [connection.data?.lastSuccessAt, queryClient]);
 
   const timezone = settings.data?.timezone ?? DEFAULT_TIMEZONE;
   const hidden = useMemo(
@@ -223,24 +218,16 @@ function DeadlinesPage() {
 
   if (connection.data && !connection.data.connected) {
     return (
-      <div className="surface-card mx-auto max-w-md space-y-4 p-6 text-center">
+      <div className="mx-auto max-w-md space-y-4 py-16 text-center">
         <h1 className="text-xl font-semibold">Let's bring in your deadlines</h1>
         <p className="text-sm text-muted-foreground">
-          Connect your eLearn coursework once — about two minutes on a laptop, no password needed.
+          Sign in to eLearn, copy one link, and you’re in. Your password stays with your school.
         </p>
         <Button asChild className="tap-target">
-          <Link to="/connect">Start the connection steps</Link>
+          <Link to="/connect">Connect eLearn</Link>
         </Button>
       </div>
     );
-  }
-
-  if (
-    typeof window !== "undefined" &&
-    connection.data?.connected &&
-    connection.data.lastSuccessAt
-  ) {
-    window.localStorage.setItem("isb-deadline-tracker-install-ready", "true");
   }
 
   return (
@@ -248,6 +235,7 @@ function DeadlinesPage() {
       <header className="space-y-3">
         <div className="flex flex-wrap items-start gap-3">
           <div className="mr-auto">
+            <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Your semester, sorted</p>
             <h1 className="text-3xl font-semibold">
               Hello
               {firstPreferredName(user?.user_metadata, profile.data?.display_name)

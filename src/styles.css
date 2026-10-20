@@ -11,8 +11,8 @@
  */
 
 @theme inline {
-  --font-display: "Newsreader", ui-serif, Georgia, serif;
-  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -59,31 +59,31 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  --shadow-card: 0 1px 2px oklch(0.25 0.05 250 / 0.06), 0 8px 24px oklch(0.25 0.05 250 / 0.06);
+  --shadow-card: 0 1px 2px oklch(0.25 0.012 160 / 0.03);
   --shadow-raised: 0 2px 4px oklch(0.25 0.05 250 / 0.08), 0 18px 40px oklch(0.25 0.05 250 / 0.1);
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
-  --background: oklch(0.985 0.006 95);
-  --foreground: oklch(0.24 0.045 255);
+  --background: oklch(0.985 0.002 160);
+  --foreground: oklch(0.25 0.012 160);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.045 255);
+  --card-foreground: oklch(0.25 0.012 160);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.045 255);
+  --popover-foreground: oklch(0.25 0.012 160);
 
-  --primary: oklch(0.32 0.078 255);
-  --primary-foreground: oklch(0.985 0.006 95);
+  --primary: oklch(0.27 0.015 160);
+  --primary-foreground: oklch(0.985 0.002 160);
 
-  --secondary: oklch(0.945 0.012 240);
-  --secondary-foreground: oklch(0.3 0.06 255);
+  --secondary: oklch(0.94 0.025 155);
+  --secondary-foreground: oklch(0.3 0.03 155);
 
-  --muted: oklch(0.955 0.008 240);
-  --muted-foreground: oklch(0.5 0.028 250);
+  --muted: oklch(0.955 0.003 160);
+  --muted-foreground: oklch(0.51 0.012 160);
 
-  --accent: oklch(0.6 0.095 195);
-  --accent-foreground: oklch(0.99 0.005 195);
+  --accent: oklch(0.72 0.14 155);
+  --accent-foreground: oklch(0.22 0.028 155);
 
   --destructive: oklch(0.55 0.185 25);
   --destructive-foreground: oklch(0.99 0.005 95);
@@ -92,26 +92,26 @@
   --success-foreground: oklch(0.99 0.005 160);
 
   --warning: oklch(0.68 0.13 72);
-  --warning-foreground: oklch(0.24 0.045 255);
+  --warning-foreground: oklch(0.25 0.012 160);
 
-  --border: oklch(0.9 0.012 245);
-  --input: oklch(0.9 0.012 245);
-  --ring: oklch(0.6 0.095 195);
+  --border: oklch(0.90 0.005 160);
+  --input: oklch(0.90 0.005 160);
+  --ring: oklch(0.72 0.14 155);
 
-  --chart-1: oklch(0.32 0.078 255);
-  --chart-2: oklch(0.6 0.095 195);
+  --chart-1: oklch(0.27 0.015 160);
+  --chart-2: oklch(0.72 0.14 155);
   --chart-3: oklch(0.68 0.13 72);
   --chart-4: oklch(0.55 0.105 160);
   --chart-5: oklch(0.55 0.185 25);
 
-  --sidebar: oklch(0.975 0.008 95);
-  --sidebar-foreground: oklch(0.24 0.045 255);
-  --sidebar-primary: oklch(0.32 0.078 255);
-  --sidebar-primary-foreground: oklch(0.985 0.006 95);
-  --sidebar-accent: oklch(0.945 0.012 240);
-  --sidebar-accent-foreground: oklch(0.3 0.06 255);
-  --sidebar-border: oklch(0.9 0.012 245);
-  --sidebar-ring: oklch(0.6 0.095 195);
+  --sidebar: oklch(0.975 0.003 160);
+  --sidebar-foreground: oklch(0.25 0.012 160);
+  --sidebar-primary: oklch(0.27 0.015 160);
+  --sidebar-primary-foreground: oklch(0.985 0.002 160);
+  --sidebar-accent: oklch(0.94 0.025 155);
+  --sidebar-accent-foreground: oklch(0.3 0.03 155);
+  --sidebar-border: oklch(0.90 0.005 160);
+  --sidebar-ring: oklch(0.72 0.14 155);
 }
 
 .dark {
@@ -177,14 +177,14 @@
   .surface-card {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
   }
 
   .deadline-card {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-left: 3px solid var(--color-accent);
+    border-left: 3px solid var(--color-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
     transition:
@@ -217,11 +217,8 @@
     display: grid;
     grid-template-columns: 2rem minmax(0, 1fr);
     gap: 0.75rem;
-    padding: 1rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-card);
-    box-shadow: var(--shadow-card);
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .connection-step-number {
@@ -280,3 +277,5 @@
     scroll-behavior: auto !important;
   }
 }
+
+.settings-section { padding: 1.5rem 0; border-top: 1px solid var(--border); }

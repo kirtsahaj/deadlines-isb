@@ -16,13 +16,13 @@ export const Route = createFileRoute("/_authenticated/connect")({
       {
         name: "description",
         content:
-          "Five short steps to link your eLearn coursework, read-only and without a password.",
+          "Connect your eLearn coursework in three simple steps with a private copied link.",
       },
       { property: "og:title", content: "Connect eLearn — ISB Deadline Tracker" },
       {
         property: "og:description",
         content:
-          "Five short steps to link your eLearn coursework, read-only and without a password.",
+          "Connect your eLearn coursework in three simple steps with a private copied link.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/connect")({
 
 const MESSAGES: Record<string, string> = {
   invalid_connection_code:
-    "That doesn't look like a connection code. Copy the whole red line from the Console and try again.",
+    "That isn’t the connection link. Right-click the eLearn fallback link and choose Copy Link Address, then paste it here.",
   invalid_elearn_key:
     "eLearn didn't accept that code. It may have expired — repeat the steps to get a fresh one.",
   network: "We couldn't reach eLearn just now. Please try again in a moment.",
@@ -56,7 +56,7 @@ function ConnectPage() {
     onSuccess: async (result) => {
       setValue("");
       if (!result.connected) {
-        setError(MESSAGES[result.error ?? ""] ?? MESSAGES["request_failed"]!);
+        setError(MESSAGES[result.error ?? ""] ?? (MESSAGES["request_failed"] ?? "Please try again."));
         return;
       }
       window.localStorage.setItem(INSTALL_READY_KEY, "true");
@@ -72,7 +72,7 @@ function ConnectPage() {
     onError: (caught: unknown) => {
       setValue("");
       const code = caught instanceof Error ? caught.message : "request_failed";
-      setError(MESSAGES[code] ?? MESSAGES["request_failed"]!);
+      setError(MESSAGES[code] ?? (MESSAGES["request_failed"] ?? "Please try again."));
     },
   });
 
@@ -81,22 +81,21 @@ function ConnectPage() {
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold">Connect your eLearn coursework</h1>
         <p className="max-w-prose text-sm text-muted-foreground">
-          This takes about two minutes on a laptop, once. Your password is never requested and the
-          tracker can only read your coursework.
+          One sign-in. One copied link. Your password stays with eLearn.
         </p>
       </header>
 
       <ConnectionGuide />
 
       <form
-        className="surface-card space-y-3 p-4"
+        className="space-y-3 border-t border-border pt-6"
         onSubmit={(event) => {
           event.preventDefault();
           setError(null);
           mutation.mutate(value);
         }}
       >
-        <Label htmlFor="connection-code">eLearn connection code</Label>
+        <Label htmlFor="connection-code">Your private eLearn link</Label>
         <Textarea
           id="connection-code"
           value={value}
@@ -121,7 +120,7 @@ function ConnectPage() {
           </p>
         )}
         <Button type="submit" className="tap-target" disabled={!value.trim() || mutation.isPending}>
-          {mutation.isPending ? "Connecting…" : "Connect and load my deadlines"}
+          {mutation.isPending ? "Connecting…" : "Connect eLearn"}
         </Button>
       </form>
     </div>

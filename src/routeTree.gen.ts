@@ -15,6 +15,7 @@ import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDeadlinesRouteImport } from './routes/_authenticated/deadlines'
 import { Route as AuthenticatedHelpRouteImport } from './routes/_authenticated/help'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as ApiPublicScheduledAccountRouteImport } from './routes/api/public/scheduled-account'
 import { Route as ApiPublicScheduledSyncRouteImport } from './routes/api/public/scheduled-sync'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,6 +47,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicScheduledAccountRoute =
+  ApiPublicScheduledAccountRouteImport.update({
+    id: '/api/public/scheduled-account',
+    path: '/api/public/scheduled-account',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicScheduledSyncRoute = ApiPublicScheduledSyncRouteImport.update({
   id: '/api/public/scheduled-sync',
   path: '/api/public/scheduled-sync',
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/help': typeof AuthenticatedHelpRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
   '/api/public/scheduled-sync': typeof ApiPublicScheduledSyncRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/help': typeof AuthenticatedHelpRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
   '/api/public/scheduled-sync': typeof ApiPublicScheduledSyncRoute
 }
 export interface FileRoutesById {
@@ -76,6 +85,7 @@ export interface FileRoutesById {
   '/_authenticated/deadlines': typeof AuthenticatedDeadlinesRoute
   '/_authenticated/help': typeof AuthenticatedHelpRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
   '/api/public/scheduled-sync': typeof ApiPublicScheduledSyncRoute
 }
 export interface FileRouteTypes {
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/deadlines'
     | '/help'
     | '/settings'
+    | '/api/public/scheduled-account'
     | '/api/public/scheduled-sync'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/deadlines'
     | '/help'
     | '/settings'
+    | '/api/public/scheduled-account'
     | '/api/public/scheduled-sync'
   id:
     | '__root__'
@@ -103,12 +115,14 @@ export interface FileRouteTypes {
     | '/_authenticated/deadlines'
     | '/_authenticated/help'
     | '/_authenticated/settings'
+    | '/api/public/scheduled-account'
     | '/api/public/scheduled-sync'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ApiPublicScheduledAccountRoute: typeof ApiPublicScheduledAccountRoute
   ApiPublicScheduledSyncRoute: typeof ApiPublicScheduledSyncRoute
 }
 
@@ -156,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/scheduled-account': {
+      id: '/api/public/scheduled-account'
+      path: '/api/public/scheduled-account'
+      fullPath: '/api/public/scheduled-account'
+      preLoaderRoute: typeof ApiPublicScheduledAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/scheduled-sync': {
       id: '/api/public/scheduled-sync'
       path: '/api/public/scheduled-sync'
@@ -186,6 +207,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ApiPublicScheduledAccountRoute: ApiPublicScheduledAccountRoute,
   ApiPublicScheduledSyncRoute: ApiPublicScheduledSyncRoute,
 }
 export const routeTree = rootRouteImport
