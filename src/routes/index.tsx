@@ -29,23 +29,6 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const FEATURES = [
-  {
-    icon: CalendarClock,
-    title: "One list, every source",
-    body: "Assignments, quizzes, forums, the course calendar and dates mentioned in course text — merged and de-duplicated.",
-  },
-  {
-    icon: Lock,
-    title: "Read-only by design",
-    body: "No password is ever requested. The tracker can only read your coursework, never submit or change anything.",
-  },
-  {
-    icon: RefreshCcw,
-    title: "Kept fresh quietly",
-    body: "Deadlines refresh in the background, and you can refresh manually whenever you want.",
-  },
-] as const;
 
 function Landing() {
   const navigate = useNavigate();
@@ -92,9 +75,6 @@ function Landing() {
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
         </div>
-        <ul className="mt-16 grid gap-6 border-t border-border pt-8 sm:grid-cols-3">
-          {FEATURES.map((feature) => { const Icon = feature.icon; return <li key={feature.title}><Icon className="mb-3 size-5 text-foreground" aria-hidden /><h2 className="text-sm font-semibold">{feature.title}</h2><p className="mt-2 text-sm text-muted-foreground">{feature.body}</p></li>; })}
-        </ul>
       </main>
       <footer className="mx-auto w-full max-w-5xl px-4 pb-8">
         <AppFooter />
