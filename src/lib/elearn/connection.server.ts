@@ -40,13 +40,14 @@ export async function connectElearnToken(userId: string, rawToken: string): Prom
     });
     if (error) return { ok: false, error: "request_failed" };
 
-    await supabaseAdmin.from("sync_queue").upsert({
+    const { error: queueError } = await supabaseAdmin.from("sync_queue").upsert({
       user_id: userId,
       run_after: new Date().toISOString(),
       priority: 10,
       locked_at: null,
       locked_by: null,
     });
+    if (queueError) return { ok: false, error: "request_failed" };
 
     return {
       ok: true,

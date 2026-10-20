@@ -11,5 +11,7 @@ export function mayRemoveMissing(complete: boolean): boolean {
 }
 
 export function nextRefreshAt(now: number, minutes: number): string {
-  return new Date(now + minutes * 60_000).toISOString();
+  // Scheduler delivery is staggered. Remove seconds so its next half-hour
+  // tick cannot fall a few seconds before the account's due timestamp.
+  return new Date(Math.floor(now / 60_000) * 60_000 + minutes * 60_000).toISOString();
 }
