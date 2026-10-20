@@ -7,7 +7,6 @@ import { AppFooter } from "@/components/AppShell";
 import { useSession } from "@/lib/useSession";
 import { lovable } from "@/integrations/lovable/index";
 import { getAccessPolicy } from "@/lib/elearn.functions";
-import { PhoneChromeGuidance } from "@/components/PhoneChromeGuidance";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -71,7 +70,6 @@ function Landing() {
           <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">ISB Deadline Tracker<span className="text-accent">.</span></h1>
           <p className="mt-5 max-w-lg text-lg text-muted-foreground">All your eLearn deadlines in one list.</p>
           <div className="mt-8 space-y-3">
-            <PhoneChromeGuidance />
             <Button size="lg" className="tap-target w-full sm:w-auto" onClick={signIn} disabled={signingIn || loading}>{signingIn ? "Opening Microsoft…" : "Continue with Microsoft"}</Button>
             {domains.length > 0 && <p className="text-xs text-muted-foreground">Use your {domains.map((domain) => `@${domain}`).join(" or ")} account.</p>}
             {error && <p className="text-sm text-destructive">{error}</p>}
