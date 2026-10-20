@@ -49,7 +49,7 @@ const FAQ = [
   },
   {
     q: "How often does it refresh?",
-    a: "About every 30 minutes, even when this tracker is closed. Refresh now requests an extra update with a short wait between manual refreshes. Last synced changes only after fresh deadline data is saved; unavailable sections retain their previous dates.",
+    a: "About every 2 hours, even when this tracker is closed. Refresh now requests an extra update with a short wait between manual refreshes. Last synced changes only after fresh deadline data is saved; unavailable sections retain their previous dates.",
   },
   {
     q: "My connection stopped working",

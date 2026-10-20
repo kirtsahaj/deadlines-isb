@@ -73,8 +73,8 @@ export function ConnectionTroubleshooting() {
       <AccordionItem value="phone">
         <AccordionTrigger>On a phone?</AccordionTrigger>
         <AccordionContent className="space-y-2 text-sm text-muted-foreground">
-          <p>Open this tracker in the Google Chrome app and sign in. Tap Open eLearn and log in there in Chrome. Hold the launch link, then choose Copy Link on iPhone or Copy link address on Android. Return to Chrome and tap Paste and connect. Cancel any Moodle app prompt.</p>
-          <p>If Safari opens instead, copy the setup URL and paste it into Chrome. If you’re still stuck, complete setup on a laptop. Once connected, use any browser or your home-screen app with the same Microsoft account.</p>
+          <p>Keep this tracker open. Tap Open eLearn in Chrome and log in there. Hold the launch link, then choose Copy Link on iPhone or Copy link address on Android. Switch back to the tracker and tap Paste and connect. Cancel any Moodle app prompt.</p>
+          <p>If Chrome doesn’t open, copy the eLearn address and paste it into Chrome. Still stuck? Complete setup on a laptop.</p>
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="troubleshooting">
