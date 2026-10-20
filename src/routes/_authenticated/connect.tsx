@@ -8,6 +8,7 @@ import { ConnectionGuide, ConnectionTroubleshooting } from "@/components/Connect
 import { parseElearnConnectionCode } from "@/lib/parseElearnConnectionCode";
 import { connectElearn } from "@/lib/elearn.functions";
 import { INSTALL_DISMISSED_KEY, INSTALL_READY_KEY } from "@/lib/installPrompt";
+import { REMINDER_SETUP_KEY } from "@/lib/pushClient";
 import { ClipboardPaste } from "lucide-react";
 import { connectFromClipboard } from "@/lib/connectFromClipboard";
 
@@ -71,6 +72,7 @@ function ConnectPage() {
         return;
       }
       window.localStorage.setItem(INSTALL_READY_KEY, "true");
+      window.localStorage.setItem(REMINDER_SETUP_KEY, "true");
       window.localStorage.removeItem(INSTALL_DISMISSED_KEY);
       window.sessionStorage.setItem(
         "deadline-tracker-sync-notice",

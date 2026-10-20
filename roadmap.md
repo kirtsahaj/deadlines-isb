@@ -8,3 +8,4 @@
 - [x] Run regression and signed-in browser checks
 - [x] Publish and observe an actual scheduled run
 - [ ] Physical-phone and fresh private eLearn linking verification (requires device/live eLearn session)
+- [x] 3-hour push reminders + home-screen setup popup (physical phone test pending)
