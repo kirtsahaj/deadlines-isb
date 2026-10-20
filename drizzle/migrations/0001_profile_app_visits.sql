@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS first_opened_at timestamptz, ADD COLUMN IF NOT EXISTS last_active_at timestamptz;
