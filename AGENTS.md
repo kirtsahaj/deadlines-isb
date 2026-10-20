@@ -19,3 +19,4 @@
 - The shared sync policy gates snapshot removal and fresh-data success; both initial and background sync use the same read-only pipeline to preserve deadline semantics.
 - Background refresh runs on a 15-minute tick; each account gets a stable hash-derived slot in a 2-hour cycle so load spreads evenly as users grow, and dispatch is throttled to pairs to stay polite to eLearn.
 - Deadline reminders use self-contained WebCrypto Web Push (src/lib/push) driven by a managed 15-minute schedule, deduped per deadline+due time; no Node push libraries because the server runs on Workers.
+- The admin dashboard is limited to one hardcoded email, checked server-side through the verified sign-in email, because the owner asked that only they have access.
