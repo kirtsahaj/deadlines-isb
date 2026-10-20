@@ -14,8 +14,8 @@ function HomeScreenSteps() {
       </TabsList>
       <TabsContent value="ios">
         <ol className="list-decimal space-y-1.5 pl-5 text-sm">
-          <li>Open <strong>deadlines-isb.lovable.app</strong> in <strong>Safari</strong>.</li>
-          <li>Tap <strong>Share</strong> (square with an arrow).</li>
+          <li>Open <strong>deadlines-isb.lovable.app</strong> in Safari or Chrome.</li>
+          <li>Tap <strong>Share</strong> (in Chrome, it's next to the address bar).</li>
           <li>Tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
           <li>Open the app from your home screen and tap <strong>Turn on reminders</strong>.</li>
         </ol>
