@@ -100,15 +100,24 @@ export function ReminderSetupDialog() {
 /** Settings card. */
 export function ReminderSettings() {
   const state = useReminderState();
+  const [installed, setInstalled] = useState(false);
+  useEffect(() => {
+    setInstalled(window.matchMedia("(display-mode: standalone)").matches || (navigator as { standalone?: boolean }).standalone === true);
+  }, []);
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
         One notification 3 hours before each deadline.{" "}
         {state.support === "supported" ? (state.enabled ? "On for this device." : "Off for this device.") : "Add the app to your home screen to turn these on."}
       </p>
-      {state.support !== "supported" && <HomeScreenSteps />}
       <ReminderActions state={state} />
       {state.message && <p role="status" className="text-sm text-muted-foreground">{state.message}</p>}
+      {!installed && (
+        <div className="space-y-2 pt-2">
+          <p className="text-sm font-medium">Add it to your phone's home screen</p>
+          <HomeScreenSteps />
+        </div>
+      )}
     </div>
   );
 }
