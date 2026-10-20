@@ -1,6 +1,6 @@
 # Tracker improvements
-- [ ] Add Chrome-first phone setup, browser-opening actions and copy-address fallbacks; preserve desktop flow
-- [ ] Verify phone guidance and Chrome URL helpers
+- [x] Add Chrome-first phone setup, browser-opening actions and copy-address fallbacks; preserve desktop flow
+- [x] Verify phone guidance and Chrome URL helpers (10 tests passed; browser-rendered guide and public sign-in checked)
 - [x] Add explicit clipboard connection action and manual fallback
 - [x] Replace connection screenshot and clarify minimal desktop/phone wording
 - [x] Test clipboard reading, denied access, validation, and successful-response navigation (connection success simulated; fresh private eLearn test remains blocked below)
@@ -9,5 +9,5 @@
 - [x] Refresh visual design across the tracker
 - [x] Run regression and signed-in browser checks
 - [x] Publish and observe an actual scheduled run
-- [ ] Physical-phone and fresh private eLearn linking verification (requires device/live eLearn session)
+- [ ] Verify new Chrome-opening buttons on physical phones and fresh private eLearn linking (requires devices and live eLearn session; user already verified copying in iPhone Chrome)
 - [x] 3-hour push reminders + home-screen setup popup (physical phone test pending)
