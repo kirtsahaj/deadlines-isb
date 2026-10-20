@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { DeadlineCard, type DeadlineRow } from "@/components/DeadlineCard";
 import { MultiSelectFilter } from "@/components/MultiSelectFilter";
+import { ReminderSetupDialog } from "@/components/ReminderSetup";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/useSession";
 import { getConnectionState, syncNow } from "@/lib/elearn.functions";
@@ -231,6 +232,7 @@ function DeadlinesPage() {
 
   return (
     <div className="space-y-6">
+      <ReminderSetupDialog />
       <header className="space-y-3">
         <div className="flex flex-wrap items-start gap-3">
           <div className="mr-auto">

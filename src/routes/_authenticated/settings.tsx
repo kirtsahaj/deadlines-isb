@@ -19,6 +19,7 @@ import { useSession } from "@/lib/useSession";
 import { deleteAccount, disconnectElearn, getConnectionState } from "@/lib/elearn.functions";
 import { DEFAULT_TIMEZONE, formatDateTime } from "@/lib/format";
 import { InstallInstructions } from "@/components/InstallPrompt";
+import { ReminderSettings } from "@/components/ReminderSetup";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -135,6 +136,11 @@ function SettingsPage() {
           Your connection, how deadlines are shown, and control over your data.
         </p>
       </header>
+
+      <section className="settings-section space-y-3 p-4">
+        <h2 className="text-lg font-semibold">Deadline reminders</h2>
+        <ReminderSettings />
+      </section>
 
       <section className="settings-section space-y-3 p-4">
         <h2 className="text-lg font-semibold">eLearn connection</h2>
