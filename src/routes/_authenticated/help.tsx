@@ -84,7 +84,7 @@ function HelpPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Connecting eLearn</h2>
         <p className="text-sm text-muted-foreground">
-          Open eLearn, copy the eLearn connection link, and paste it on the Connect page.
+          Open eLearn, copy the eLearn connection link’s address, then choose Paste and connect on the Connect page.
         </p>
         <Button asChild className="tap-target">
           <Link to="/connect">Go to Connect</Link>

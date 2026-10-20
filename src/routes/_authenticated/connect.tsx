@@ -8,6 +8,8 @@ import { ConnectionGuide, ConnectionTroubleshooting } from "@/components/Connect
 import { parseElearnConnectionCode } from "@/lib/parseElearnConnectionCode";
 import { connectElearn } from "@/lib/elearn.functions";
 import { INSTALL_DISMISSED_KEY, INSTALL_READY_KEY } from "@/lib/installPrompt";
+import { ClipboardPaste } from "lucide-react";
+import { connectFromClipboard } from "@/lib/connectFromClipboard";
 
 export const Route = createFileRoute("/_authenticated/connect")({
   head: () => ({
@@ -47,14 +49,23 @@ function ConnectPage() {
   const queryClient = useQueryClient();
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [manualPaste, setManualPaste] = useState(false);
 
   const mutation = useMutation({
-    mutationFn: async (raw: string) => {
-      const token = parseElearnConnectionCode(raw);
-      return connectElearn({ data: { token } });
+    mutationFn: async (input: { source: "clipboard" } | { source: "manual"; raw: string }) => {
+      if (input.source === "clipboard") {
+        return connectFromClipboard(navigator.clipboard, (token) => connectElearn({ data: { token } }));
+      }
+      const token = parseElearnConnectionCode(input.raw);
+      return { kind: "connected" as const, result: await connectElearn({ data: { token } }) };
     },
-    onSuccess: async (result) => {
+    onSuccess: async (outcome) => {
       setValue("");
+      if (outcome.kind === "manual") {
+        setManualPaste(true);
+        return;
+      }
+      const result = outcome.result;
       if (!result.connected) {
         setError(MESSAGES[result.error ?? ""] ?? (MESSAGES["request_failed"] ?? "Please try again."));
         return;
@@ -87,17 +98,42 @@ function ConnectPage() {
 
       <ConnectionGuide />
 
-      <form
+      <div className="space-y-3">
+        <Button
+          className="tap-target"
+          disabled={mutation.isPending}
+          onClick={() => {
+            setError(null);
+            mutation.mutate({ source: "clipboard" });
+          }}
+        >
+          <ClipboardPaste className="size-4" />
+          {mutation.isPending ? "Connecting…" : "Paste and connect"}
+        </Button>
+        <p className="text-xs text-muted-foreground">Keep your eLearn connection link private. Paste it only here.</p>
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+        {!manualPaste && (
+          <Button variant="link" className="px-0" disabled={mutation.isPending} onClick={() => setManualPaste(true)}>
+            Paste manually instead
+          </Button>
+        )}
+      </div>
+
+      {manualPaste && <form
         className="space-y-3"
         onSubmit={(event) => {
           event.preventDefault();
           setError(null);
-          mutation.mutate(value);
+          const raw = value;
+          setValue("");
+          mutation.mutate({ source: "manual", raw });
         }}
       >
+        <p role="status" className="text-sm text-muted-foreground">Paste your eLearn connection link manually, then connect.</p>
         <Label htmlFor="connection-code">eLearn connection link</Label>
         <Textarea
           id="connection-code"
+          autoFocus
           value={value}
           onChange={(event) => setValue(event.target.value)}
           rows={3}
@@ -111,15 +147,10 @@ function ConnectPage() {
         <p id="connection-code-help" className="text-xs text-muted-foreground">
           Keep this link private. Paste it only here.
         </p>
-        {error && (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
-        )}
         <Button type="submit" className="tap-target" disabled={!value.trim() || mutation.isPending}>
           {mutation.isPending ? "Connecting…" : "Connect eLearn"}
         </Button>
-      </form>
+      </form>}
 
       <ConnectionTroubleshooting />
     </div>
