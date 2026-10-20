@@ -86,6 +86,7 @@ function HelpPage() {
         <p className="text-sm text-muted-foreground">
           Open eLearn, copy the eLearn connection link’s address, then choose Paste and connect on the Connect page.
         </p>
+        <p className="text-sm text-muted-foreground">On a phone, use the Google Chrome app for both this tracker and eLearn during setup. Once connected, you can return to your preferred browser.</p>
         <Button asChild className="tap-target">
           <Link to="/connect">Go to Connect</Link>
         </Button>

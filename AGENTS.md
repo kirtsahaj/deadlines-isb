@@ -14,6 +14,7 @@
 - Derive deadline term/course filters at runtime from Moodle short names so existing rows need no migration.
 - Keep phone installability manifest-only; offline caching is intentionally excluded to protect fresh authenticated data.
 - eLearn launch URLs are generated on interaction in a shared browser-safe helper so every attempt gets a fresh passport.
+- Detect phone browsers after hydration and keep Chrome-opening URL schemes in a shared browser-safe helper; browser handoffs are explicit and public setup URL copying has a manual fallback.
 - Clipboard connection goes through a browser-safe helper that validates before sending only the REST token; permission failures return a manual-paste outcome without attempting a connection.
 - Managed scheduled routes authenticate with the generated cron helper; dispatch one bounded account sync per same-origin invocation and retain it through the Worker request waitUntil hook so scheduler timeouts do not interrupt work.
 - The shared sync policy gates snapshot removal and fresh-data success; both initial and background sync use the same read-only pipeline to preserve deadline semantics.
