@@ -3,6 +3,7 @@ import { MoodleClient, MoodleError } from "./moodle.server";
 import { normalizeDeadlines } from "./normalize";
 import { manualCooldownSeconds, syncConcurrency, syncIntervalMinutes } from "./config.server";
 import type { Json as DbJson } from "@/integrations/supabase/types";
+import { SYNC_BUDGET_MS, SYNC_LEASE_MS, hasFreshDeadlineSources, mayRemoveMissing, nextRefreshAt } from "./syncPolicy";
 
 type Json = Record<string, unknown>;
 type SourceStatus = Record<string, { ok: boolean; code?: string; count?: number }>;
@@ -61,7 +62,7 @@ export async function runSync(
       const attemptedAt = connection.last_attempt_at
         ? new Date(connection.last_attempt_at).getTime()
         : 0;
-      if (Date.now() - attemptedAt < 120_000) {
+      if (Date.now() - attemptedAt < SYNC_LEASE_MS) {
         return { ok: false, error: "sync_cooldown", retryAfterSeconds: 30 };
       }
     }
@@ -80,6 +81,21 @@ export async function runSync(
       }
     }
 
+    // Compare-and-set the lease: manual and scheduled calls cannot both start.
+    const { data: lease, error: leaseError } = await supabaseAdmin
+      .from("elearn_connections")
+      .update({
+        status: "syncing",
+        last_attempt_at: started.toISOString(),
+        ...(trigger === "manual" ? { last_manual_sync_at: started.toISOString() } : {}),
+      })
+      .eq("user_id", userId)
+      .or(`status.neq.syncing,last_attempt_at.lt.${new Date(Date.now() - SYNC_LEASE_MS).toISOString()},last_attempt_at.is.null`)
+      .select("user_id")
+      .maybeSingle();
+    if (leaseError) throw new Error("database");
+    if (!lease) return { ok: false, error: "sync_cooldown", retryAfterSeconds: 30 };
+
     const { data: run, error: runError } = await supabaseAdmin
       .from("sync_runs")
       .insert({ user_id: userId, trigger, outcome: "running" })
@@ -88,22 +104,13 @@ export async function runSync(
     if (runError || !run) throw new Error("database");
     runId = run.id;
 
-    await supabaseAdmin
-      .from("elearn_connections")
-      .update({
-        status: "syncing",
-        last_attempt_at: started.toISOString(),
-        ...(trigger === "manual" ? { last_manual_sync_at: started.toISOString() } : {}),
-      })
-      .eq("user_id", userId);
-
     const token = await decryptToken(
       connection.token_ciphertext,
       connection.token_iv,
       userId,
       connection.base_url,
     );
-    const client = new MoodleClient(token);
+    const client = new MoodleClient(token, started.getTime() + SYNC_BUDGET_MS);
     const sourceStatus: SourceStatus = {};
     const safe = async (
       name: string,
@@ -139,6 +146,7 @@ export async function runSync(
       .map((course) => Number(course["id"]))
       .filter((id) => Number.isInteger(id) && id > 0);
     if (!courseIds.length && !sourceStatus["courses"]?.ok) throw new Error("courses_unavailable");
+    if (!courseIds.length) throw new Error("courses_empty");
 
     const concurrency = syncConcurrency();
 
@@ -186,6 +194,7 @@ export async function runSync(
     const quizzes = quizzesRaw as Json;
     const calendar = calendarRaw as Json;
     const contents = new Map<number, Json[]>(contentPairs);
+    if (!hasFreshDeadlineSources(sourceStatus)) throw new Error("sources_unavailable");
 
 
     const assignmentObjects = asList(assignments["courses"]).flatMap((course) =>
@@ -262,11 +271,11 @@ export async function runSync(
         .eq("active", true)
         .lt("last_seen_at", started.toISOString());
     };
-    if (sourceStatus["assignments"]?.ok) await deactivateMissing("mod_assign_get_assignments");
-    if (sourceStatus["quizzes"]?.ok) await deactivateMissing("mod_quiz_get_quizzes_by_courses");
-    if (sourceStatus["forums"]?.ok) await deactivateMissing("mod_forum_get_forums_by_courses");
-    if (sourceStatus["calendar"]?.ok) await deactivateMissing("core_calendar_get_calendar_events");
-    if (courseIds.length && courseIds.every((id) => sourceStatus[`contents:${id}`]?.ok)) {
+    if (mayRemoveMissing(complete)) {
+      await deactivateMissing("mod_assign_get_assignments");
+      await deactivateMissing("mod_quiz_get_quizzes_by_courses");
+      await deactivateMissing("mod_forum_get_forums_by_courses");
+      await deactivateMissing("core_calendar_get_calendar_events");
       await deactivateMissing("core_course_get_contents.description");
     }
 
@@ -279,22 +288,12 @@ export async function runSync(
       .lt("removed_at", new Date(Date.now() - 30 * 86400_000).toISOString());
 
     const interval = syncIntervalMinutes();
-    const jitterMinutes = Math.floor(Math.random() * Math.max(2, Math.floor(interval / 5)));
-    const nextSync = new Date(Date.now() + (interval + jitterMinutes) * 60_000).toISOString();
+    // Anchor to start time so a 30-minute scheduler does not skip the next tick.
+    const nextSync = nextRefreshAt(started.getTime(), interval);
     const outcome = complete ? "success" : "partial";
     const finishedAt = new Date().toISOString();
 
-    await supabaseAdmin
-      .from("elearn_connections")
-      .update({
-        status: complete ? "connected" : "partial",
-        last_success_at: finishedAt,
-        next_sync_at: nextSync,
-        consecutive_failures: 0,
-        safe_error_code: complete ? null : "partial_sources",
-      })
-      .eq("user_id", userId);
-    await supabaseAdmin.from("sync_queue").upsert({
+    const { error: queueError } = await supabaseAdmin.from("sync_queue").upsert({
       user_id: userId,
       run_after: nextSync,
       priority: 0,
@@ -302,7 +301,8 @@ export async function runSync(
       locked_at: null,
       locked_by: null,
     });
-    await supabaseAdmin
+    if (queueError) throw new Error("database");
+    const { error: finishError } = await supabaseAdmin
       .from("sync_runs")
       .update({
         outcome,
@@ -312,6 +312,18 @@ export async function runSync(
         finished_at: finishedAt,
       })
       .eq("id", runId);
+    if (finishError) throw new Error("database");
+    const { error: successError } = await supabaseAdmin
+      .from("elearn_connections")
+      .update({
+        status: complete ? "connected" : "partial",
+        last_success_at: finishedAt,
+        next_sync_at: nextSync,
+        consecutive_failures: 0,
+        safe_error_code: complete ? null : "partial_sources",
+      })
+      .eq("user_id", userId);
+    if (successError) throw new Error("database");
 
     return {
       ok: true,

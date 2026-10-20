@@ -77,6 +77,10 @@ export const connectElearn = createServerFn({ method: "POST" })
     const { connectElearnToken } = await import("./elearn/connection.server");
     const result = await connectElearnToken(context.userId, data.token);
     if (!result.ok) return { connected: false as const, error: result.error };
+    const { keepWorking } = await import("./background.server");
+    const { runSync } = await import("./elearn/sync.server");
+    const firstSync = runSync(context.userId, "first_connect");
+    if (!keepWorking(firstSync)) await firstSync;
     // The first full sync is queued, not awaited: the connection is already
     // saved, so the user goes straight to their deadlines while it runs.
     return { connected: true as const, accountName: result.accountName, firstSync: "pending" };

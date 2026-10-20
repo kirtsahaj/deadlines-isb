@@ -56,8 +56,10 @@ export const readOnlyFunctions = [...ALLOWED];
 
 export class MoodleClient {
   private endpoint: URL;
+  private waiting: Array<() => void> = [];
+  private active = 0;
 
-  constructor(private token: string) {
+  constructor(private token: string, private deadline = Infinity) {
     if (!/^[A-Za-z0-9]{16,128}$/.test(token)) throw new MoodleError("credentials");
     const base = new URL(elearnBaseUrl());
     if (base.protocol !== "https:" || base.username || base.password || base.search || base.hash) {
@@ -73,6 +75,20 @@ export class MoodleClient {
     functionName: string,
     params: Record<string, unknown> = {},
   ): Promise<Record<string, unknown> | unknown[]> {
+    if (this.active >= 6) await new Promise<void>((resolve) => this.waiting.push(resolve));
+    this.active++;
+    try {
+      return await this.performCall(functionName, params);
+    } finally {
+      this.active--;
+      this.waiting.shift()?.();
+    }
+  }
+
+  private async performCall(
+    functionName: string,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown> | unknown[]> {
     if (!ALLOWED.has(functionName)) throw new MoodleError("read_only");
     if (["wstoken", "wsfunction", "moodlewsrestformat"].some((key) => key in params)) {
       throw new MoodleError("parameters");
@@ -85,8 +101,10 @@ export class MoodleClient {
     for (const [key, value] of Object.entries(params)) add(form, key, value);
 
     for (let attempt = 0; attempt < 3; attempt++) {
+      const remaining = this.deadline - Date.now();
+      if (remaining <= 0) throw new MoodleError("timeout");
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30_000);
+      const timeout = setTimeout(() => controller.abort(), Math.min(30_000, remaining));
       try {
         const response = await fetch(this.endpoint, {
           method: "POST",
