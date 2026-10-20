@@ -16,7 +16,7 @@ export function emailAllowed(email: string | null | undefined): boolean {
 }
 
 export function syncIntervalMinutes(): number {
-  return Math.max(15, Number(process.env["SYNC_INTERVAL_MINUTES"] ?? 30));
+  return Math.max(15, 120);
 }
 
 export function manualCooldownSeconds(): number {
