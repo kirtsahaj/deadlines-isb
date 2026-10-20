@@ -1,7 +1,7 @@
 # Tracker improvements
-- [ ] Add explicit clipboard connection action and manual fallback
-- [ ] Replace connection screenshot and clarify minimal desktop/phone wording
-- [ ] Test clipboard success, denied access, and connection outcomes
+- [x] Add explicit clipboard connection action and manual fallback
+- [x] Replace connection screenshot and clarify minimal desktop/phone wording
+- [x] Test clipboard reading, denied access, validation, and successful-response navigation (connection success simulated; fresh private eLearn test remains blocked below)
 - [x] Replace primary eLearn setup with confirmed copied-link flow and update Help/images
 - [x] Fix managed automatic refresh and initial sync; preserve dates and honest timestamps
 - [x] Refresh visual design across the tracker
