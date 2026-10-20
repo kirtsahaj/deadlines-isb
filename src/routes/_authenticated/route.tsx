@@ -67,7 +67,7 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <AppShell>
+    <AppShell isAdmin={!!access.data?.isAdmin}>
       <Outlet />
     </AppShell>
   );

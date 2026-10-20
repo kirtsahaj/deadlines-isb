@@ -35,8 +35,30 @@ export const getAccountAccess = createServerFn({ method: "GET" })
     const allowed = emailAllowed(email);
     if (allowed) {
       await context.supabase.rpc("ensure_current_user_bootstrapped");
+      try {
+        const { shouldRecordVisit } = await import("./admin");
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("first_opened_at, last_active_at")
+          .eq("user_id", context.userId)
+          .maybeSingle();
+        const now = new Date();
+        if (profile && shouldRecordVisit(profile.last_active_at, now.getTime())) {
+          await supabaseAdmin
+            .from("profiles")
+            .update({
+              last_active_at: now.toISOString(),
+              first_opened_at: profile.first_opened_at ?? now.toISOString(),
+            })
+            .eq("user_id", context.userId);
+        }
+      } catch {
+        // Visit tracking must never block access.
+      }
     }
-    return { allowed, email, allowedDomains: allowedEmailDomains() };
+    const { isAdminEmail } = await import("./admin");
+    return { allowed, email, allowedDomains: allowedEmailDomains(), isAdmin: allowed && isAdminEmail(email) };
   });
 
 /** Safe connection metadata only. Never ciphertext, IV, key version or token. */
