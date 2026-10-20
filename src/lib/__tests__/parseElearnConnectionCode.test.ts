@@ -25,6 +25,11 @@ describe("parseElearnConnectionCode", () => {
     expect(parseElearnConnectionCode(`moodlemobile://token=${encoded}`)).toBe(REST_TOKEN);
   });
 
+  it("accepts a copied fallback link address and discards the auto-login key", () => {
+    expect(parseElearnConnectionCode(`moodlemobile://token=${encodeURIComponent(encoded)}`)).toBe(REST_TOKEN);
+    expect(() => parseElearnConnectionCode("Click here if the app does not open automatically.")).toThrow("invalid_connection_code");
+  });
+
   it("tolerates surrounding quotes and whitespace", () => {
     expect(parseElearnConnectionCode(`  "moodlemobile://token=${encoded}"  `)).toBe(REST_TOKEN);
   });

@@ -15,7 +15,6 @@ export const Route = createFileRoute("/api/public/scheduled-sync")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { syncBatchSize } = await import("@/lib/elearn/config.server");
-        const { runSync } = await import("@/lib/elearn/sync.server");
         const { keepWorking } = await import("@/lib/background.server");
 
         const worker = crypto.randomUUID();
