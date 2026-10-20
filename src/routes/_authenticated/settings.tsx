@@ -136,27 +136,27 @@ function SettingsPage() {
         </p>
       </header>
 
-      <section className="surface-card space-y-3 p-4">
+      <section className="settings-section space-y-3 p-4">
         <h2 className="text-lg font-semibold">eLearn connection</h2>
         {state?.connected ? (
           <>
             <dl className="space-y-1 text-sm">
-              <div className="flex justify-between gap-4">
+              <div className="flex flex-wrap justify-between gap-2">
                 <dt className="text-muted-foreground">eLearn account</dt>
                 <dd>{state.accountName ?? "Connected"}</dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Last successful refresh</dt>
+              <div className="flex flex-wrap justify-between gap-2">
+                <dt className="text-muted-foreground">Last saved refresh</dt>
                 <dd>{state.lastSuccessAt ? formatDateTime(state.lastSuccessAt) : "Not yet"}</dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Next background refresh</dt>
+              <div className="flex flex-wrap justify-between gap-2">
+                <dt className="text-muted-foreground">Next refresh due</dt>
                 <dd>{state.nextSyncAt ? formatDateTime(state.nextSyncAt) : "Soon"}</dd>
               </div>
             </dl>
             <div className="flex flex-wrap gap-2">
               <Button asChild variant="secondary" className="tap-target">
-                <Link to="/connect">Reconnect with a new code</Link>
+                <Link to="/connect">Reconnect with a new link</Link>
               </Button>
               <Button
                 variant="outline"
@@ -175,7 +175,7 @@ function SettingsPage() {
         )}
       </section>
 
-      <section className="surface-card space-y-4 p-4">
+      <section className="settings-section space-y-4 p-4">
         <h2 className="text-lg font-semibold">Display</h2>
         <div className="grid gap-2">
           <Label htmlFor="timezone">Time zone</Label>
@@ -225,11 +225,11 @@ function SettingsPage() {
         </div>
       </section>
 
-      <section className="surface-card p-4">
+      <section className="settings-section p-4">
         <InstallInstructions />
       </section>
 
-      <section className="surface-card space-y-3 p-4">
+      <section className="settings-section space-y-3 p-4">
         <h2 className="text-lg font-semibold">Hide courses</h2>
         <p className="text-sm text-muted-foreground">
           Hidden courses stay out of your deadline list.
@@ -259,7 +259,7 @@ function SettingsPage() {
         </ul>
       </section>
 
-      <section className="surface-card space-y-3 border-destructive/30 p-4">
+      <section className="settings-section space-y-3 border-destructive/30 p-4">
         <h2 className="text-lg font-semibold">Delete your account</h2>
         <p className="text-sm text-muted-foreground">
           This permanently removes your account, your eLearn connection and every synced deadline.

@@ -48,11 +48,11 @@ const FAQ = [
   },
   {
     q: "How often does it refresh?",
-    a: "Automatically in the background through the day, and instantly when you use Refresh now (with a short wait between manual refreshes).",
+    a: "About every 30 minutes, even when this tracker is closed. Refresh now requests an extra update with a short wait between manual refreshes. Last synced changes only after fresh deadline data is saved; unavailable sections retain their previous dates.",
   },
   {
     q: "My connection stopped working",
-    a: "eLearn connection codes expire. Open Settings, disconnect, and run the connection steps again to get a fresh code.",
+    a: "eLearn connection codes expire. Open Settings and choose Reconnect with a new link. There is no need to disconnect or delete your saved deadlines.",
   },
 ] as const;
 
@@ -81,7 +81,7 @@ function HelpPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Connection steps</h2>
+        <h2 className="text-lg font-semibold">Connect eLearn</h2>
         <ConnectionGuide />
       </section>
 
