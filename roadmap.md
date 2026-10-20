@@ -1,4 +1,6 @@
 # Tracker improvements
+- [ ] Add Chrome-first phone setup, browser-opening actions and copy-address fallbacks; preserve desktop flow
+- [ ] Verify phone guidance and Chrome URL helpers
 - [x] Add explicit clipboard connection action and manual fallback
 - [x] Replace connection screenshot and clarify minimal desktop/phone wording
 - [x] Test clipboard reading, denied access, validation, and successful-response navigation (connection success simulated; fresh private eLearn test remains blocked below)
