@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DeadlineCard, type DeadlineRow } from "@/components/DeadlineCard";
-import { InstallPrompt } from "@/components/InstallPrompt";
 import { MultiSelectFilter } from "@/components/MultiSelectFilter";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/useSession";
@@ -278,7 +277,6 @@ function DeadlinesPage() {
         )}
       </header>
 
-      <InstallPrompt />
 
       <div
         className="inline-flex rounded-lg bg-muted p-1"
