@@ -28,16 +28,23 @@ export const Route = createFileRoute("/api/public/scheduled-sync")({
         // Each account has its own invocation and six-connection budget.
         // Forward only the already verified scheduler credential, same-origin.
         const target = new URL("/api/public/scheduled-account", request.url);
-        const work = Promise.all(rows.map(async (row) => {
+        const dispatch = async (row: { user_id: string }) => {
           const response = await fetch(target, {
             method: "POST",
             headers: { authorization: request.headers.get("authorization") ?? "", "content-type": "application/json" },
             body: JSON.stringify({ userId: row.user_id }),
-          });
-          if (!response.ok) {
+          }).catch(() => null);
+          if (!response?.ok) {
             await supabaseAdmin.from("sync_queue").update({ locked_at: null, locked_by: null }).eq("user_id", row.user_id).eq("locked_by", worker);
           }
-        }));
+        };
+        // Gentle on eLearn: two accounts at a time with a short pause between pairs.
+        const work = (async () => {
+          for (let i = 0; i < rows.length; i += 2) {
+            if (i > 0) await new Promise((r) => setTimeout(r, 500));
+            await Promise.all(rows.slice(i, i + 2).map(dispatch));
+          }
+        })();
         if (!keepWorking(work)) await work;
         return Response.json(
           {

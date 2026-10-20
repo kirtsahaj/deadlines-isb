@@ -1,9 +1,9 @@
 import { decryptToken } from "./crypto.server";
 import { MoodleClient, MoodleError } from "./moodle.server";
 import { normalizeDeadlines } from "./normalize";
-import { manualCooldownSeconds, syncConcurrency, syncIntervalMinutes } from "./config.server";
+import { manualCooldownSeconds, syncConcurrency } from "./config.server";
 import type { Json as DbJson } from "@/integrations/supabase/types";
-import { SYNC_BUDGET_MS, SYNC_LEASE_MS, hasFreshDeadlineSources, mayRemoveMissing, nextRefreshAt } from "./syncPolicy";
+import { SYNC_BUDGET_MS, SYNC_LEASE_MS, hasFreshDeadlineSources, mayRemoveMissing, nextSlottedRefreshAt } from "./syncPolicy";
 
 type Json = Record<string, unknown>;
 type SourceStatus = Record<string, { ok: boolean; code?: string; count?: number }>;
@@ -287,9 +287,9 @@ export async function runSync(
       .eq("active", false)
       .lt("removed_at", new Date(Date.now() - 30 * 86400_000).toISOString());
 
-    const interval = syncIntervalMinutes();
+
     // Anchor to start time so a 30-minute scheduler does not skip the next tick.
-    const nextSync = nextRefreshAt(started.getTime(), interval);
+    const nextSync = nextSlottedRefreshAt(started.getTime(), userId);
     const outcome = complete ? "success" : "partial";
     const finishedAt = new Date().toISOString();
 
