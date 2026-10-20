@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ConnectionGuide } from "@/components/ConnectionGuide";
+import { ConnectionGuide, ConnectionTroubleshooting } from "@/components/ConnectionGuide";
 import { parseElearnConnectionCode } from "@/lib/parseElearnConnectionCode";
 import { connectElearn } from "@/lib/elearn.functions";
 import { INSTALL_DISMISSED_KEY, INSTALL_READY_KEY } from "@/lib/installPrompt";
@@ -33,9 +33,9 @@ export const Route = createFileRoute("/_authenticated/connect")({
 
 const MESSAGES: Record<string, string> = {
   invalid_connection_code:
-    "That isn’t the connection link. Right-click the eLearn fallback link and choose Copy Link Address, then paste it here.",
+    "That isn’t the eLearn connection link. Right-click the link on eLearn, choose Copy Link Address, and paste it here.",
   invalid_elearn_key:
-    "eLearn didn't accept that code. It may have expired — repeat the steps to get a fresh one.",
+    "eLearn didn’t accept that link. It may have expired — open eLearn again for a fresh one.",
   network: "We couldn't reach eLearn just now. Please try again in a moment.",
   timeout: "eLearn took too long to answer. Please try again in a moment.",
   rate_limited: "eLearn is busy right now. Please wait a minute and try again.",
@@ -79,23 +79,23 @@ function ConnectPage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold">Connect your eLearn coursework</h1>
+        <h1 className="text-2xl font-semibold">Connect eLearn</h1>
         <p className="max-w-prose text-sm text-muted-foreground">
-          One sign-in. One copied link. Your password stays with eLearn.
+          Three quick steps. Your eLearn password is never shared.
         </p>
       </header>
 
       <ConnectionGuide />
 
       <form
-        className="space-y-3 border-t border-border pt-6"
+        className="space-y-3"
         onSubmit={(event) => {
           event.preventDefault();
           setError(null);
           mutation.mutate(value);
         }}
       >
-        <Label htmlFor="connection-code">Your private eLearn link</Label>
+        <Label htmlFor="connection-code">eLearn connection link</Label>
         <Textarea
           id="connection-code"
           value={value}
@@ -109,10 +109,7 @@ function ConnectPage() {
           aria-describedby="connection-code-help"
         />
         <p id="connection-code-help" className="text-xs text-muted-foreground">
-          This value is as sensitive as a password. Paste it only here. Never put it in chat, email,
-          screenshots, analytics, logs, or support messages. If you share it anywhere else, do not
-          use it—generate a fresh one. It is decoded only in browser memory, cleared immediately,
-          and only the read-only key is sent securely.
+          Keep this link private. Paste it only here.
         </p>
         {error && (
           <p role="alert" className="text-sm text-destructive">
@@ -123,6 +120,8 @@ function ConnectPage() {
           {mutation.isPending ? "Connecting…" : "Connect eLearn"}
         </Button>
       </form>
+
+      <ConnectionTroubleshooting />
     </div>
   );
 }

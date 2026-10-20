@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarClock, Lock, RefreshCcw } from "lucide-react";
+import { CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppFooter } from "@/components/AppShell";
 import { useSession } from "@/lib/useSession";
@@ -29,23 +29,6 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const FEATURES = [
-  {
-    icon: CalendarClock,
-    title: "One list, every source",
-    body: "Assignments, quizzes, forums, the course calendar and dates mentioned in course text — merged and de-duplicated.",
-  },
-  {
-    icon: Lock,
-    title: "Read-only by design",
-    body: "No password is ever requested. The tracker can only read your coursework, never submit or change anything.",
-  },
-  {
-    icon: RefreshCcw,
-    title: "Kept fresh quietly",
-    body: "Deadlines refresh in the background, and you can refresh manually whenever you want.",
-  },
-] as const;
 
 function Landing() {
   const navigate = useNavigate();
@@ -85,16 +68,13 @@ function Landing() {
           <CalendarClock className="mb-8 size-12 text-foreground" aria-hidden />
           <p className="text-xs font-semibold uppercase text-muted-foreground">For ISB students</p>
           <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">ISB Deadline Tracker<span className="text-accent">.</span></h1>
-          <p className="mt-5 max-w-lg text-lg text-muted-foreground">Less tab-hopping. More headspace. Your eLearn deadlines, together.</p>
+          <p className="mt-5 max-w-lg text-lg text-muted-foreground">All your eLearn deadlines in one list.</p>
           <div className="mt-8 space-y-3">
             <Button size="lg" className="tap-target w-full sm:w-auto" onClick={signIn} disabled={signingIn || loading}>{signingIn ? "Opening Microsoft…" : "Continue with Microsoft"}</Button>
             {domains.length > 0 && <p className="text-xs text-muted-foreground">Use your {domains.map((domain) => `@${domain}`).join(" or ")} account.</p>}
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
         </div>
-        <ul className="mt-16 grid gap-6 border-t border-border pt-8 sm:grid-cols-3">
-          {FEATURES.map((feature) => { const Icon = feature.icon; return <li key={feature.title}><Icon className="mb-3 size-5 text-foreground" aria-hidden /><h2 className="text-sm font-semibold">{feature.title}</h2><p className="mt-2 text-sm text-muted-foreground">{feature.body}</p></li>; })}
-        </ul>
       </main>
       <footer className="mx-auto w-full max-w-5xl px-4 pb-8">
         <AppFooter />
