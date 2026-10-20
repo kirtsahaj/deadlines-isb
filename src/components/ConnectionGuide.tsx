@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { createElearnLaunchUrl } from "@/lib/elearnLaunch";
 import copyLinkAsset from "@/assets/01-elearn-copy-link-overlay.png.asset.json";
 import { ChromeUrlActions, PhoneChromeGuidance, usePhoneBrowser } from "@/components/PhoneChromeGuidance";
+import { chromeOpenUrl } from "@/lib/phoneBrowser";
 
 export function ConnectionGuide() {
   const browser = usePhoneBrowser();
@@ -18,7 +19,14 @@ export function ConnectionGuide() {
         <div className="min-w-0 space-y-3">
           <h3 className="text-lg font-semibold">Open eLearn</h3>
           <p className="text-sm text-muted-foreground">Sign in with your ISB Microsoft account if asked.</p>
-          <Button onClick={() => window.open(createElearnLaunchUrl(), "_blank", "noopener,noreferrer")} className="tap-target">
+          <Button onClick={() => {
+            const url = createElearnLaunchUrl();
+            if (browser && !browser.chrome) {
+              window.location.assign(chromeOpenUrl(url, browser.platform));
+              return;
+            }
+            window.open(url, "_blank", "noopener,noreferrer");
+          }} className="tap-target">
             Open eLearn <ArrowUpRight className="size-4" />
           </Button>
           {browser && <ChromeUrlActions browser={browser} getUrl={createElearnLaunchUrl} copyLabel="Copy setup URL" />}
