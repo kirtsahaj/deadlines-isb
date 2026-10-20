@@ -17,3 +17,4 @@
 - Clipboard connection goes through a browser-safe helper that validates before sending only the REST token; permission failures return a manual-paste outcome without attempting a connection.
 - Managed scheduled routes authenticate with the generated cron helper; dispatch one bounded account sync per same-origin invocation and retain it through the Worker request waitUntil hook so scheduler timeouts do not interrupt work.
 - The shared sync policy gates snapshot removal and fresh-data success; both initial and background sync use the same read-only pipeline to preserve deadline semantics.
+- Deadline reminders use self-contained WebCrypto Web Push (src/lib/push) driven by a managed 15-minute schedule, deduped per deadline+due time; no Node push libraries because the server runs on Workers.
