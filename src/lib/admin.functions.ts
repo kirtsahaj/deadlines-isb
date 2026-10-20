@@ -69,7 +69,7 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
       const c = conns.get(u.id);
       const r = runs.get(u.id);
       const meta = (u.user_metadata ?? {}) as Record<string, unknown>;
-      const metaName = typeof meta.full_name === "string" ? meta.full_name : typeof meta.name === "string" ? meta.name : null;
+      const metaName = typeof meta['full_name'] === "string" ? meta['full_name'] : typeof meta['name'] === "string" ? meta['name'] : null;
       return {
         userId: u.id,
         name: p?.display_name ?? metaName ?? c?.external_full_name ?? null,
