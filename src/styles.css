@@ -333,7 +333,7 @@
   background-color: color-mix(in oklab, var(--color-muted-foreground) 14%, var(--color-card));
 }
 
-.settings-section { padding: 1.5rem 0; border-top: 1px solid var(--border); }
+.settings-section { padding: 1rem 0; border-top: 1px solid var(--border); }
 
 /* Static chips (course code, type) share one shape; only links get an outline + hover. */
 .deadline-card .tile-chip,

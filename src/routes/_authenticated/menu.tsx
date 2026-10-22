@@ -216,7 +216,7 @@ function MenuPage() {
   const state = connection.data;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <h1 className="text-3xl font-semibold">Menu</h1>
       <SetupNudges />
 
