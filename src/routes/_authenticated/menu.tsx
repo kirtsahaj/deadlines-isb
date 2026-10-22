@@ -355,14 +355,22 @@ function MenuPage() {
           <LogOut className="size-4" aria-hidden /> Sign out
           <span className="ml-auto text-xs font-normal text-muted-foreground">Keeps your eLearn connection</span>
         </Button>
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="tap-target flex items-center gap-3 p-4 text-sm font-medium"
-        >
-          <MessageCircle className="size-4" aria-hidden /> Text Kirt on WhatsApp
-        </a>
+        <div className="p-4">
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tap-target flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 p-3 text-sm font-semibold text-success-foreground transition-colors hover:bg-success/20"
+          >
+            <WhatsAppIcon className="size-6 shrink-0 text-success" />
+            <span className="min-w-0 flex-1">
+              <span className="underline decoration-success decoration-2 underline-offset-2">Message Kirt on WhatsApp</span>
+              <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                For any support, feedback or feature requests — just say hi.
+              </span>
+            </span>
+          </a>
+        </div>
       </div>
     </div>
   );
