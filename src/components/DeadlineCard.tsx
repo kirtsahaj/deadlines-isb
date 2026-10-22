@@ -78,9 +78,14 @@ export function DeadlineCard({
   const meta = CONFIDENCE_META[item.confidence];
   const isText = item.kind === "text";
   const destination = elearnDestination(item);
+  const sourceLabel = item.sources.some(s => s.kind === "own_elearn") ? "eLearn"
+    : item.sources.some(s => s.kind === "shared_elearn") ? "Shared"
+    : item.provisional ? "Estimated" : "Outline";
+  const tileType = item.kind === "preread" ? "preread" : item.kind === "quiz" ? "quiz"
+    : item.kind === "choice" || item.kind === "forum" || item.kind === "calendar" ? "activity" : "deadline";
 
   return (
-    <article className="deadline-card relative p-4 sm:p-5">
+    <article data-tile-type={tileType} className="deadline-card relative px-3 py-3 sm:px-4">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -93,10 +98,10 @@ export function DeadlineCard({
           <DialogTrigger asChild>
             <Button variant="ghost" size="icon"
               type="button"
-              className="tap-target -mr-1 grid size-9 place-items-center rounded-full hover:bg-muted"
+              className={`-mr-1 h-8 shrink-0 px-2 text-xs ${meta.className}`}
               aria-label={`${meta.label}. Source details for ${item.title}`}
             >
-              <ConfidenceMark value={item.confidence} />
+              {sourceLabel}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md rounded-2xl">
@@ -135,7 +140,7 @@ export function DeadlineCard({
         </Dialog>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         <span className="inline-flex items-center gap-1.5 font-medium">
           <Clock className="size-4 text-muted-foreground" aria-hidden />
           {item.kind === "preread" ? "Class starts " : ""}{whenLabel(item, timezone)}
@@ -144,11 +149,12 @@ export function DeadlineCard({
         {item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>}
       </div>
 
-      {item.preparation && <ul className="mt-3 space-y-2 text-sm">
+      {item.preparation && <ul className="mt-2 space-y-1 text-sm">
         {item.preparation.map(p => <li key={p.id}>{p.title} <span className="text-xs text-muted-foreground">· {p.requirement === "assigned" ? "Required" : p.requirement}</span></li>)}
       </ul>}
 
-      <div className="mt-3 flex flex-wrap gap-1.5">
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <div className="flex flex-1 flex-wrap items-center gap-1.5">
         <Badge variant="secondary">{KIND_LABELS[item.kind] ?? item.kind}</Badge>
         {item.deadlineType === "cutoff" && <Badge variant="outline">Hard cut-off</Badge>}
         {item.submissionStatus === "submitted" && (
@@ -162,10 +168,11 @@ export function DeadlineCard({
             Dates differ
           </Badge>
         )}
-      </div>
-      {destination && <Button asChild variant="outline" size="sm" className="mt-3">
-        <a href={destination.url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden />{destination.activity ? "Open assignment / activity" : "Open course in eLearn"}</a>
+        </div>
+      {destination && <Button asChild variant="secondary" size="sm" className="tile-link ml-auto h-6 gap-1 rounded-full px-2 text-xs" title={destination.activity ? "Open assignment / activity in eLearn" : "Open course in eLearn"}>
+        <a href={destination.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3" aria-hidden />{destination.activity ? "Open activity" : "Open course"}</a>
       </Button>}
+      </div>
     </article>
   );
 }

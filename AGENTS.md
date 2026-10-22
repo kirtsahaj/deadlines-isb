@@ -29,3 +29,5 @@
 - eLearn destinations use validated numeric IDs and Moodle instance parameters, with course fallback; never treat instance IDs as module IDs or include credentials in URLs.
 - Assessment matching uses normalized entities, curated company aliases, meaningful tokens and unambiguous course/date/scope candidates; no AI calls are required.
 - Discovery-inside-window alerts and scheduled reminders use the same merged identities and atomic reminder claim helper to prevent duplicate outline/eLearn reminders.
+- A root ThemeProvider applies explicit day/night preferences after hydration; theme storage is browser-only and defaults to light to keep SSR deterministic.
+- Tile accents use semantic global tokens keyed by presentation type; Schedule shares the preread role without changing academic or confidence logic.
