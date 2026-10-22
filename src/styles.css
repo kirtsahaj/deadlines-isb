@@ -229,12 +229,14 @@
   .deadline-card[data-tile-type="quiz"] { --tile-accent: var(--color-quiz); }
   .deadline-card[data-tile-type="activity"] { --tile-accent: var(--color-activity); }
   .deadline-card .course-code,
-  .deadline-card .tile-link {
-    background-color: color-mix(in oklch, var(--tile-accent) 12%, var(--color-card));
+  .deadline-card .tile-link,
+  .deadline-card .tile-badges [data-slot="badge"] {
+    background-color: color-mix(in oklab, var(--tile-accent) 12%, var(--color-card));
     color: var(--tile-accent);
+    border-color: color-mix(in oklab, var(--tile-accent) 25%, transparent);
   }
   .deadline-card .tile-link:hover {
-    background-color: color-mix(in oklch, var(--tile-accent) 20%, var(--color-card));
+    background-color: color-mix(in oklab, var(--tile-accent) 20%, var(--color-card));
   }
 
   .course-code {
@@ -316,6 +318,18 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Tile controls override component variant backgrounds, including secondary buttons. */
+.deadline-card .course-code,
+.deadline-card .tile-link,
+.deadline-card .tile-badges [data-slot="badge"] {
+  background-color: color-mix(in oklab, var(--tile-accent) 12%, var(--color-card));
+  color: var(--tile-accent);
+  border-color: color-mix(in oklab, var(--tile-accent) 25%, transparent);
+}
+.deadline-card .tile-link:hover {
+  background-color: color-mix(in oklab, var(--tile-accent) 20%, var(--color-card));
 }
 
 .settings-section { padding: 1.5rem 0; border-top: 1px solid var(--border); }
