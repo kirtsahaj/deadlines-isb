@@ -120,6 +120,10 @@ function ClassCard({ c }: { c: ScheduleClass }) {
 
 function SchedulePage() {
   const term5 = useTerm5();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (term5.data && !term5.data.inRoster) void navigate({ to: "/deadlines", replace: true });
+  }, [term5.data, navigate]);
   const [showPast, setShowPast] = useState(false);
   const days = useMemo(() => {
     const now = Date.now();
