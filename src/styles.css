@@ -231,12 +231,12 @@
   .deadline-card .course-code,
   .deadline-card .tile-link,
   .deadline-card .tile-badges [data-slot="badge"] {
-    background-color: color-mix(in oklab, var(--tile-accent) 12%, var(--color-card));
-    color: var(--tile-accent);
-    border-color: color-mix(in oklab, var(--tile-accent) 25%, transparent);
+    background-color: var(--color-muted);
+    color: var(--color-muted-foreground);
+    border-color: transparent;
   }
   .deadline-card .tile-link:hover {
-    background-color: color-mix(in oklab, var(--tile-accent) 20%, var(--color-card));
+    background-color: color-mix(in oklab, var(--color-muted-foreground) 14%, var(--color-card));
   }
 
   .course-code {
@@ -320,16 +320,17 @@
   }
 }
 
-/* Tile controls override component variant backgrounds, including secondary buttons. */
+/* Tile controls override component variant backgrounds, including secondary buttons.
+   Everything inside a tile stays neutral; only the left accent strip carries color. */
 .deadline-card .course-code,
 .deadline-card .tile-link,
 .deadline-card .tile-badges [data-slot="badge"] {
-  background-color: color-mix(in oklab, var(--tile-accent) 12%, var(--color-card));
-  color: var(--tile-accent);
-  border-color: color-mix(in oklab, var(--tile-accent) 25%, transparent);
+  background-color: var(--color-muted);
+  color: var(--color-muted-foreground);
+  border-color: transparent;
 }
 .deadline-card .tile-link:hover {
-  background-color: color-mix(in oklab, var(--tile-accent) 20%, var(--color-card));
+  background-color: color-mix(in oklab, var(--color-muted-foreground) 14%, var(--color-card));
 }
 
 .settings-section { padding: 1.5rem 0; border-top: 1px solid var(--border); }
