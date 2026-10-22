@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ConfidenceMark } from "@/components/Confidence";
 import { SetupNudges } from "@/components/SetupNudges";
 import { useTerm5 } from "@/lib/useTerm5";
 import type { ScheduleClass } from "@/lib/term5.functions";
@@ -52,7 +51,7 @@ function ClassCard({ c }: { c: ScheduleClass }) {
     .map((t) => ({ t, items: c.prep.filter((p) => p.timing === t) }))
     .filter((g) => g.items.length);
   return (
-    <article className="deadline-card p-4">
+    <article data-tile-type="preread" className="deadline-card px-3 py-3 sm:px-4">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -72,17 +71,17 @@ function ClassCard({ c }: { c: ScheduleClass }) {
             </span>
           </p>
         </div>
-        <span
+        <span className="shrink-0 text-xs font-medium text-muted-foreground"
           title={blocked ? "Topic can't be matched to this date yet" : "Topic matched from the outline by class order"}
           aria-label={blocked ? "Topic not confirmed" : "Topic estimated from outline"}
         >
-          <ConfidenceMark value={blocked ? "provisional" : "outline"} />
+          {blocked ? "Unconfirmed" : "Outline"}
         </span>
       </div>
       {c.prep.length > 0 && (
-        <Collapsible open={open} onOpenChange={setOpen} className="mt-3">
+        <Collapsible open={open} onOpenChange={setOpen} className="mt-2">
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="-ml-2">
+            <Button variant="ghost" size="sm" className="-ml-2 text-preread">
               <ChevronDown className={`size-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden />
               Preparation ({c.prep.length})
             </Button>
@@ -139,7 +138,7 @@ function SchedulePage() {
     <div className="space-y-5">
       <header className="flex flex-wrap items-end gap-3">
         <div className="mr-auto">
-          <h1 className="text-3xl font-semibold">Schedule</h1>
+          <h1 className="text-3xl font-semibold text-preread">Schedule</h1>
           <p className="mt-1 text-sm text-muted-foreground">Term 5 · Mohali · your sections</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => setShowPast((v) => !v)}>
@@ -159,7 +158,7 @@ function SchedulePage() {
       ) : (
         days.map(([key, classes]) => (
           <section key={key} className="space-y-2">
-            <h2 className="sticky top-14 z-10 bg-background/90 py-1 text-sm font-semibold backdrop-blur">{dayLabel(classes[0]!.startsAt)}</h2>
+            <h2 className="sticky top-16 z-10 bg-background/90 py-1 text-sm font-semibold backdrop-blur">{classes[0] ? dayLabel(classes[0].startsAt) : key}</h2>
             <ul className="space-y-3">
               {classes.map((c) => (
                 <li key={c.id}>

@@ -1,4 +1,5 @@
 # Tracker improvements
+- [x] Compact type-accented tiles, matching Schedule accent, word source labels, visible Menu sections and light-default day/night toggle; 32 tests and signed-in desktop/phone checks passed.
 - [x] Prereads in Deadlines and three-hour class preparation reminder eligibility
 - [x] eLearn activity/course buttons and conservative duplicate assessment matching (P&G regression covered)
 - [x] Representative signed-in student views, course opening, source details, Past, admin visibility and account isolation; 111 rule tests

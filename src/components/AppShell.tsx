@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { CalendarClock, CalendarDays, ListChecks, Menu } from "lucide-react";
 import type { ReactNode } from "react";
+import { ThemeToggle } from "@/components/ThemeProvider";
 
 const NAV = [
   { to: "/deadlines", label: "Deadlines", icon: ListChecks },
@@ -28,8 +29,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
               <CalendarClock className="size-4" aria-hidden />
             </span>
-            <span className="font-display text-base font-semibold">ISB Deadline Tracker</span>
+            <span className="font-display text-sm font-semibold sm:text-base">ISB Deadline Tracker</span>
           </Link>
+          <ThemeToggle />
         </div>
       </header>
 
@@ -58,7 +60,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 <span
                   className={`grid h-9 w-14 place-items-center rounded-full transition-colors ${
-                    active ? "bg-primary/15 text-primary" : "text-muted-foreground"
+                    active ? item.to === "/schedule" ? "bg-preread/15 text-preread" : "bg-primary/15 text-primary" : "text-muted-foreground"
                   }`}
                 >
                   <Icon className="size-5" aria-hidden />

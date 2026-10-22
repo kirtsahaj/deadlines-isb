@@ -44,6 +44,9 @@
   --color-conf-shared: var(--conf-shared);
   --color-conf-outline: var(--conf-outline);
   --color-conf-provisional: var(--conf-provisional);
+  --color-preread: var(--preread);
+  --color-quiz: var(--quiz);
+  --color-activity: var(--activity);
   --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -68,6 +71,10 @@
 }
 
 :root {
+  color-scheme: light;
+  --preread: oklch(0.48 0.1 185);
+  --quiz: oklch(0.53 0.16 350);
+  --activity: oklch(0.5 0.13 65);
   --radius: 1rem;
 
   --background: oklch(0.985 0.008 300);
@@ -123,17 +130,21 @@
 }
 
 .dark {
-  --background: oklch(0.19 0.032 255);
+  color-scheme: dark;
+  --preread: oklch(0.78 0.11 180);
+  --quiz: oklch(0.78 0.13 350);
+  --activity: oklch(0.8 0.12 75);
+  --background: oklch(0.19 0.008 280);
   --foreground: oklch(0.96 0.008 240);
-  --card: oklch(0.235 0.036 255);
+  --card: oklch(0.235 0.012 280);
   --card-foreground: oklch(0.96 0.008 240);
-  --popover: oklch(0.235 0.036 255);
+  --popover: oklch(0.235 0.012 280);
   --popover-foreground: oklch(0.96 0.008 240);
-  --primary: oklch(0.88 0.02 240);
+  --primary: oklch(0.78 0.12 295);
   --primary-foreground: oklch(0.22 0.04 255);
-  --secondary: oklch(0.29 0.036 255);
+  --secondary: oklch(0.29 0.025 290);
   --secondary-foreground: oklch(0.96 0.008 240);
-  --muted: oklch(0.29 0.036 255);
+  --muted: oklch(0.29 0.012 280);
   --muted-foreground: oklch(0.72 0.02 245);
   --accent: oklch(0.7 0.1 195);
   --accent-foreground: oklch(0.19 0.032 255);
@@ -198,10 +209,11 @@
   }
 
   .deadline-card {
+    --tile-accent: var(--color-primary);
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-left: 4px solid var(--color-primary);
-    border-radius: var(--radius-xl);
+    border-left: 3px solid var(--tile-accent);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
     transition:
       box-shadow 160ms ease,
@@ -211,6 +223,18 @@
   .deadline-card:hover {
     box-shadow: var(--shadow-raised);
     transform: translateY(-1px);
+  }
+
+  .deadline-card[data-tile-type="preread"] { --tile-accent: var(--color-preread); }
+  .deadline-card[data-tile-type="quiz"] { --tile-accent: var(--color-quiz); }
+  .deadline-card[data-tile-type="activity"] { --tile-accent: var(--color-activity); }
+  .deadline-card .course-code,
+  .deadline-card .tile-link {
+    background-color: color-mix(in oklch, var(--tile-accent) 12%, var(--color-card));
+    color: var(--tile-accent);
+  }
+  .deadline-card .tile-link:hover {
+    background-color: color-mix(in oklch, var(--tile-accent) 20%, var(--color-card));
   }
 
   .course-code {
