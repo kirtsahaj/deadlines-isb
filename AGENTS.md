@@ -28,3 +28,4 @@
 - Schedule mapping and preread projection share the browser-safe preparation module for UI and reminders; bundle readings at the first applicable class so shared readings never generate repeated tasks.
 - eLearn destinations use validated numeric IDs and Moodle instance parameters, with course fallback; never treat instance IDs as module IDs or include credentials in URLs.
 - Assessment matching uses normalized entities, curated company aliases, meaningful tokens and unambiguous course/date/scope candidates; no AI calls are required.
+- Discovery-inside-window alerts and scheduled reminders use the same merged identities and atomic reminder claim helper to prevent duplicate outline/eLearn reminders.
