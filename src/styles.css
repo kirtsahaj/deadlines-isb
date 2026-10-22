@@ -334,3 +334,28 @@
 }
 
 .settings-section { padding: 1.5rem 0; border-top: 1px solid var(--border); }
+
+/* Static chips (course code, type) share one shape; only links get an outline + hover. */
+.deadline-card .tile-chip,
+.deadline-card .tile-badges [data-slot="badge"] {
+  display: inline-flex; align-items: center; height: 1.5rem;
+  padding: 0 0.625rem; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600; line-height: 1;
+  background-color: var(--color-muted); color: var(--color-muted-foreground);
+  border: 1px solid transparent;
+}
+.deadline-card .tile-link {
+  background-color: transparent; color: var(--color-foreground);
+  border: 1px solid var(--color-border); font-weight: 600;
+}
+.deadline-card .tile-link:hover { background-color: var(--color-muted); }
+/* Info button tinted by confidence: own = green, classmate = amber, outline/estimate = red. */
+.deadline-card .tile-info { --conf: var(--color-destructive); }
+.deadline-card[data-confidence="own"] .tile-info { --conf: var(--color-success); }
+.deadline-card[data-confidence="shared"] .tile-info { --conf: var(--color-warning); }
+.deadline-card .tile-info {
+  color: color-mix(in oklab, var(--conf) 75%, var(--color-foreground));
+  background-color: color-mix(in oklab, var(--conf) 16%, var(--color-card));
+  box-shadow: none;
+}
+.deadline-card .tile-info:hover { background-color: color-mix(in oklab, var(--conf) 28%, var(--color-card)); }
