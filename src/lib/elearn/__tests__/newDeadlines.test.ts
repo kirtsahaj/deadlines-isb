@@ -31,4 +31,12 @@ describe("choice deadlines", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ kind: "choice", title: "Project Group Selection_G", due_at: "2026-10-22T16:30:00.000Z" });
   });
+  it("captures a Group choice plugin's 'Closes:' badge", () => {
+    const rows = normalizeDeadlines({
+      assignments: {}, submissions: new Map(), quizzes: {}, forums: [], calendar: {},
+      contents: new Map([[11057, [{ id: 1, modules: [{ modname: "choicegroup", instance: 9, name: "Project Group Selction_G", dates: [{ label: "Opened:", timestamp: 1792660800 }, { label: "Closes:", timestamp: 1792686600 }] }] }]]]),
+      nowSeconds: 1792680000,
+    });
+    expect(rows.map((r) => r.due_at)).toEqual([new Date(1792686600 * 1000).toISOString()]);
+  });
 });
