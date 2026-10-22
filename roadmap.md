@@ -1,4 +1,7 @@
 # Tracker improvements
+- [ ] Prereads in Deadlines and three-hour class preparation reminders
+- [ ] eLearn activity/course buttons and conservative duplicate assessment matching
+- [ ] Test signed-in student views, source links, reminders and account isolation
 - [x] Earlier work (connection flow, background refresh, reminders, admin) — see history
 - [ ] Verify Chrome-opening buttons on physical phones and fresh private eLearn linking (needs devices + live eLearn session)
 
