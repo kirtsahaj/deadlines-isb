@@ -1,7 +1,9 @@
 # Tracker improvements
-- [ ] Prereads in Deadlines and three-hour class preparation reminders
-- [ ] eLearn activity/course buttons and conservative duplicate assessment matching
-- [ ] Test signed-in student views, source links, reminders and account isolation
+- [x] Prereads in Deadlines and three-hour class preparation reminder eligibility
+- [x] eLearn activity/course buttons and conservative duplicate assessment matching (P&G regression covered)
+- [x] Representative signed-in student views, course opening, source details, Past, admin visibility and account isolation; 111 rule tests
+- [ ] Verify real preread push receipt on a phone (needs installed tracker, notification permission and a due class)
+- [ ] Verify assignment destination and duplicate merge against Kirt's own live eLearn data (current preview account has no connection or deadline rows)
 - [x] Earlier work (connection flow, background refresh, reminders, admin) — see history
 - [ ] Verify Chrome-opening buttons on physical phones and fresh private eLearn linking (needs devices + live eLearn session)
 
@@ -12,4 +14,4 @@
 - [x] Rotating setup banner: connect, notifications, home screen
 - [x] Outline + eLearn merge with conflicts kept; shared section pool; merged reminders; one reminder when found inside 3 hours
 - [x] Rule tests (20) and signed-in phone checks
-- [ ] Live check of shared section updates across several connected classmates (fills in as classmates' next refreshes run)
+- [ ] Live check of shared section updates across several connected classmates (pool currently empty; needs successful contributor refresh)
