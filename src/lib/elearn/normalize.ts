@@ -207,9 +207,13 @@ export function normalizeDeadlines(input: {
   for (const [courseId, sections] of input.contents) {
     for (const section of sections) {
       for (const modul of list(section["modules"])) {
-        if (modul["modname"] !== "choice") continue;
+        // Covers Choice and plugins like Group choice (choicegroup); core
+        // assign/quiz/forum already have structured sources.
+        if (["assign", "quiz", "forum"].includes(String(modul["modname"]))) continue;
         const id = num(modul["instance"]);
-        const close = list(modul["dates"]).find((d) => d["dataid"] === "timeclose");
+        const close = list(modul["dates"]).find(
+          (d) => d["dataid"] === "timeclose" || /^\s*(closes?|due)\b/i.test(String(d["label"] ?? "")),
+        );
         const due = num(close?.["timestamp"]);
         if (id && due) putChoice(courseId, id, modul["name"], due, "core_course_get_contents.dates");
       }
