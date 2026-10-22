@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-3xl items-center gap-2 px-4 py-3">
+        <div className="mx-auto flex w-full max-w-3xl items-center gap-2 px-4 py-2">
           <Link to="/deadlines" className="mr-auto flex items-center gap-3">
             <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
               <CalendarClock className="size-4" aria-hidden />
@@ -35,7 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-6">{children}</main>
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-24 pt-4">{children}</main>
 
       <footer className="mx-auto w-full max-w-3xl px-4 pb-24">
         <AppFooter />

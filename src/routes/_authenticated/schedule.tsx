@@ -135,7 +135,7 @@ function SchedulePage() {
   }, [term5.data, showPast]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <header className="flex flex-wrap items-end gap-3">
         <div className="mr-auto">
           <h1 className="text-3xl font-semibold text-preread">Schedule</h1>

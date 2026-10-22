@@ -22,7 +22,7 @@ const KIND_LABELS: Record<string, string> = {
   calendar: "Calendar",
   text: "Mentioned in text",
   choice: "Choice",
-  outline: "From outline",
+  outline: "Deadline",
   preread: "Preread",
 };
 
@@ -85,11 +85,11 @@ export function DeadlineCard({
 
   return (
     <Dialog open={sourceOpen} onOpenChange={setSourceOpen}>
-    <article data-tile-type={tileType} className="deadline-card relative px-3 py-3 sm:px-4">
+    <article data-tile-type={tileType} data-confidence={item.confidence} className="deadline-card relative px-3 py-2.5 sm:px-4">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="course-code">{item.courseCode}</span>
+            <span className="tile-chip">{item.courseCode}</span>
             <span className="truncate text-xs text-muted-foreground">{item.courseName}</span>
           </div>
           <h3 className="mt-0.5 text-base font-semibold leading-snug">{item.title}</h3>
@@ -97,7 +97,7 @@ export function DeadlineCard({
           <DialogTrigger asChild>
             <Button variant="ghost" size="icon"
               type="button"
-              className="tile-link size-8 shrink-0 rounded-full"
+              className="tile-info size-8 shrink-0 rounded-full"
               title="Source details"
               aria-label={`${meta.label}. Source details for ${item.title}`}
             >
@@ -139,7 +139,7 @@ export function DeadlineCard({
           </DialogContent>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         <span className="inline-flex items-center gap-1.5 font-medium">
           <Clock className="size-4 text-muted-foreground" aria-hidden />
           {item.kind === "preread" ? "Class starts " : ""}{whenLabel(item, timezone)}
@@ -148,15 +148,13 @@ export function DeadlineCard({
         {item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>}
       </div>
 
-      {item.preparation && <ul className="mt-2 space-y-1 text-sm">
+      {item.preparation && <ul className="mt-1.5 space-y-0.5 text-sm">
         {item.preparation.map(p => <li key={p.id}>{p.title} <span className="text-xs text-muted-foreground">· {p.requirement === "assigned" ? "Required" : p.requirement}</span></li>)}
       </ul>}
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
         <div className="tile-badges flex flex-1 flex-wrap items-center gap-1.5">
-        <Button type="button" variant="secondary" size="sm" className="tile-link h-6 rounded-full px-2 text-xs" onClick={() => setSourceOpen(true)} title="Source details">
-          {KIND_LABELS[item.kind] ?? item.kind}
-        </Button>
+        <span className="tile-chip">{KIND_LABELS[item.kind] ?? item.kind}</span>
         {item.deadlineType === "cutoff" && <Badge variant="outline">Hard cut-off</Badge>}
         {item.submissionStatus === "submitted" && (
           <Badge className="bg-success text-success-foreground">Submitted</Badge>
@@ -170,7 +168,7 @@ export function DeadlineCard({
           </Badge>
         )}
         </div>
-      {destination && <Button asChild variant="secondary" size="sm" className="tile-link ml-auto h-6 gap-1 rounded-full px-2 text-xs" title={destination.activity ? "Open assignment / activity in eLearn" : "Open course in eLearn"}>
+      {destination && <Button asChild variant="secondary" size="sm" className="tile-link ml-auto h-6 gap-1 rounded-full px-2.5 text-xs" title={destination.activity ? "Open assignment / activity in eLearn" : "Open course in eLearn"}>
         <a href={destination.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3" aria-hidden />{destination.activity ? "Open activity" : "Open course"}</a>
       </Button>}
       </div>

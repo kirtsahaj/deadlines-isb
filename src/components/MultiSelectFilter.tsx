@@ -31,7 +31,7 @@ export function MultiSelectFilter({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="outline" className="tap-target min-w-32 justify-between">
+        <Button type="button" variant="outline" className="h-10 min-w-32 justify-between rounded-full">
           <span>{summary}</span>
           <ListFilter className="size-4 text-muted-foreground" aria-hidden />
         </Button>
