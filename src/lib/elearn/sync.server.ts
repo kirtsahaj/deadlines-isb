@@ -1,6 +1,7 @@
 import { decryptToken } from "./crypto.server";
 import { MoodleClient, MoodleError } from "./moodle.server";
 import { normalizeDeadlines } from "./normalize";
+import { selectNewDeadlineAlerts } from "./newDeadlines";
 import { manualCooldownSeconds, syncConcurrency } from "./config.server";
 import type { Json as DbJson } from "@/integrations/supabase/types";
 import { SYNC_BUDGET_MS, SYNC_LEASE_MS, hasFreshDeadlineSources, mayRemoveMissing, nextSlottedRefreshAt } from "./syncPolicy";
@@ -152,7 +153,7 @@ export async function runSync(
 
     // The four course-wide sources are independent: fetch them together, and
     // fetch per-course contents at the same time, instead of one after another.
-    const [assignmentsRaw, quizzesRaw, forums, calendarRaw, contentPairs] = await Promise.all([
+    const [assignmentsRaw, quizzesRaw, forums, calendarRaw, contentPairs, choicesRaw] = await Promise.all([
       safe("assignments", () => client.call("mod_assign_get_assignments", { courseids: courseIds }), {
         courses: [],
       }),
@@ -189,6 +190,11 @@ export async function runSync(
         );
         return [courseId, asList(value)] as const;
       }),
+      safe(
+        "choices",
+        () => client.call("mod_choice_get_choices_by_courses", { courseids: courseIds }),
+        { choices: [] },
+      ),
     ]);
     const assignments = assignmentsRaw as Json;
     const quizzes = quizzesRaw as Json;
@@ -232,6 +238,7 @@ export async function runSync(
       forums: forums as Json | Json[],
       calendar,
       contents,
+      choices: choicesRaw as Json,
       markerOnly: settings?.explicit_deadline_marker_only ?? false,
     });
 
@@ -249,6 +256,15 @@ export async function runSync(
       );
       if (error) throw new Error("database");
     }
+    // Keys already stored before this sync, used to spot newly posted deadlines.
+    const { data: knownRows } = await supabaseAdmin
+      .from("deadline_items")
+      .select("external_key")
+      .eq("user_id", userId);
+    const known = new Set((knownRows ?? []).map((r) => r.external_key));
+    const newDeadlines = connection.last_success_at
+      ? selectNewDeadlineAlerts(deadlines, known, Date.now())
+      : [];
     if (deadlines.length) {
       const { error } = await supabaseAdmin.from("deadline_items").upsert(
         deadlines.map((row) => ({
@@ -261,7 +277,11 @@ export async function runSync(
       if (error) throw new Error("database");
     }
 
-    const complete = Object.values(sourceStatus).every((value) => value.ok);
+    // Choices may be disabled on the eLearn mobile service; that alone must not
+    // block cleanup, so it is judged separately.
+    const complete = Object.entries(sourceStatus).every(
+      ([name, value]) => name === "choices" || value.ok,
+    );
     const deactivateMissing = async (source: string) => {
       await supabaseAdmin
         .from("deadline_items")
@@ -277,6 +297,16 @@ export async function runSync(
       await deactivateMissing("mod_forum_get_forums_by_courses");
       await deactivateMissing("core_calendar_get_calendar_events");
       await deactivateMissing("core_course_get_contents.description");
+      await deactivateMissing("core_course_get_contents.dates");
+      if (sourceStatus["choices"]?.ok) await deactivateMissing("mod_choice_get_choices_by_courses");
+    }
+    if (newDeadlines.length) {
+      try {
+        const { notifyNewDeadlines } = await import("@/lib/push/newDeadlines.server");
+        await notifyNewDeadlines(userId, newDeadlines);
+      } catch {
+        // Alerts are best-effort and never fail a sync.
+      }
     }
 
     // Purge rows that have been gone for more than 30 days.

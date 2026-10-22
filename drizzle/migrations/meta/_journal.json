@@ -15,6 +15,13 @@
       "when": 1792493908982,
       "tag": "0001_profile_app_visits",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792674699083,
+      "tag": "0002_deadline_kind_choice",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,2 @@
+ALTER TABLE public.deadline_items DROP CONSTRAINT deadline_items_kind_check;
+ALTER TABLE public.deadline_items ADD CONSTRAINT deadline_items_kind_check CHECK (kind = ANY (ARRAY['assignment','quiz','forum','calendar','text','choice']));

@@ -34,6 +34,8 @@ const SOURCE_LABELS: Record<string, string> = {
   mod_forum_get_forums_by_courses: "Forum due date",
   core_calendar_get_calendar_events: "Course calendar",
   "core_course_get_contents.description": "Course text",
+  mod_choice_get_choices_by_courses: "Choice close time",
+  "core_course_get_contents.dates": "Activity close time",
 };
 
 const KIND_LABELS: Record<string, string> = {
@@ -42,6 +44,7 @@ const KIND_LABELS: Record<string, string> = {
   forum: "Forum",
   calendar: "Calendar",
   text: "Mentioned in text",
+  choice: "Choice",
 };
 
 export function DeadlineCard({

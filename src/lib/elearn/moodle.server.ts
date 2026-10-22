@@ -9,6 +9,7 @@ const ALLOWED = new Set([
   "mod_quiz_get_quizzes_by_courses",
   "mod_forum_get_forums_by_courses",
   "core_calendar_get_calendar_events",
+  "mod_choice_get_choices_by_courses",
 ]);
 
 const RETRYABLE = new Set([429, 502, 503, 504]);
