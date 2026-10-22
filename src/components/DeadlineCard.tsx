@@ -1,4 +1,5 @@
-import { AlertTriangle, Clock, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, Clock, ExternalLink, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { elearnDestination } from "@/lib/elearnDestination";
 import { Badge } from "@/components/ui/badge";
@@ -78,13 +79,12 @@ export function DeadlineCard({
   const meta = CONFIDENCE_META[item.confidence];
   const isText = item.kind === "text";
   const destination = elearnDestination(item);
-  const sourceLabel = item.sources.some(s => s.kind === "own_elearn") ? "eLearn"
-    : item.sources.some(s => s.kind === "shared_elearn") ? "Shared"
-    : item.provisional ? "Estimated" : "Outline";
+  const [sourceOpen, setSourceOpen] = useState(false);
   const tileType = item.kind === "preread" ? "preread" : item.kind === "quiz" ? "quiz"
     : item.kind === "choice" || item.kind === "forum" || item.kind === "calendar" ? "activity" : "deadline";
 
   return (
+    <Dialog open={sourceOpen} onOpenChange={setSourceOpen}>
     <article data-tile-type={tileType} className="deadline-card relative px-3 py-3 sm:px-4">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
@@ -94,14 +94,14 @@ export function DeadlineCard({
           </div>
           <h3 className="mt-0.5 text-base font-semibold leading-snug">{item.title}</h3>
         </div>
-        <Dialog>
           <DialogTrigger asChild>
             <Button variant="ghost" size="icon"
               type="button"
-              className={`h-8 shrink-0 px-2 text-xs ${meta.className}`}
+              className="tile-link size-8 shrink-0 rounded-full"
+              title="Source details"
               aria-label={`${meta.label}. Source details for ${item.title}`}
             >
-              {sourceLabel}
+              <Info className="size-4" aria-hidden />
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md rounded-2xl">
@@ -137,7 +137,6 @@ export function DeadlineCard({
               <ConnectCta connected={connected} />
             </div>
           </DialogContent>
-        </Dialog>
       </div>
 
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
@@ -154,8 +153,10 @@ export function DeadlineCard({
       </ul>}
 
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-        <div className="flex flex-1 flex-wrap items-center gap-1.5">
-        <Badge variant="secondary">{KIND_LABELS[item.kind] ?? item.kind}</Badge>
+        <div className="tile-badges flex flex-1 flex-wrap items-center gap-1.5">
+        <Button type="button" variant="secondary" size="sm" className="tile-link h-6 rounded-full px-2 text-xs" onClick={() => setSourceOpen(true)} title="Source details">
+          {KIND_LABELS[item.kind] ?? item.kind}
+        </Button>
         {item.deadlineType === "cutoff" && <Badge variant="outline">Hard cut-off</Badge>}
         {item.submissionStatus === "submitted" && (
           <Badge className="bg-success text-success-foreground">Submitted</Badge>
@@ -174,5 +175,6 @@ export function DeadlineCard({
       </Button>}
       </div>
     </article>
+    </Dialog>
   );
 }

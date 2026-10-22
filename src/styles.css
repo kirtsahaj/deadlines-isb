@@ -229,9 +229,11 @@
   .deadline-card[data-tile-type="quiz"] { --tile-accent: var(--color-quiz); }
   .deadline-card[data-tile-type="activity"] { --tile-accent: var(--color-activity); }
   .deadline-card .course-code,
-  .deadline-card .tile-link {
+  .deadline-card .tile-link,
+  .deadline-card .tile-badges [data-slot="badge"] {
     background-color: color-mix(in oklch, var(--tile-accent) 12%, var(--color-card));
     color: var(--tile-accent);
+    border-color: color-mix(in oklch, var(--tile-accent) 25%, transparent);
   }
   .deadline-card .tile-link:hover {
     background-color: color-mix(in oklch, var(--tile-accent) 20%, var(--color-card));
