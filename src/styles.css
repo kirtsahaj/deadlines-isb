@@ -40,6 +40,10 @@
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
+  --color-conf-own: var(--conf-own);
+  --color-conf-shared: var(--conf-shared);
+  --color-conf-outline: var(--conf-outline);
+  --color-conf-provisional: var(--conf-provisional);
   --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -89,6 +93,10 @@
   --destructive-foreground: oklch(0.99 0.005 18);
 
   --success: oklch(0.62 0.13 160);
+  --conf-own: oklch(0.62 0.15 150);
+  --conf-shared: oklch(0.62 0.1 195);
+  --conf-outline: oklch(0.72 0.14 70);
+  --conf-provisional: oklch(0.6 0.01 260);
   --success-foreground: oklch(0.99 0.005 160);
 
   --warning: oklch(0.8 0.13 80);
@@ -132,6 +140,10 @@
   --destructive: oklch(0.68 0.17 25);
   --destructive-foreground: oklch(0.15 0.03 25);
   --success: oklch(0.7 0.11 160);
+  --conf-own: oklch(0.74 0.15 150);
+  --conf-shared: oklch(0.74 0.1 195);
+  --conf-outline: oklch(0.8 0.14 75);
+  --conf-provisional: oklch(0.7 0.01 260);
   --success-foreground: oklch(0.18 0.03 160);
   --warning: oklch(0.78 0.13 72);
   --warning-foreground: oklch(0.2 0.03 72);
