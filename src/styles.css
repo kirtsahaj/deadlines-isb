@@ -349,13 +349,16 @@
   border: 1px solid var(--color-border); font-weight: 600;
 }
 .deadline-card .tile-link:hover { background-color: var(--color-muted); }
-/* Info button tinted by confidence: own = green, classmate = amber, outline/estimate = red. */
+/* Only the info glyph is coloured, by confidence: own = green, classmate = amber,
+   outline/estimate = red. Prereads are never sourced from eLearn, so they take the
+   tile's own accent instead of the warning colour. */
 .deadline-card .tile-info { --conf: var(--color-destructive); }
 .deadline-card[data-confidence="own"] .tile-info { --conf: var(--color-success); }
 .deadline-card[data-confidence="shared"] .tile-info { --conf: var(--color-warning); }
+.deadline-card[data-tile-type="preread"] .tile-info { --conf: var(--color-preread); }
 .deadline-card .tile-info {
-  color: color-mix(in oklab, var(--conf) 75%, var(--color-foreground));
-  background-color: color-mix(in oklab, var(--conf) 16%, var(--color-card));
+  color: var(--conf);
+  background-color: transparent;
   box-shadow: none;
 }
-.deadline-card .tile-info:hover { background-color: color-mix(in oklab, var(--conf) 28%, var(--color-card)); }
+.deadline-card .tile-info:hover { background-color: var(--color-muted); }
