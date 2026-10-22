@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, MessageCircle, ShieldCheck } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -15,7 +16,6 @@ import { resetEnrollments, saveEnrollment } from "@/lib/term5.functions";
 import { DEFAULT_TIMEZONE, formatDateTime } from "@/lib/format";
 import { ReminderSettings } from "@/components/ReminderSetup";
 import { ConnectionTroubleshooting } from "@/components/ConnectionGuide";
-import { ConfidenceLegend } from "@/components/Confidence";
 import { SetupNudges } from "@/components/SetupNudges";
 
 export const Route = createFileRoute("/_authenticated/menu")({
@@ -38,11 +38,11 @@ const WHATSAPP_URL = "https://wa.me/918890060456";
 const FAQ = [
   {
     q: "Where do these dates come from?",
-    a: "Your own eLearn (when connected), course updates seen on classmates' eLearn for your section, and your Term 5 course outlines. Tap the source label on any card to see exactly which.",
+    a: "Your own eLearn (when connected), course updates seen on classmates' eLearn for your section, and your Term 5 course outlines. Tap the ⓘ button on any card to see exactly which.",
   },
   {
-    q: "What do the source colors mean?",
-    a: "They show how confident the tracker is right now — not a guarantee. See the key below.",
+    q: "How sure are these dates?",
+    a: "The ⓘ button on every card shows where a date came from and when it was last seen — so you know how fresh it is before relying on it.",
   },
   {
     q: "What is shared from my eLearn?",
