@@ -15,7 +15,6 @@ import { disconnectElearn, getAccountAccess, getConnectionState } from "@/lib/el
 import { resetEnrollments, saveEnrollment } from "@/lib/term5.functions";
 import { DEFAULT_TIMEZONE, formatDateTime } from "@/lib/format";
 import { ReminderSettings } from "@/components/ReminderSetup";
-import { ConnectionTroubleshooting } from "@/components/ConnectionGuide";
 import { SetupNudges } from "@/components/SetupNudges";
 
 export const Route = createFileRoute("/_authenticated/menu")({
@@ -51,6 +50,14 @@ const FAQ = [
   {
     q: "How sure are these dates?",
     a: "The ⓘ button on every card shows where a date came from and when it was last seen — so you know how fresh it is before relying on it.",
+  },
+  {
+    q: "Setting up from a phone",
+    a: "Keep this tracker open. Open eLearn in the Google Chrome app and log in there. Hold the launch link, then choose Copy Link on iPhone or Copy link address on Android. Switch back to the tracker and tap Paste and connect. Cancel any Moodle app prompt.",
+  },
+  {
+    q: "The link isn't accepted",
+    a: "Copy the link's address, not its text — it starts with moodlemobile://. Each link works once, so open eLearn again for a fresh one. Reconnecting keeps your saved deadlines.",
   },
   {
     q: "What is shared from my eLearn?",
@@ -163,9 +170,12 @@ function MenuPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [notice, setNotice] = useState<string | null>(null);
+  const [open, setOpen] = useState<string[]>([]);
   useEffect(() => {
     const id = window.location.hash.slice(1);
-    if (id) document.getElementById(id)?.scrollIntoView();
+    if (!id) return;
+    if (id === "courses") setOpen((prev) => (prev.includes("courses") ? prev : [...prev, "courses"]));
+    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView());
   }, []);
 
   const connection = useQuery({ queryKey: ["connection-state"], queryFn: () => getConnectionState() });
@@ -256,23 +266,26 @@ function MenuPage() {
           </div>
         </section>
 
-        <section className="scroll-mt-24 py-5 first:pt-0" id="courses">
-          <h2 className="mb-3 text-lg font-semibold">My courses</h2>
-          <div>
-            <MyCourses />
-          </div>
-        </section>
-
         <section className="scroll-mt-24 py-5 first:pt-0" id="home-screen">
           <h2 className="mb-3 text-lg font-semibold">Reminders and home screen</h2>
           <div>
             <ReminderSettings />
           </div>
         </section>
+      </div>
 
-        <section className="scroll-mt-24 py-5 first:pt-0">
-          <h2 className="mb-3 text-lg font-semibold">Display</h2>
-          <div className="space-y-4">
+      <Accordion type="multiple" value={open} onValueChange={setOpen} className="border-t border-border">
+        <div id="courses" className="scroll-mt-24">
+          <AccordionItem value="courses">
+            <AccordionTrigger className="text-base font-semibold">My courses</AccordionTrigger>
+            <AccordionContent>
+              <MyCourses />
+            </AccordionContent>
+          </AccordionItem>
+        </div>
+        <AccordionItem value="display">
+          <AccordionTrigger className="text-base font-semibold">Display</AccordionTrigger>
+          <AccordionContent className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="timezone">Time zone</Label>
               <Select value={settings.data?.timezone ?? DEFAULT_TIMEZONE} onValueChange={(v) => save.mutate({ timezone: v })}>
@@ -324,24 +337,22 @@ function MenuPage() {
                 </ul>
               </div>
             )}
-          </div>
-        </section>
-
-        <section className="scroll-mt-24 py-5 first:pt-0">
-          <h2 className="mb-3 text-lg font-semibold">Help and troubleshooting</h2>
-          <Accordion type="multiple" className="space-y-3">
-            {FAQ.map((f) => (
-              <AccordionItem key={f.q} value={f.q} className="rounded-xl border px-4 last:border-b">
-                <AccordionTrigger className="text-sm font-medium">{f.q}</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground">{f.a}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-          <div className="mt-3">
-            <ConnectionTroubleshooting />
-          </div>
-        </section>
-      </div>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="help">
+          <AccordionTrigger className="text-base font-semibold">Help and troubleshooting</AccordionTrigger>
+          <AccordionContent>
+            <Accordion type="multiple" className="space-y-3">
+              {FAQ.map((f) => (
+                <AccordionItem key={f.q} value={f.q} className="rounded-xl border px-4 last:border-b">
+                  <AccordionTrigger className="text-sm font-medium">{f.q}</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground">{f.a}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
 
