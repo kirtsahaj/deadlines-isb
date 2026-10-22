@@ -347,6 +347,75 @@ export type Database = {
         }
         Relationships: []
       }
+      term5_enrollment_overrides: {
+        Row: {
+          course_code: string
+          removed: boolean
+          section_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_code: string
+          removed?: boolean
+          section_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_code?: string
+          removed?: boolean
+          section_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      term5_shared_deadlines: {
+        Row: {
+          active: boolean
+          contributor_section: string
+          course_code: string
+          deadline_type: string
+          due_at: string | null
+          first_seen_at: string
+          id: string
+          kind: string
+          last_confirmed_at: string
+          section_hint: string | null
+          source_key: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          contributor_section: string
+          course_code: string
+          deadline_type: string
+          due_at?: string | null
+          first_seen_at?: string
+          id?: string
+          kind: string
+          last_confirmed_at?: string
+          section_hint?: string | null
+          source_key: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          contributor_section?: string
+          course_code?: string
+          deadline_type?: string
+          due_at?: string | null
+          first_seen_at?: string
+          id?: string
+          kind?: string
+          last_confirmed_at?: string
+          section_hint?: string | null
+          source_key?: string
+          title?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           created_at: string
