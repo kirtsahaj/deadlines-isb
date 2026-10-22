@@ -126,20 +126,3 @@ export const disconnectElearn = createServerFn({ method: "POST" })
     await purgeUserData(context.userId);
     return { disconnected: true };
   });
-
-export const deleteAccount = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: { confirmation: string }) =>
-    z.object({ confirmation: z.string() }).parse(data),
-  )
-  .handler(async ({ data, context }) => {
-    if (data.confirmation !== "DELETE MY ACCOUNT") {
-      return { deleted: false as const, error: "confirmation_required" };
-    }
-    const { purgeUserData } = await import("./elearn/connection.server");
-    await purgeUserData(context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(context.userId);
-    if (error) return { deleted: false as const, error: "delete_failed" };
-    return { deleted: true as const };
-  });

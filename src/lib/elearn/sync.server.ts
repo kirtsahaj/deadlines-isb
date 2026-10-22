@@ -308,6 +308,16 @@ export async function runSync(
         // Alerts are best-effort and never fail a sync.
       }
     }
+    try {
+      const { publishSharedDeadlines } = await import("@/lib/term5/share.server");
+      await publishSharedDeadlines(
+        userId,
+        deadlines,
+        courses.map((c) => ({ id: Number(c["id"]), shortname: typeof c["shortname"] === "string" ? c["shortname"] : null })),
+      );
+    } catch {
+      // Shared section updates are best-effort and never fail a sync.
+    }
 
     // Purge rows that have been gone for more than 30 days.
     await supabaseAdmin

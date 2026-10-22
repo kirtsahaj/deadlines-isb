@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 describe("ordinary sign-out", () => {
   it("ends only the browser session and never purges account-scoped data", () => {
-    const settings = readFileSync("src/routes/_authenticated/settings.tsx", "utf8");
+    const settings = readFileSync("src/routes/_authenticated/menu.tsx", "utf8");
     const start = settings.indexOf("async function signOut()");
     const end = settings.indexOf("\n  }", start);
     const implementation = settings.slice(start, end);

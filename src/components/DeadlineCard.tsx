@@ -1,6 +1,5 @@
-import { AlertTriangle, Clock, Info } from "lucide-react";
+import { AlertTriangle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,33 +9,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatDateTime, relativeTime } from "@/lib/format";
-
-export type DeadlineRow = {
-  id: string;
-  title: string;
-  kind: string;
-  deadline_type: string;
-  deadline_status: string;
-  submission_status: string;
-  due_at: string | null;
-  conflict: boolean;
-  moodle_course_id: number;
-  source_primary: string;
-  source_evidence: unknown;
-  text_evidence: string | null;
-  text_precision: string | null;
-};
-
-const SOURCE_LABELS: Record<string, string> = {
-  mod_assign_get_assignments: "Assignment due date",
-  mod_assign_get_submission_status: "Submission status",
-  mod_quiz_get_quizzes_by_courses: "Quiz close time",
-  mod_forum_get_forums_by_courses: "Forum due date",
-  core_calendar_get_calendar_events: "Course calendar",
-  "core_course_get_contents.description": "Course text",
-  mod_choice_get_choices_by_courses: "Choice close time",
-  "core_course_get_contents.dates": "Activity close time",
-};
+import type { SourceRef, UnifiedDeadline } from "@/lib/term5/model";
+import { CONFIDENCE_META, ConfidenceMark, ConnectCta } from "@/components/Confidence";
 
 const KIND_LABELS: Record<string, string> = {
   assignment: "Assignment",
@@ -45,139 +19,141 @@ const KIND_LABELS: Record<string, string> = {
   calendar: "Calendar",
   text: "Mentioned in text",
   choice: "Choice",
+  outline: "From outline",
 };
+
+const OUTLINE_KIND: Record<string, string> = {
+  elearn_retrieved_outline: "Course outline from eLearn",
+  sharepoint_outline: "Course outline (SharePoint)",
+  atrium_fallback_outline: "Earlier Atrium outline (fallback)",
+};
+
+function formatDateOnly(date: string) {
+  return new Intl.DateTimeFormat("en-IN", { weekday: "short", day: "numeric", month: "short" }).format(
+    new Date(`${date}T12:00:00+05:30`),
+  );
+}
+
+function whenLabel(item: { dueAt: string | null; dateOnly: string | null }, timezone: string) {
+  if (item.dueAt) return formatDateTime(item.dueAt, timezone);
+  if (item.dateOnly) return `${formatDateOnly(item.dateOnly)} · time not given`;
+  return "Date not announced yet";
+}
+
+function SourceLine({ source, outlineKind, timezone }: { source: SourceRef; outlineKind: string | null; timezone: string }) {
+  const name =
+    source.kind === "own_elearn"
+      ? "Your eLearn"
+      : source.kind === "shared_elearn"
+        ? "A classmate's eLearn (course details only)"
+        : (outlineKind && OUTLINE_KIND[outlineKind]) || "Course outline";
+  return (
+    <li className="rounded-lg bg-muted/60 p-3">
+      <p className="font-medium">{name}</p>
+      <p className="text-muted-foreground">{whenLabel({ dueAt: source.dueAt, dateOnly: source.date }, timezone)}</p>
+      {source.observedAt && (
+        <p className="text-xs text-muted-foreground">Last seen {relativeTime(source.observedAt)}</p>
+      )}
+      {source.note && <p className="text-xs text-muted-foreground">{source.note}</p>}
+    </li>
+  );
+}
 
 export function DeadlineCard({
   item,
-  courseName,
-  courseCode,
   timezone,
+  connected,
+  outlineKind,
 }: {
-  item: DeadlineRow;
-  courseName: string;
-  courseCode: string;
+  item: UnifiedDeadline;
   timezone: string;
+  connected: boolean;
+  outlineKind: string | null;
 }) {
+  const at = item.dueAt ?? (item.dateOnly ? `${item.dateOnly}T23:59:59+05:30` : null);
+  const overdue = !!at && new Date(at).getTime() < Date.now() && item.submissionStatus !== "submitted";
+  const meta = CONFIDENCE_META[item.confidence];
   const isText = item.kind === "text";
-  const tbd = !item.due_at;
-  const overdue =
-    !!item.due_at &&
-    new Date(item.due_at).getTime() < Date.now() &&
-    item.submission_status !== "submitted";
 
   return (
     <article className="deadline-card relative p-4 sm:p-5">
-      <div className="flex flex-wrap items-start gap-2">
+      <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 pr-8">
-            <span className="course-code">{courseCode}</span>
-            <span className="truncate text-xs text-muted-foreground">{courseName}</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="course-code">{item.courseCode}</span>
+            <span className="truncate text-xs text-muted-foreground">{item.courseName}</span>
           </div>
           <h3 className="mt-0.5 text-base font-semibold leading-snug">{item.title}</h3>
         </div>
-        <div className="flex items-center gap-1">
-          <Badge variant="secondary">{KIND_LABELS[item.kind] ?? item.kind}</Badge>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-9"
-                aria-label={`Information about ${item.title}`}
-              >
-                <Info className="size-4" aria-hidden />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md rounded-lg">
-              <DialogHeader>
-                <DialogTitle>Deadline information</DialogTitle>
-                <DialogDescription>{item.title}</DialogDescription>
-              </DialogHeader>
-              <dl className="space-y-3 text-sm">
-                <div>
-                  <dt className="font-medium">Source</dt>
-                  <dd className="text-muted-foreground">
-                    {SOURCE_LABELS[item.source_primary] ?? "eLearn course data"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-medium">How this date was found</dt>
-                  <dd className="text-muted-foreground">
-                    {isText || item.deadline_status === "dated_from_text"
-                      ? "Mentioned in course text"
-                      : "Published as a structured eLearn deadline"}
-                  </dd>
-                </div>
-                {item.text_evidence && (
-                  <div>
-                    <dt className="font-medium">Evidence</dt>
-                    <dd className="text-muted-foreground">“{item.text_evidence}”</dd>
-                  </div>
-                )}
-                {item.conflict && (
-                  <div>
-                    <dt className="font-medium">Sources disagree</dt>
-                    <dd className="text-muted-foreground">
-                      The activity and calendar show different times. Check the activity in eLearn
-                      before relying on this date.
-                    </dd>
-                  </div>
-                )}
-                {(isText || item.deadline_status === "dated_from_text") && (
-                  <div className="rounded-md bg-warning/15 p-3 text-warning-foreground">
-                    This is not a confirmed eLearn due date. Check the activity before relying on
-                    it.
-                  </div>
-                )}
-                {item.deadline_status === "TBD" && (
-                  <div className="text-muted-foreground">
-                    eLearn has not published a date for this item.
-                  </div>
-                )}
-              </dl>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              className="tap-target -mr-1 grid size-9 place-items-center rounded-full hover:bg-muted"
+              aria-label={`${meta.label}. Source details for ${item.title}`}
+            >
+              <ConfidenceMark value={item.confidence} />
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ConfidenceMark value={item.confidence} /> {meta.label}
+              </DialogTitle>
+              <DialogDescription>{item.title}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 text-sm">
+              <p className="text-muted-foreground">{meta.explain} The dot shows how confident the tracker is, not a guarantee.</p>
+              <ul className="space-y-2">
+                {item.sources.map((s, i) => (
+                  <SourceLine key={i} source={s} outlineKind={outlineKind} timezone={timezone} />
+                ))}
+              </ul>
+              {item.conflict && (
+                <p className="rounded-lg bg-warning/15 p-3">
+                  These sources show different dates. Check eLearn or with your course team before relying on one.
+                </p>
+              )}
+              {item.otherSection && (
+                <p className="rounded-lg bg-muted p-3">Seen for another section — it may not apply to yours.</p>
+              )}
+              {item.own?.text_evidence && <p className="text-muted-foreground">“{item.own.text_evidence}”</p>}
+              {item.outline && item.outline.deadline_rule !== "explicit" && (
+                <p className="text-muted-foreground">
+                  {item.dateOnly || item.dueAt
+                    ? "The outline links this to a class; the exact cut-off isn't stated."
+                    : "The outline doesn't give a date yet."}
+                </p>
+              )}
+              <ConnectCta connected={connected} />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         <span className="inline-flex items-center gap-1.5 font-medium">
           <Clock className="size-4 text-muted-foreground" aria-hidden />
-          {tbd ? "Date to be confirmed" : formatDateTime(item.due_at, timezone)}
+          {whenLabel(item, timezone)}
         </span>
-        {!tbd && <span className="text-muted-foreground">{relativeTime(item.due_at)}</span>}
+        {item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>}
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        {item.deadline_type !== "due" && (
-          <Badge variant="outline">
-            {item.deadline_type === "cutoff" ? "Hard cut-off" : item.deadline_type}
-          </Badge>
-        )}
-        {item.submission_status === "submitted" && (
+        <Badge variant="secondary">{KIND_LABELS[item.kind] ?? item.kind}</Badge>
+        {item.deadlineType === "cutoff" && <Badge variant="outline">Hard cut-off</Badge>}
+        {item.submissionStatus === "submitted" && (
           <Badge className="bg-success text-success-foreground">Submitted</Badge>
         )}
         {overdue && <Badge variant="destructive">Past due</Badge>}
-        {isText && (
-          <Badge variant="outline">
-            Mentioned in course text
-            {item.text_precision === "assumed_end_of_day" ? " · time assumed" : ""}
-          </Badge>
-        )}
+        {isText && <Badge variant="outline">Mentioned in course text</Badge>}
         {item.conflict && (
           <Badge className="bg-warning text-warning-foreground">
             <AlertTriangle className="mr-1 size-3" aria-hidden />
-            Sources disagree
+            Dates differ
           </Badge>
         )}
       </div>
-
-      {(isText || item.conflict) && (
-        <p className="mt-3 text-xs text-muted-foreground">
-          Not an official due date. Confirm this one in eLearn before you rely on it.
-        </p>
-      )}
     </article>
   );
 }
