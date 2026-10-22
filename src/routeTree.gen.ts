@@ -15,6 +15,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated/connect'
 import { Route as AuthenticatedDeadlinesRouteImport } from './routes/_authenticated/deadlines'
 import { Route as AuthenticatedHelpRouteImport } from './routes/_authenticated/help'
+import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as ApiPublicDeadlineRemindersRouteImport } from './routes/api/public/deadline-reminders'
 import { Route as ApiPublicScheduledAccountRouteImport } from './routes/api/public/scheduled-account'
@@ -49,6 +50,11 @@ const AuthenticatedHelpRoute = AuthenticatedHelpRouteImport.update({
   path: '/help',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/connect': typeof AuthenticatedConnectRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/help': typeof AuthenticatedHelpRoute
+  '/schedule': typeof AuthenticatedScheduleRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/connect': typeof AuthenticatedConnectRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/help': typeof AuthenticatedHelpRoute
+  '/schedule': typeof AuthenticatedScheduleRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/deadlines': typeof AuthenticatedDeadlinesRoute
   '/_authenticated/help': typeof AuthenticatedHelpRoute
+  '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/deadlines'
     | '/help'
+    | '/schedule'
     | '/settings'
     | '/api/public/deadline-reminders'
     | '/api/public/scheduled-account'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/deadlines'
     | '/help'
+    | '/schedule'
     | '/settings'
     | '/api/public/deadline-reminders'
     | '/api/public/scheduled-account'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/_authenticated/connect'
     | '/_authenticated/deadlines'
     | '/_authenticated/help'
+    | '/_authenticated/schedule'
     | '/_authenticated/settings'
     | '/api/public/deadline-reminders'
     | '/api/public/scheduled-account'
@@ -196,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHelpRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/schedule': {
+      id: '/_authenticated/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof AuthenticatedScheduleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -232,6 +251,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConnectRoute: typeof AuthenticatedConnectRoute
   AuthenticatedDeadlinesRoute: typeof AuthenticatedDeadlinesRoute
   AuthenticatedHelpRoute: typeof AuthenticatedHelpRoute
+  AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
 }
 
@@ -240,6 +260,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConnectRoute: AuthenticatedConnectRoute,
   AuthenticatedDeadlinesRoute: AuthenticatedDeadlinesRoute,
   AuthenticatedHelpRoute: AuthenticatedHelpRoute,
+  AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
 }
 
