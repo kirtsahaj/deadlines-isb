@@ -93,29 +93,29 @@ export type UnifiedDeadline = {
   provisional: boolean;
   remindable: boolean;
   otherSection: boolean;
-  own?: OwnRow;
-  outline?: OutlineOccurrence;
+  own?: OwnRow | undefined;
+  outline?: OutlineOccurrence | undefined;
 };
 
 /** Full course code for a Mohali 2026-27 Term 5 eLearn course; never a prefix match. */
 export function term5CodeFromShortName(shortName: string | null | undefined): string | null {
   const m = /^([A-Za-z0-9.]+)_PGPMOH_2026-27_T5$/.exec((shortName ?? "").trim());
-  return m ? m[1].toUpperCase() : null;
+  return m?.[1] ? m[1].toUpperCase() : null;
 }
 
 export function sectionLetter(sectionId: string | null): string | null {
   if (!sectionId) return null;
   const m = /_([A-Z])$/.exec(sectionId);
-  return m ? m[1] : null;
+  return m?.[1] ?? null;
 }
 
 /** Section named explicitly in an eLearn title such as "Group Selection_G" or "(Section H)". */
 export function sectionHintFromTitle(title: string): string | null {
   const t = title.trim();
   const sec = /\bsec(?:tion)?\.?\s*([G-L])\b/i.exec(t);
-  if (sec) return sec[1].toUpperCase();
+  if (sec?.[1]) return sec[1].toUpperCase();
   const tail = /[_(\-\s]([G-L])\)?$/.exec(t);
-  return tail ? tail[1] : null;
+  return tail?.[1] ?? null;
 }
 
 const STOP = new Set(["the", "a", "an", "of", "and", "for", "to", "in", "on", "submission", "submit", "deadline", "due"]);

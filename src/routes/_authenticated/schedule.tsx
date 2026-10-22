@@ -159,7 +159,7 @@ function SchedulePage() {
       ) : (
         days.map(([key, classes]) => (
           <section key={key} className="space-y-2">
-            <h2 className="sticky top-14 z-10 bg-background/90 py-1 text-sm font-semibold backdrop-blur">{dayLabel(classes[0].startsAt)}</h2>
+            <h2 className="sticky top-14 z-10 bg-background/90 py-1 text-sm font-semibold backdrop-blur">{dayLabel(classes[0]!.startsAt)}</h2>
             <ul className="space-y-3">
               {classes.map((c) => (
                 <li key={c.id}>

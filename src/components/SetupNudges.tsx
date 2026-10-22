@@ -83,7 +83,7 @@ export function SetupNudges() {
   }, [nudges.length]);
 
   if (!nudges.length) return null;
-  const current = nudges[index % nudges.length];
+  const current = nudges[index % nudges.length]!;
   const Icon = current.icon;
   return (
     <section aria-label="Setup steps" className="surface-card flex items-center gap-3 p-3" aria-live="polite">
