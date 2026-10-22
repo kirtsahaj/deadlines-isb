@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         aria-label="Main"
       >
         <div className="mx-auto flex max-w-md">
-          {NAV.map((item) => {
+          {nav.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.to;
             return (

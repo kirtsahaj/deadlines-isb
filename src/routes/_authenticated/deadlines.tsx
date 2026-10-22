@@ -175,7 +175,7 @@ function DeadlinesPage() {
         <div className="mr-auto">
           <h1 className="text-3xl font-semibold">Hello{name ? ` ${name}` : ""}!</h1>
           <p className="mt-1 text-sm font-medium text-muted-foreground">
-            {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : "Showing your Term 5 outlines and class updates"}
+            {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : term5.data?.inRoster ? "Showing your Term 5 outlines and class updates" : "Connect eLearn to see your deadlines"}
           </p>
         </div>
         {connected && (
@@ -239,8 +239,8 @@ function DeadlinesPage() {
             <SelectItem value="choice">Choices</SelectItem>
             <SelectItem value="calendar">Calendar</SelectItem>
             <SelectItem value="text">Mentioned in text</SelectItem>
-            <SelectItem value="outline">Outline deadlines</SelectItem>
-            <SelectItem value="preread">Prereads</SelectItem>
+            {term5.data?.inRoster && <SelectItem value="outline">Outline deadlines</SelectItem>}
+            {term5.data?.inRoster && <SelectItem value="preread">Prereads</SelectItem>}
           </SelectContent>
         </Select>
       </div>
