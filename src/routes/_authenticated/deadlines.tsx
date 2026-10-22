@@ -169,7 +169,7 @@ function DeadlinesPage() {
   const loading = connection.isLoading || term5.isLoading || (connected && deadlines.isLoading);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       {connected && <ReminderSetupDialog />}
       <header className="flex flex-wrap items-start gap-3">
         <div className="mr-auto">
@@ -221,7 +221,7 @@ function DeadlinesPage() {
       <div className="flex flex-wrap gap-2">
         <div className="relative min-w-48 flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search deadlines" aria-label="Search deadlines" className="pl-9" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search deadlines" aria-label="Search deadlines" className="h-10 pl-9" />
         </div>
         <MultiSelectFilter
           label="Term"
@@ -234,7 +234,7 @@ function DeadlinesPage() {
         />
         <MultiSelectFilter label="Course" options={courseOptions} selected={activeCourses} onChange={setSelectedCourses} getLabel={courseLabel} />
         <Select value={kindFilter} onValueChange={setKindFilter}>
-          <SelectTrigger className="w-36" aria-label="Filter by type">
+          <SelectTrigger className="h-10 w-36 rounded-full bg-card px-4" aria-label="Filter by type">
             <SelectValue placeholder="All types" />
           </SelectTrigger>
           <SelectContent>
@@ -245,7 +245,7 @@ function DeadlinesPage() {
             <SelectItem value="choice">Choices</SelectItem>
             <SelectItem value="calendar">Calendar</SelectItem>
             <SelectItem value="text">Mentioned in text</SelectItem>
-            <SelectItem value="outline">From outline</SelectItem>
+            <SelectItem value="outline">Outline deadlines</SelectItem>
             <SelectItem value="preread">Prereads</SelectItem>
           </SelectContent>
         </Select>
@@ -264,7 +264,7 @@ function DeadlinesPage() {
           </p>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-2">
           {visible.map((item) => (
             <li key={item.id}>
               <DeadlineCard
