@@ -105,14 +105,14 @@ describe("merging outline and eLearn", () => {
   it("one card per assessment, keeping both sources", () => {
     const r = mergeDeadlines(base({ own: [own({})], ownLastSuccessAt: "2026-10-22T09:00:00+05:30" }));
     expect(r).toHaveLength(1);
-    expect(r[0].sources.map((s) => s.kind)).toEqual(["own_elearn", "outline"]);
-    expect(r[0].confidence).toBe("own");
-    expect(r[0].notifyKeys).toHaveLength(2);
+    expect(r[0]!.sources.map((s) => s.kind)).toEqual(["own_elearn", "outline"]);
+    expect(r[0]!.confidence).toBe("own");
+    expect(r[0]!.notifyKeys).toHaveLength(2);
   });
   it("surfaces conflicting dates instead of hiding them", () => {
     const r = mergeDeadlines(base({ own: [own({ due_at: "2026-10-23T23:59:00+05:30" })], ownLastSuccessAt: "2026-10-22T09:00:00+05:30" }));
     expect(r).toHaveLength(1);
-    expect(r[0].conflict).toBe(true);
+    expect(r[0]!.conflict).toBe(true);
   });
   it("different assessment numbers stay separate", () => {
     expect(titlesMatch("Case write-up 1", "Case write-up 2")).toBe(false);
@@ -125,7 +125,7 @@ describe("merging outline and eLearn", () => {
   });
   it("stale own data drops to amber", () => {
     const r = mergeDeadlines(base({ own: [own({})], ownLastSuccessAt: "2026-10-21T09:00:00+05:30" }));
-    expect(r[0].confidence).toBe("outline");
+    expect(r[0]!.confidence).toBe("outline");
   });
 });
 
@@ -147,14 +147,14 @@ describe("shared section updates", () => {
   it("same-section fresh update is teal and merges with outline", () => {
     const r = mergeDeadlines(base({ shared: [shared({})] }));
     expect(r).toHaveLength(1);
-    expect(r[0].confidence).toBe("shared");
-    expect(r[0].remindable).toBe(true);
+    expect(r[0]!.confidence).toBe("shared");
+    expect(r[0]!.remindable).toBe(true);
   });
   it("other-section data is a labelled fallback without reminders", () => {
     const r = mergeDeadlines(base({ shared: [shared({ contributor_section: "H" })] }));
-    expect(r[0].otherSection).toBe(true);
-    expect(r[0].confidence).toBe("outline");
-    expect(r[0].remindable).toBe(false);
+    expect(r[0]!.otherSection).toBe(true);
+    expect(r[0]!.confidence).toBe("outline");
+    expect(r[0]!.remindable).toBe(false);
   });
   it("items explicitly for another section never apply", () => {
     expect(sectionHintFromTitle("Project Group Selection_H")).toBe("H");
@@ -181,7 +181,7 @@ describe("ordering and views", () => {
     const rows = [item(null), item("2026-10-25T10:00:00+05:30"), item("2026-10-23T10:00:00+05:30")];
     expect(sortView(rows, "upcoming").map((r) => r.dueAt)).toEqual(["2026-10-23T10:00:00+05:30", "2026-10-25T10:00:00+05:30", null]);
     const past = [item("2026-10-01T10:00:00+05:30"), item("2026-10-10T10:00:00+05:30")];
-    expect(sortView(past, "past")[0].dueAt).toBe("2026-10-10T10:00:00+05:30");
+    expect(sortView(past, "past")[0]!.dueAt).toBe("2026-10-10T10:00:00+05:30");
   });
   it("date-only items count until the end of that day", () => {
     expect(inView(item(null, "unknown", "2026-10-22"), "upcoming", NOW)).toBe(true);
