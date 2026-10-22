@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, MessageCircle, ShieldCheck } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -39,10 +38,10 @@ const WHATSAPP_URL = "https://wa.me/918890060456";
 const FAQ = [
   {
     q: "Where do these dates come from?",
-    a: "Your own eLearn (when connected), course updates seen on classmates' eLearn for your section, and your Term 5 course outlines. Tap the dot on any card to see exactly which.",
+    a: "Your own eLearn (when connected), course updates seen on classmates' eLearn for your section, and your Term 5 course outlines. Tap the source label on any card to see exactly which.",
   },
   {
-    q: "What do the dots mean?",
+    q: "What do the source colors mean?",
     a: "They show how confident the tracker is right now — not a guarantee. See the key below.",
   },
   {
@@ -89,7 +88,8 @@ function MyCourses() {
         {term5.data.courses
           .filter((c) => mine.has(c.code))
           .map((c) => {
-            const e = mine.get(c.code)!;
+            const e = mine.get(c.code);
+            if (!e) return null;
             return (
               <li key={c.code} className="flex flex-wrap items-center gap-2">
                 <span className="course-code">{c.code}</span>
@@ -155,12 +155,9 @@ function MenuPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [notice, setNotice] = useState<string | null>(null);
-  const [open, setOpen] = useState<string[]>([]);
-
   useEffect(() => {
-    const hash = window.location.hash.replace("#", "");
-    if (hash === "home-screen") setOpen(["reminders"]);
-    if (hash === "courses") setOpen(["courses"]);
+    const id = window.location.hash.slice(1);
+    if (id) document.getElementById(id)?.scrollIntoView();
   }, []);
 
   const connection = useQuery({ queryKey: ["connection-state"], queryFn: () => getConnectionState() });
@@ -215,10 +212,10 @@ function MenuPage() {
       <h1 className="text-3xl font-semibold">Menu</h1>
       <SetupNudges />
 
-      <Accordion type="multiple" value={open} onValueChange={setOpen} className="surface-card px-4">
-        <AccordionItem value="connection">
-          <AccordionTrigger>eLearn connection</AccordionTrigger>
-          <AccordionContent className="space-y-3">
+      <div className="divide-y divide-border">
+        <section className="scroll-mt-24 py-5 first:pt-0">
+          <h2 className="mb-3 text-lg font-semibold">eLearn connection</h2>
+          <div className="space-y-3">
             {state?.connected ? (
               <>
                 <dl className="space-y-1 text-sm">
@@ -248,26 +245,26 @@ function MenuPage() {
                 </Button>
               </>
             )}
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </section>
 
-        <AccordionItem value="courses" id="courses">
-          <AccordionTrigger>My courses</AccordionTrigger>
-          <AccordionContent>
+        <section className="scroll-mt-24 py-5 first:pt-0" id="courses">
+          <h2 className="mb-3 text-lg font-semibold">My courses</h2>
+          <div>
             <MyCourses />
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </section>
 
-        <AccordionItem value="reminders" id="home-screen">
-          <AccordionTrigger>Reminders and home screen</AccordionTrigger>
-          <AccordionContent>
+        <section className="scroll-mt-24 py-5 first:pt-0" id="home-screen">
+          <h2 className="mb-3 text-lg font-semibold">Reminders and home screen</h2>
+          <div>
             <ReminderSettings />
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </section>
 
-        <AccordionItem value="display">
-          <AccordionTrigger>Display</AccordionTrigger>
-          <AccordionContent className="space-y-4">
+        <section className="scroll-mt-24 py-5 first:pt-0">
+          <h2 className="mb-3 text-lg font-semibold">Display</h2>
+          <div className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="timezone">Time zone</Label>
               <Select value={settings.data?.timezone ?? DEFAULT_TIMEZONE} onValueChange={(v) => save.mutate({ timezone: v })}>
@@ -319,19 +316,19 @@ function MenuPage() {
                 </ul>
               </div>
             )}
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </section>
 
-        <AccordionItem value="dots">
-          <AccordionTrigger>What the dots mean</AccordionTrigger>
-          <AccordionContent>
+        <section className="scroll-mt-24 py-5 first:pt-0">
+          <h2 className="mb-3 text-lg font-semibold">Sources and confidence</h2>
+          <div>
             <ConfidenceLegend />
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </section>
 
-        <AccordionItem value="help">
-          <AccordionTrigger>Help and troubleshooting</AccordionTrigger>
-          <AccordionContent className="space-y-4">
+        <section className="scroll-mt-24 py-5 first:pt-0">
+          <h2 className="mb-3 text-lg font-semibold">Help and troubleshooting</h2>
+          <div className="space-y-4">
             <dl className="space-y-3 text-sm">
               {FAQ.map((f) => (
                 <div key={f.q}>
@@ -341,22 +338,22 @@ function MenuPage() {
               ))}
             </dl>
             <ConnectionTroubleshooting />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+          </div>
+        </section>
+      </div>
 
       {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
 
-      <div className="surface-card divide-y divide-border">
+      <div className="divide-y divide-border border-t border-border">
         {access.data?.isAdmin && (
           <Link to="/admin" className="tap-target flex items-center gap-3 p-4 text-sm font-medium">
             <ShieldCheck className="size-4" aria-hidden /> Admin
           </Link>
         )}
-        <button type="button" onClick={signOut} className="tap-target flex w-full items-center gap-3 p-4 text-left text-sm font-medium">
+        <Button variant="ghost" type="button" onClick={signOut} className="tap-target flex h-auto w-full flex-wrap justify-start gap-3 rounded-none p-4 text-left text-sm font-medium">
           <LogOut className="size-4" aria-hidden /> Sign out
           <span className="ml-auto text-xs font-normal text-muted-foreground">Keeps your eLearn connection</span>
-        </button>
+        </Button>
         <a
           href={WHATSAPP_URL}
           target="_blank"
