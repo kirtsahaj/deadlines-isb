@@ -320,23 +320,16 @@ function MenuPage() {
         </section>
 
         <section className="scroll-mt-24 py-5 first:pt-0">
-          <h2 className="mb-3 text-lg font-semibold">Sources and confidence</h2>
-          <div>
-            <ConfidenceLegend />
-          </div>
-        </section>
-
-        <section className="scroll-mt-24 py-5 first:pt-0">
           <h2 className="mb-3 text-lg font-semibold">Help and troubleshooting</h2>
-          <div className="space-y-4">
-            <dl className="space-y-3 text-sm">
-              {FAQ.map((f) => (
-                <div key={f.q}>
-                  <dt className="font-medium">{f.q}</dt>
-                  <dd className="text-muted-foreground">{f.a}</dd>
-                </div>
-              ))}
-            </dl>
+          <Accordion type="multiple" className="space-y-3">
+            {FAQ.map((f) => (
+              <AccordionItem key={f.q} value={f.q} className="rounded-xl border px-4 last:border-b">
+                <AccordionTrigger className="text-sm font-medium">{f.q}</AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">{f.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+          <div className="mt-3">
             <ConnectionTroubleshooting />
           </div>
         </section>
