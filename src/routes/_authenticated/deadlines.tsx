@@ -195,12 +195,6 @@ function DeadlinesPage() {
         </div>
       )}
       {syncMessage && <p role="status" className="text-sm text-muted-foreground">{syncMessage}</p>}
-      {term5.data && !term5.data.inRoster && (
-        <p className="surface-card p-3 text-sm text-muted-foreground">
-          We couldn't find you on the Term 5 Mohali class list. Add your courses from{" "}
-          <Link to="/menu" hash="courses" className="font-medium underline">Menu → My courses</Link>.
-        </p>
-      )}
 
       <div className="inline-flex rounded-full bg-muted p-1" role="tablist" aria-label="Deadline view">
         {(["upcoming", "past"] as DeadlineView[]).map((value) => (

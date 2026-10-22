@@ -19,7 +19,9 @@ export async function enrollmentsFor(userId: string, email: string) {
     .from("term5_enrollment_overrides")
     .select("course_code, section_id, removed")
     .eq("user_id", userId);
-  return resolveEnrollments(email, (data ?? []) as Override[]);
+  const resolved = resolveEnrollments(email, (data ?? []) as Override[]);
+  // Students outside the Term 5 Mohali list get the plain eLearn-only tracker.
+  return resolved.inRoster ? resolved : { ...resolved, enrollments: [] };
 }
 
 export async function sharedFor(enrollments: Enrollment[]): Promise<SharedRow[]> {
