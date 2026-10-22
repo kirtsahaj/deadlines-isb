@@ -360,7 +360,7 @@ function MenuPage() {
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="tap-target flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 p-3 text-sm font-semibold text-success-foreground transition-colors hover:bg-success/20"
+            className="tap-target flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 p-3 text-sm font-semibold transition-colors hover:bg-success/20"
           >
             <WhatsAppIcon className="size-6 shrink-0 text-success" />
             <span className="min-w-0 flex-1">
