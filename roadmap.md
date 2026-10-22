@@ -1,13 +1,12 @@
 # Tracker improvements
-- [x] Add Chrome-first phone setup, browser-opening actions and copy-address fallbacks; preserve desktop flow
-- [x] Verify phone guidance and Chrome URL helpers (10 tests passed; browser-rendered guide and public sign-in checked)
-- [x] Add explicit clipboard connection action and manual fallback
-- [x] Replace connection screenshot and clarify minimal desktop/phone wording
-- [x] Test clipboard reading, denied access, validation, and successful-response navigation (connection success simulated; fresh private eLearn test remains blocked below)
-- [x] Replace primary eLearn setup with confirmed copied-link flow and update Help/images
-- [x] Fix managed automatic refresh and initial sync; preserve dates and honest timestamps
-- [x] Refresh visual design across the tracker
-- [x] Run regression and signed-in browser checks
-- [x] Publish and observe an actual scheduled run
-- [ ] Verify new Chrome-opening buttons on physical phones and fresh private eLearn linking (requires devices and live eLearn session; user already verified copying in iPhone Chrome)
-- [x] 3-hour push reminders + home-screen setup popup (physical phone test pending)
+- [x] Earlier work (connection flow, background refresh, reminders, admin) — see history
+- [ ] Verify Chrome-opening buttons on physical phones and fresh private eLearn linking (needs devices + live eLearn session)
+
+# Term 5 companion
+- [x] Roster matching, corrections in Menu
+- [x] Three icon tabs: Deadlines, Schedule, Menu (Help/Settings merged, account deletion removed, WhatsApp last)
+- [x] Confidence dots + source details with connect action
+- [x] Rotating setup banner: connect, notifications, home screen
+- [x] Outline + eLearn merge with conflicts kept; shared section pool; merged reminders; one reminder when found inside 3 hours
+- [x] Rule tests (20) and signed-in phone checks
+- [ ] Live check of shared section updates across several connected classmates (fills in as classmates' next refreshes run)

@@ -33,7 +33,7 @@ export const CONFIDENCE_META: Record<Confidence, { symbol: string; label: string
 export function ConfidenceMark({ value, className = "" }: { value: Confidence; className?: string }) {
   const meta = CONFIDENCE_META[value];
   return (
-    <span aria-hidden className={`inline-grid size-5 place-items-center text-sm font-bold leading-none ${meta.className} ${className}`}>
+    <span aria-hidden className={`inline-grid size-5 place-items-center text-base font-bold leading-none ${meta.className} ${className}`}>
       {meta.symbol}
     </span>
   );
