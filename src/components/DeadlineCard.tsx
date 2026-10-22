@@ -135,6 +135,7 @@ export function DeadlineCard({
         <span className="inline-flex items-center gap-1.5 font-medium">
           <Clock className="size-4 text-muted-foreground" aria-hidden />
           {whenLabel(item, timezone)}
+          {item.provisional && item.dueAt ? " · estimated" : ""}
         </span>
         {item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>}
       </div>
