@@ -225,7 +225,8 @@
     transform: translateY(-1px);
   }
 
-  .deadline-card[data-tile-type="preread"] { --tile-accent: var(--color-preread); }
+  /* Preread tiles (and Schedule class tiles) are neutral; only deadline tiles keep colour. */
+  .deadline-card[data-tile-type="preread"] { --tile-accent: var(--color-muted-foreground); }
   .deadline-card[data-tile-type="quiz"] { --tile-accent: var(--color-quiz); }
   .deadline-card[data-tile-type="activity"] { --tile-accent: var(--color-activity); }
   .deadline-card .course-code,
@@ -361,3 +362,14 @@
   box-shadow: none;
 }
 .deadline-card .tile-info:hover { background-color: var(--color-muted); }
+
+/* The type label (Deadline/Assignment/Quiz) carries a tint of the tile accent to
+   emphasise real deadlines; preread tiles are neutral, so their label stays grey. */
+.deadline-card .tile-kind {
+  background-color: color-mix(in oklab, var(--tile-accent) 16%, var(--color-card));
+  color: color-mix(in oklab, var(--tile-accent) 80%, var(--color-foreground));
+}
+.deadline-card[data-tile-type="preread"] .tile-kind {
+  background-color: var(--color-muted);
+  color: var(--color-muted-foreground);
+}
