@@ -154,7 +154,7 @@ export function DeadlineCard({
 
       <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
         <div className="tile-badges flex flex-1 flex-wrap items-center gap-1.5">
-        <span className="tile-chip">{KIND_LABELS[item.kind] ?? item.kind}</span>
+        <span className="tile-chip tile-kind">{KIND_LABELS[item.kind] ?? item.kind}</span>
         {item.deadlineType === "cutoff" && <Badge variant="outline">Hard cut-off</Badge>}
         {item.submissionStatus === "submitted" && (
           <Badge className="bg-success text-success-foreground">Submitted</Badge>

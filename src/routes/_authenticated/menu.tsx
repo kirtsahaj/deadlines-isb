@@ -231,40 +231,17 @@ function MenuPage() {
       <SetupNudges />
 
       <div className="divide-y divide-border">
-        <section className="scroll-mt-24 py-5 first:pt-0">
-          <h2 className="mb-3 text-lg font-semibold">eLearn connection</h2>
-          <div className="space-y-3">
-            {state?.connected ? (
-              <>
-                <dl className="space-y-1 text-sm">
-                  <div className="flex flex-wrap justify-between gap-2">
-                    <dt className="text-muted-foreground">Account</dt>
-                    <dd>{state.accountName ?? "Connected"}</dd>
-                  </div>
-                  <div className="flex flex-wrap justify-between gap-2">
-                    <dt className="text-muted-foreground">Last saved refresh</dt>
-                    <dd>{state.lastSuccessAt ? formatDateTime(state.lastSuccessAt) : "Not yet"}</dd>
-                  </div>
-                </dl>
-                <div className="flex flex-wrap gap-2">
-                  <Button asChild variant="secondary">
-                    <Link to="/connect">Reconnect with a new link</Link>
-                  </Button>
-                  <Button variant="outline" onClick={() => disconnect.mutate()} disabled={disconnect.isPending}>
-                    {disconnect.isPending ? "Disconnecting…" : "Disconnect and delete synced data"}
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground">Connect to get personal updates from your own eLearn.</p>
-                <Button asChild>
-                  <Link to="/connect">Connect eLearn</Link>
-                </Button>
-              </>
-            )}
-          </div>
-        </section>
+        {state && !state.connected && (
+          <section className="scroll-mt-24 py-5 first:pt-0">
+            <h2 className="mb-3 text-lg font-semibold">eLearn connection</h2>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">Connect to get personal updates from your own eLearn.</p>
+              <Button asChild>
+                <Link to="/connect">Connect eLearn</Link>
+              </Button>
+            </div>
+          </section>
+        )}
 
         <section className="scroll-mt-24 py-5 first:pt-0" id="home-screen">
           <h2 className="mb-3 text-lg font-semibold">Reminders and home screen</h2>
@@ -352,6 +329,31 @@ function MenuPage() {
             </Accordion>
           </AccordionContent>
         </AccordionItem>
+        {state?.connected && (
+          <AccordionItem value="connection">
+            <AccordionTrigger className="text-base font-semibold">eLearn connection</AccordionTrigger>
+            <AccordionContent className="space-y-3">
+              <dl className="space-y-1 text-sm">
+                <div className="flex flex-wrap justify-between gap-2">
+                  <dt className="text-muted-foreground">Account</dt>
+                  <dd>{state.accountName ?? "Connected"}</dd>
+                </div>
+                <div className="flex flex-wrap justify-between gap-2">
+                  <dt className="text-muted-foreground">Last saved refresh</dt>
+                  <dd>{state.lastSuccessAt ? formatDateTime(state.lastSuccessAt) : "Not yet"}</dd>
+                </div>
+              </dl>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="secondary">
+                  <Link to="/connect">Reconnect with a new link</Link>
+                </Button>
+                <Button variant="outline" onClick={() => disconnect.mutate()} disabled={disconnect.isPending}>
+                  {disconnect.isPending ? "Disconnecting…" : "Disconnect and delete synced data"}
+                </Button>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
       </Accordion>
 
       {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
