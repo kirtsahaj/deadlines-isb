@@ -231,12 +231,12 @@
   .deadline-card .course-code,
   .deadline-card .tile-link,
   .deadline-card .tile-badges [data-slot="badge"] {
-    background-color: color-mix(in oklch, var(--tile-accent) 12%, var(--color-card));
+    background-color: color-mix(in oklab, var(--tile-accent) 12%, var(--color-card));
     color: var(--tile-accent);
-    border-color: color-mix(in oklch, var(--tile-accent) 25%, transparent);
+    border-color: color-mix(in oklab, var(--tile-accent) 25%, transparent);
   }
   .deadline-card .tile-link:hover {
-    background-color: color-mix(in oklch, var(--tile-accent) 20%, var(--color-card));
+    background-color: color-mix(in oklab, var(--tile-accent) 20%, var(--color-card));
   }
 
   .course-code {
@@ -324,12 +324,12 @@
 .deadline-card .course-code,
 .deadline-card .tile-link,
 .deadline-card .tile-badges [data-slot="badge"] {
-  background-color: color-mix(in oklch, var(--tile-accent) 12%, var(--color-card));
+  background-color: color-mix(in oklab, var(--tile-accent) 12%, var(--color-card));
   color: var(--tile-accent);
-  border-color: color-mix(in oklch, var(--tile-accent) 25%, transparent);
+  border-color: color-mix(in oklab, var(--tile-accent) 25%, transparent);
 }
 .deadline-card .tile-link:hover {
-  background-color: color-mix(in oklch, var(--tile-accent) 20%, var(--color-card));
+  background-color: color-mix(in oklab, var(--tile-accent) 20%, var(--color-card));
 }
 
 .settings-section { padding: 1.5rem 0; border-top: 1px solid var(--border); }
