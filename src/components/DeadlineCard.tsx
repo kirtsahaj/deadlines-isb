@@ -98,7 +98,7 @@ export function DeadlineCard({
           <DialogTrigger asChild>
             <Button variant="ghost" size="icon"
               type="button"
-              className={`-mr-1 h-8 shrink-0 px-2 text-xs ${meta.className}`}
+              className={`h-8 shrink-0 px-2 text-xs ${meta.className}`}
               aria-label={`${meta.label}. Source details for ${item.title}`}
             >
               {sourceLabel}
