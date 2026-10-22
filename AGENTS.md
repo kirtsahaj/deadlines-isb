@@ -25,3 +25,6 @@
 - Deadline merging, confidence and reminder eligibility live in one pure browser-safe module (src/lib/term5/model.ts) used by both the Deadlines screen and the reminder job so what students see and what they're notified about never diverge.
 - The shared section pool stores course-level deadline metadata keyed by course, eLearn activity key and contributor section with no user identifiers; it is server-access only and used only for students without their own successful sync.
 - Navigation is exactly three icon-only tabs (Deadlines, Schedule, Menu); Help and Settings live inside Menu.
+- Schedule mapping and preread projection share the browser-safe preparation module for UI and reminders; bundle readings at the first applicable class so shared readings never generate repeated tasks.
+- eLearn destinations use validated numeric IDs and Moodle instance parameters, with course fallback; never treat instance IDs as module IDs or include credentials in URLs.
+- Assessment matching uses normalized entities, curated company aliases, meaningful tokens and unambiguous course/date/scope candidates; no AI calls are required.

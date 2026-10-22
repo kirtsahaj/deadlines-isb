@@ -14,29 +14,7 @@ async function allowedEmail(claims: unknown) {
   return email;
 }
 
-export type PrepItem = {
-  id: string;
-  title: string;
-  kind: string;
-  requirement: string;
-  timing: string;
-  alsoFor: string[];
-  note: string | null;
-};
-export type ScheduleClass = {
-  id: string;
-  courseCode: string;
-  courseName: string;
-  section: string;
-  startsAt: string;
-  endsAt: string;
-  room: string;
-  sessionTitle: string | null;
-  sessionLabels: string[];
-  mapping: string;
-  sourceKind: string | null;
-  prep: PrepItem[];
-};
+export type { PrepItem, ScheduleClass } from "./term5/preparation";
 
 /** The student's Term 5 plan: matched courses, outline deadlines, schedule and shared updates. */
 export const getMyTerm5 = createServerFn({ method: "GET" })
@@ -48,43 +26,11 @@ export const getMyTerm5 = createServerFn({ method: "GET" })
     const { enrollments, inRoster } = await enrollmentsFor(context.userId, email);
     const titles = courseTitles();
     const codes = new Set(enrollments.map((e) => e.courseCode));
-    const sectionIds = new Set(enrollments.map((e) => e.sectionId).filter(Boolean) as string[]);
-    const sessions = new Map(cat.sessions.map((s) => [s.outline_session_id, s]));
+    const { classesFor } = await import("./term5/preparation");
+    const { courseRefsFor } = await import("./term5/userDeadlines.server");
     const sourceKind = (id: string | null | undefined) => (id ? (cat.sources as Record<string, { kind: string }>)[id]?.kind ?? null : null);
 
-    const classes: ScheduleClass[] = cat.classes
-      .filter((c) => sectionIds.has(c.section_id))
-      .map((c) => {
-        const s = c.outline_session_id ? sessions.get(c.outline_session_id) : undefined;
-        const labels = s?.session_labels ?? [];
-        const prep = s
-          ? cat.prep
-              .filter((p) => p.course_code === c.course_code && p.applies_to_session_labels.some((l) => labels.includes(l)))
-              .map((p) => ({
-                id: p.preparation_id,
-                title: p.title,
-                kind: p.kind,
-                requirement: p.requirement,
-                timing: p.timing,
-                alsoFor: p.applies_to_session_labels.filter((l) => !labels.includes(l)),
-                note: p.source_requirement_note,
-              }))
-          : [];
-        return {
-          id: c.class_id,
-          courseCode: c.course_code,
-          courseName: titles[c.course_code] ?? c.course_code,
-          section: c.section_id.split("_").pop() ?? "",
-          startsAt: c.starts_at,
-          endsAt: c.ends_at,
-          room: c.room,
-          sessionTitle: s?.title ?? null,
-          sessionLabels: labels,
-          mapping: c.session_mapping_status,
-          sourceKind: sourceKind(s?.source_id),
-          prep,
-        };
-      });
+    const classes = classesFor(cat, enrollments, titles);
 
     const courses = cat.courses.map((c) => ({
       code: c.course_code,
@@ -102,6 +48,7 @@ export const getMyTerm5 = createServerFn({ method: "GET" })
       outline: cat.occurrences.filter((o) => codes.has(o.course_code)),
       outlineSourceKinds: Object.fromEntries(cat.courses.map((c) => [c.course_code, sourceKind(c.primary_source_id)])),
       classes,
+      courseRefs: await courseRefsFor(enrollments),
       shared: await sharedFor(enrollments),
       term: cat.meta,
     };

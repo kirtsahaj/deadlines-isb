@@ -1,8 +1,18 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { courseTitles, resolveEnrollments, term5Catalog, type Override } from "./catalog.server";
 import { mergeDeadlines, type Enrollment, type OutlineOccurrence, type SharedRow, type UnifiedDeadline } from "./model";
+import { classesFor, prereadDeadlines } from "./preparation";
 
 const SHARED_MAX_AGE_MS = 14 * 86400_000;
+
+/** Only nonpersonal course identifiers for the caller's exact enrolled Term 5 courses. */
+export async function courseRefsFor(enrollments: Enrollment[]) {
+  const names = enrollments.map(e => `${e.courseCode}_PGPMOH_2026-27_T5`);
+  if (!names.length) return [];
+  const { data, error } = await supabaseAdmin.from("courses").select("moodle_course_id, short_name, full_name").in("short_name", names);
+  if (error) throw error;
+  return [...new Map((data ?? []).map(c => [c.moodle_course_id, c])).values()];
+}
 
 export async function enrollmentsFor(userId: string, email: string) {
   const { data } = await supabaseAdmin
@@ -30,14 +40,15 @@ export async function mergedForUser(userId: string, email: string): Promise<Unif
   const [{ data: own }, { data: courses }, { data: conn }, shared] = await Promise.all([
     supabaseAdmin
       .from("deadline_items")
-      .select("id, external_key, title, kind, deadline_type, deadline_status, submission_status, due_at, conflict, moodle_course_id, source_primary")
+       .select("id, activity_id, external_key, title, kind, deadline_type, deadline_status, submission_status, due_at, conflict, moodle_course_id, source_primary")
       .eq("user_id", userId)
       .eq("active", true),
     supabaseAdmin.from("courses").select("moodle_course_id, short_name, full_name").eq("user_id", userId),
     supabaseAdmin.from("elearn_connections").select("last_success_at").eq("user_id", userId).maybeSingle(),
     sharedFor(enrollments),
   ]);
-  return mergeDeadlines({
+  const refs = await courseRefsFor(enrollments);
+  return [...mergeDeadlines({
     now: Date.now(),
     enrollments,
     courseTitles: courseTitles(),
@@ -46,7 +57,7 @@ export async function mergedForUser(userId: string, email: string): Promise<Unif
     ownCourses: courses ?? [],
     ownLastSuccessAt: conn?.last_success_at ?? null,
     shared,
-  });
+  }), ...prereadDeadlines(classesFor(term5Catalog, enrollments, courseTitles()), [...(courses ?? []), ...refs])];
 }
 
 /** Deterministic UUID for notification dedupe of non-eLearn keys. */

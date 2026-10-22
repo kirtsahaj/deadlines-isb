@@ -1,4 +1,6 @@
-import { AlertTriangle, Clock } from "lucide-react";
+import { AlertTriangle, Clock, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { elearnDestination } from "@/lib/elearnDestination";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -20,6 +22,7 @@ const KIND_LABELS: Record<string, string> = {
   text: "Mentioned in text",
   choice: "Choice",
   outline: "From outline",
+  preread: "Preread",
 };
 
 const OUTLINE_KIND: Record<string, string> = {
@@ -74,6 +77,7 @@ export function DeadlineCard({
   const overdue = !!at && new Date(at).getTime() < Date.now() && item.submissionStatus !== "submitted";
   const meta = CONFIDENCE_META[item.confidence];
   const isText = item.kind === "text";
+  const destination = elearnDestination(item);
 
   return (
     <article className="deadline-card relative p-4 sm:p-5">
@@ -87,13 +91,13 @@ export function DeadlineCard({
         </div>
         <Dialog>
           <DialogTrigger asChild>
-            <button
+            <Button variant="ghost" size="icon"
               type="button"
               className="tap-target -mr-1 grid size-9 place-items-center rounded-full hover:bg-muted"
               aria-label={`${meta.label}. Source details for ${item.title}`}
             >
               <ConfidenceMark value={item.confidence} />
-            </button>
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md rounded-2xl">
             <DialogHeader>
@@ -134,11 +138,15 @@ export function DeadlineCard({
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         <span className="inline-flex items-center gap-1.5 font-medium">
           <Clock className="size-4 text-muted-foreground" aria-hidden />
-          {whenLabel(item, timezone)}
+          {item.kind === "preread" ? "Class starts " : ""}{whenLabel(item, timezone)}
           {item.provisional && item.dueAt ? " · estimated" : ""}
         </span>
         {item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>}
       </div>
+
+      {item.preparation && <ul className="mt-3 space-y-2 text-sm">
+        {item.preparation.map(p => <li key={p.id}>{p.title} <span className="text-xs text-muted-foreground">· {p.requirement === "assigned" ? "Required" : p.requirement}</span></li>)}
+      </ul>}
 
       <div className="mt-3 flex flex-wrap gap-1.5">
         <Badge variant="secondary">{KIND_LABELS[item.kind] ?? item.kind}</Badge>
@@ -146,7 +154,7 @@ export function DeadlineCard({
         {item.submissionStatus === "submitted" && (
           <Badge className="bg-success text-success-foreground">Submitted</Badge>
         )}
-        {overdue && <Badge variant="destructive">Past due</Badge>}
+        {overdue && item.kind !== "preread" && <Badge variant="destructive">Past due</Badge>}
         {isText && <Badge variant="outline">Mentioned in course text</Badge>}
         {item.conflict && (
           <Badge className="bg-warning text-warning-foreground">
@@ -155,6 +163,9 @@ export function DeadlineCard({
           </Badge>
         )}
       </div>
+      {destination && <Button asChild variant="outline" size="sm" className="mt-3">
+        <a href={destination.url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden />{destination.activity ? "Open assignment / activity" : "Open course in eLearn"}</a>
+      </Button>}
     </article>
   );
 }

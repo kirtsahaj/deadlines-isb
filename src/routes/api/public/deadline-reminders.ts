@@ -32,22 +32,25 @@ export const Route = createFileRoute("/api/public/deadline-reminders")({
             if (!due.length) continue;
             const tz = settings?.find((s) => s.user_id === userId)?.timezone ?? "Asia/Kolkata";
             for (const item of due) {
+              const dueAt = item.dueAt;
+              if (!dueAt) continue;
               const ids = await Promise.all(item.notifyKeys.map((k) => keyToUuid(userId, k)));
               const { data: done } = await supabaseAdmin
                 .from("deadline_notifications")
                 .select("deadline_id")
+                .eq("user_id", userId)
                 .in("deadline_id", ids)
-                .eq("due_at", item.dueAt!);
+                .eq("due_at", dueAt);
               if (done?.length) continue;
               // Claim every identity first so overlapping runs and merged sources never double-send.
               const { error } = await supabaseAdmin
                 .from("deadline_notifications")
-                .insert(ids.map((id) => ({ user_id: userId, deadline_id: id, due_at: item.dueAt! })));
+                .insert(ids.map((id) => ({ user_id: userId, deadline_id: id, due_at: dueAt })));
               if (error) continue;
-              const time = new Date(item.dueAt!).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", timeZone: tz });
+              const time = new Date(dueAt).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", timeZone: tz });
               const message = {
-                title: `Due at ${time}: ${item.title}`,
-                body: item.courseCode,
+                title: item.kind === "preread" ? `Preread · class at ${time}: ${item.courseCode}` : `Due at ${time}: ${item.title}`,
+                body: item.kind === "preread" ? `${item.preparation?.length ?? 0} readings · ${item.provisional ? "Outline topic estimated · " : ""}${item.classRoom ?? ""}` : item.courseCode,
                 url: "/deadlines",
                 tag: ids[0],
               };

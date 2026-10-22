@@ -32,6 +32,7 @@ export type OutlineOccurrence = {
 
 export type OwnRow = {
   id: string;
+  activity_id?: number | null;
   external_key?: string;
   title: string;
   kind: string;
@@ -95,6 +96,8 @@ export type UnifiedDeadline = {
   otherSection: boolean;
   own?: OwnRow | undefined;
   outline?: OutlineOccurrence | undefined;
+  preparation?: import("./preparation").PrepItem[];
+  classRoom?: string;
 };
 
 /** Full course code for a Mohali 2026-27 Term 5 eLearn course; never a prefix match. */
@@ -118,10 +121,13 @@ export function sectionHintFromTitle(title: string): string | null {
   return tail?.[1] ?? null;
 }
 
-const STOP = new Set(["the", "a", "an", "of", "and", "for", "to", "in", "on", "submission", "submit", "deadline", "due"]);
+const STOP = new Set(["the", "a", "an", "of", "and", "for", "to", "in", "on", "submission", "submit", "deadline", "due", "individual", "assignment", "case", "report", "write", "up"]);
 function tokens(title: string) {
   return title
     .toLowerCase()
+    .replace(/&amp;|&#0*38;|&#x0*26;/g, "&")
+    .replace(/\bp\s*&\s*g\b/g, "procter gamble")
+    .replace(/\bprocter\s*(?:&|and)\s*gamble\b/g, "procter gamble")
     .replace(/[_\-:()&,./]+/g, " ")
     .split(/\s+/)
     .filter((w) => w && !STOP.has(w));
@@ -139,7 +145,7 @@ export function titlesMatch(a: string, b: string): boolean {
   if (!wa.size || !wb.size) return false;
   let shared = 0;
   for (const w of wa) if (wb.has(w)) shared++;
-  return shared / Math.min(wa.size, wb.size) >= 0.6;
+  return shared / Math.max(wa.size, wb.size) >= 0.75;
 }
 
 export function istDate(iso: string): string {
@@ -201,8 +207,10 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
   const out: UnifiedDeadline[] = [];
   const ownFresh = !!input.ownLastSuccessAt && now - new Date(input.ownLastSuccessAt).getTime() < OWN_FRESH_MS;
 
-  const findOutline = (code: string, title: string, dueAt: string | null) =>
-    outline.find((o) => !used.has(o.occurrence_id) && o.course_code === code && titlesMatch(o.title, title) && closeEnough(dueAt, o));
+  const findOutline = (code: string, title: string, dueAt: string | null) => {
+    const candidates = outline.filter((o) => !used.has(o.occurrence_id) && o.course_code === code && titlesMatch(o.title, title) && closeEnough(dueAt, o));
+    return candidates.length === 1 ? candidates[0] : undefined;
+  };
 
   const outlineSource = (o: OutlineOccurrence): SourceRef => ({
     kind: "outline",
@@ -217,7 +225,10 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
   for (const row of input.own) {
     const course = input.ownCourses.find((c) => c.moodle_course_id === row.moodle_course_id);
     const code = term5CodeFromShortName(course?.short_name);
-    const match = code && myCodes.has(code) ? findOutline(code, row.title, row.due_at) : undefined;
+    const enrollment = code ? myCodes.get(code) : undefined;
+    const hint = sectionHintFromTitle(row.title);
+    const applicable = !hint || hint === sectionLetter(enrollment?.sectionId ?? null);
+    const match = code && enrollment && applicable && row.deadline_type !== "cutoff" ? findOutline(code, row.title, row.due_at) : undefined;
     if (match) used.add(match.occurrence_id);
     const metaCode = code ?? (course?.short_name?.split("_")[0] || "Course");
     const termSeg = course?.short_name?.split("_").pop() || "Other";
