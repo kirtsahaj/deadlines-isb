@@ -6,7 +6,7 @@ export type DeadlineRow = {
   external_key: string;
   moodle_course_id: number;
   activity_id: number | null;
-  kind: "assignment" | "quiz" | "forum" | "calendar" | "text";
+  kind: "assignment" | "quiz" | "forum" | "calendar" | "text" | "choice";
   deadline_type: string;
   title: string;
   due_at: string | null;
@@ -38,6 +38,7 @@ export function normalizeDeadlines(input: {
   forums: Json | Json[];
   calendar: Json;
   contents: Map<number, Json[]>;
+  choices?: Json;
   markerOnly?: boolean;
   nowSeconds?: number;
 }): DeadlineRow[] {
@@ -175,6 +176,43 @@ export function normalizeDeadlines(input: {
         text_precision: null,
         conflict: false,
       });
+    }
+  }
+
+  // Choice activities (e.g. study-group selection) close at `timeclose`.
+  const putChoice = (courseId: number, id: number, name: unknown, due: number, source: string) =>
+    put({
+      external_key: `choice:${courseId}:${id}:close`,
+      moodle_course_id: courseId,
+      activity_id: id,
+      kind: "choice",
+      deadline_type: "close",
+      title: String(name ?? "Untitled choice"),
+      due_at: iso(due),
+      deadline_status: "dated",
+      submission_status: "unknown",
+      source_primary: source,
+      source_evidence: [evidence(source, due)],
+      text_evidence: null,
+      text_precision: null,
+      conflict: false,
+    });
+  for (const choice of list(input.choices?.["choices"])) {
+    const id = num(choice["id"]);
+    const courseId = num(choice["course"]);
+    const due = num(choice["timeclose"]);
+    if (id && courseId && due) putChoice(courseId, id, choice["name"], due, "mod_choice_get_choices_by_courses");
+  }
+  // Moodle 4 also exposes activity date badges ("Closes: …") on course contents.
+  for (const [courseId, sections] of input.contents) {
+    for (const section of sections) {
+      for (const modul of list(section["modules"])) {
+        if (modul["modname"] !== "choice") continue;
+        const id = num(modul["instance"]);
+        const close = list(modul["dates"]).find((d) => d["dataid"] === "timeclose");
+        const due = num(close?.["timestamp"]);
+        if (id && due) putChoice(courseId, id, modul["name"], due, "core_course_get_contents.dates");
+      }
     }
   }
 
