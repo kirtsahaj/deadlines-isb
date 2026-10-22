@@ -139,7 +139,7 @@ export function DeadlineCard({
         <span className="inline-flex items-center gap-1.5 font-medium">
           <Clock className="size-4 text-muted-foreground" aria-hidden />
           {item.kind === "preread" ? "Class starts " : ""}{whenLabel(item, timezone)}
-          {item.provisional && item.dueAt ? " · estimated" : ""}
+          {item.provisional && item.dueAt ? item.kind === "preread" ? " · topic estimated" : " · estimated" : ""}
         </span>
         {item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>}
       </div>
