@@ -21,3 +21,7 @@
 - Background refresh runs on a 15-minute tick; each account gets a stable hash-derived slot in a 2-hour cycle so load spreads evenly as users grow, and dispatch is throttled to pairs to stay polite to eLearn.
 - Deadline reminders use self-contained WebCrypto Web Push (src/lib/push) driven by a managed 15-minute schedule, deduped per deadline+due time; no Node push libraries because the server runs on Workers.
 - The admin dashboard is limited to one hardcoded email, checked server-side through the verified sign-in email, because the owner asked that only they have access.
+- Term 5 catalog and class list ship as server-only JSON (src/lib/term5/data, imported only from *.server.ts) because the roster holds personal data and the catalog is a fixed snapshot; only per-user corrections and the shared pool live in the database.
+- Deadline merging, confidence and reminder eligibility live in one pure browser-safe module (src/lib/term5/model.ts) used by both the Deadlines screen and the reminder job so what students see and what they're notified about never diverge.
+- The shared section pool stores course-level deadline metadata keyed by course, eLearn activity key and contributor section with no user identifiers; it is server-access only and used only for students without their own successful sync.
+- Navigation is exactly three icon-only tabs (Deadlines, Schedule, Menu); Help and Settings live inside Menu.
