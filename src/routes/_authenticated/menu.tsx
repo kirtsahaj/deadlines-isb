@@ -224,6 +224,7 @@ function MenuPage() {
   }
 
   const state = connection.data;
+  const term5Info = useTerm5();
 
   return (
     <div className="space-y-3">
@@ -252,6 +253,7 @@ function MenuPage() {
       </div>
 
       <Accordion type="multiple" value={open} onValueChange={setOpen} className="border-t border-border">
+        {term5Info.data?.inRoster && (
         <div id="courses" className="scroll-mt-24">
           <AccordionItem value="courses">
             <AccordionTrigger className="text-base font-semibold">My courses</AccordionTrigger>
@@ -260,6 +262,7 @@ function MenuPage() {
             </AccordionContent>
           </AccordionItem>
         </div>
+        )}
         <AccordionItem value="display">
           <AccordionTrigger className="text-base font-semibold">Display</AccordionTrigger>
           <AccordionContent className="space-y-4">

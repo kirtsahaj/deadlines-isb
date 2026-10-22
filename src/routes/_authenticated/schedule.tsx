@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ChevronDown, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -120,6 +120,10 @@ function ClassCard({ c }: { c: ScheduleClass }) {
 
 function SchedulePage() {
   const term5 = useTerm5();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (term5.data && !term5.data.inRoster) void navigate({ to: "/deadlines", replace: true });
+  }, [term5.data, navigate]);
   const [showPast, setShowPast] = useState(false);
   const days = useMemo(() => {
     const now = Date.now();

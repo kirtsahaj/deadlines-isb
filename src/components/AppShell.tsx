@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { CalendarClock, CalendarDays, ListChecks, Menu } from "lucide-react";
 import type { ReactNode } from "react";
 import { ThemeToggle } from "@/components/ThemeProvider";
+import { useTerm5 } from "@/lib/useTerm5";
 
 const NAV = [
   { to: "/deadlines", label: "Deadlines", icon: ListChecks },
@@ -20,6 +21,8 @@ export function AppFooter() {
 /** Exactly three icon-only destinations with accessible names. */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const term5 = useTerm5();
+  const nav = term5.data && !term5.data.inRoster ? NAV.filter((n) => n.to !== "/schedule") : NAV;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
