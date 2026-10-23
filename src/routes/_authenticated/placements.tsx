@@ -3,10 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getJobJdLink, listJobs, setJobStar, type JobTile } from "@/lib/jobs.functions";
+import { getJobJdLink, listJobs, setJobReminders, setJobStar, type JobTile } from "@/lib/jobs.functions";
 import { deadlinePassed, jobsInView, type JobFilter, type JobSort, type JobView } from "@/lib/jobs/view";
 import { relativeTime } from "@/lib/format";
 
@@ -80,6 +81,24 @@ function JobCard({ job, now }: { job: JobTile; now: number }) {
   );
 }
 
+function JobReminderToggle({ enabled }: { enabled: boolean | undefined }) {
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: (value: boolean) => setJobReminders({ data: { enabled: value } }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["jobs"] }),
+  });
+  if (enabled === undefined) return null;
+  return (
+    <label className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3">
+      <span className="text-sm">
+        <span className="font-medium">Application deadline reminders</span>
+        <span className="block text-muted-foreground">12 and 3 hours before, when the email gives a time. Uses your existing notification setting.</span>
+      </span>
+      <Switch checked={mutation.isPending && mutation.variables !== undefined ? mutation.variables : enabled} onCheckedChange={(v) => mutation.mutate(v)} aria-label="Application deadline reminders" />
+    </label>
+  );
+}
+
 function PlacementsPage() {
   const [view, setView] = useState<JobView>("upcoming");
   const [sort, setSort] = useState<JobSort>("deadline");
@@ -101,6 +120,8 @@ function PlacementsPage() {
           From CAS emails{jobs.data?.feedUpdatedAt ? ` · last email ${relativeTime(jobs.data.feedUpdatedAt)}` : ""}. Not checked against the portal — confirm there before applying.
         </p>
       </header>
+
+      <JobReminderToggle enabled={jobs.data?.jobReminders} />
 
       <div className="inline-flex rounded-full bg-muted p-1" role="tablist" aria-label="Job view">
         {(["upcoming", "older"] as JobView[]).map((value) => (

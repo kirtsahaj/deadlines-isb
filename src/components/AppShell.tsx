@@ -67,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={item.to}
                   to={item.to}
                   aria-current={active ? "page" : undefined}
-                  className={`tap-target rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  className={`tap-target rounded-full ${tabs.length > 2 ? "px-4" : "px-5"} py-2.5 text-sm font-semibold transition-colors ${
                     active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
