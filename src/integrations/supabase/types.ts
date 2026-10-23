@@ -217,6 +217,7 @@ export type Database = {
       }
       job_events: {
         Row: {
+          claimed_at: string
           company: string
           company_key: string
           created_at: string
@@ -231,6 +232,7 @@ export type Database = {
           state: string
         }
         Insert: {
+          claimed_at?: string
           company: string
           company_key?: string
           created_at?: string
@@ -245,6 +247,7 @@ export type Database = {
           state?: string
         }
         Update: {
+          claimed_at?: string
           company?: string
           company_key?: string
           created_at?: string
