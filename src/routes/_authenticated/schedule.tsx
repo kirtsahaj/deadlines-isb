@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ChevronDown, MapPin } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { BookOpen, Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SetupNudges } from "@/components/SetupNudges";
 import { useTerm5 } from "@/lib/useTerm5";
-import type { ScheduleClass } from "@/lib/term5.functions";
+import { getConnectionState } from "@/lib/elearn.functions";
+import { getCoursepacks, type ScheduleClass } from "@/lib/term5.functions";
 
 export const Route = createFileRoute("/_authenticated/schedule")({
   head: () => ({
@@ -44,8 +47,84 @@ const REQUIREMENT: Record<string, string> = {
 
 const PREREAD_KINDS = new Set(["reading", "case", "reference", "optional", "recommended", "watch", "listen"]);
 
+type Pack = { id: string; name: string; kind: "file" | "link"; size: number | null; url: string };
+
+function CoursepackButton({ courseCode }: { courseCode: string }) {
+  const connection = useQuery({ queryKey: ["connection-state"], queryFn: () => getConnectionState() });
+  const fetchPacks = useServerFn(getCoursepacks);
+  const [dialog, setDialog] = useState<null | "connect" | "list" | "empty" | "error">(null);
+  const [items, setItems] = useState<Pack[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  async function onClick() {
+    if (connection.data && !connection.data.connected) return setDialog("connect");
+    setLoading(true);
+    try {
+      const r = await fetchPacks({ data: { courseCode } });
+      if (r.status === "not_connected") return setDialog("connect");
+      if (r.status !== "ok") return setDialog("error");
+      setItems(r.items);
+      if (r.items.length === 1) window.open(r.items[0].url, "_blank", "noopener");
+      else setDialog(r.items.length ? "list" : "empty");
+    } catch {
+      setDialog("error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <Button variant="outline" size="sm" className="mt-2 h-8" onClick={onClick} disabled={loading}>
+        {loading ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <BookOpen className="size-4" aria-hidden />}
+        Coursepack
+      </Button>
+      <Dialog open={dialog !== null} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent className="max-w-md">
+          {dialog === "connect" ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Connect eLearn first</DialogTitle>
+                <DialogDescription>Coursepacks are opened straight from your own eLearn, so connect it once.</DialogDescription>
+              </DialogHeader>
+              <Button asChild><Link to="/connect">Connect eLearn</Link></Button>
+            </>
+          ) : dialog === "list" ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>{courseCode} coursepacks</DialogTitle>
+                <DialogDescription>From your eLearn course page.</DialogDescription>
+              </DialogHeader>
+              <ul className="space-y-2">
+                {items.map((i) => (
+                  <li key={i.id}>
+                    <a href={i.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-sm hover:bg-muted">
+                      <span className="min-w-0 break-words">{i.name}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {i.kind === "link" ? "Link" : i.size ? `${Math.max(1, Math.round(i.size / 1048576))} MB` : "File"}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <DialogHeader>
+              <DialogTitle>{dialog === "empty" ? "No coursepack found" : "Couldn't reach eLearn"}</DialogTitle>
+              <DialogDescription>
+                {dialog === "empty"
+                  ? "Your eLearn course page doesn't have a coursepack or reading file yet."
+                  : "Please try again in a minute."}
+              </DialogDescription>
+            </DialogHeader>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 function ClassCard({ c }: { c: ScheduleClass }) {
-  const [open, setOpen] = useState(false);
   const prereads = c.prep.filter((p) => p.timing === "before_class" && PREREAD_KINDS.has(p.kind));
   const rest = c.prep.filter((p) => !prereads.includes(p));
   return (
@@ -58,7 +137,7 @@ function ClassCard({ c }: { c: ScheduleClass }) {
           {c.room}
         </span>
       </p>
-      {c.sessionTitle && <h3 className="mt-1.5 text-base font-semibold leading-snug">“{c.sessionTitle}”</h3>}
+      {c.sessionTitle && <h3 className="mt-1.5 text-base font-semibold leading-snug">{c.sessionTitle}</h3>}
       {prereads.length > 0 && (
         <div className="mt-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Prereads</p>
@@ -75,24 +154,15 @@ function ClassCard({ c }: { c: ScheduleClass }) {
         </div>
       )}
       {rest.length > 0 && (
-        <Collapsible open={open} onOpenChange={setOpen} className="mt-1">
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="-ml-2 h-8 text-muted-foreground">
-              <ChevronDown className={`size-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden />
-              More for this class ({rest.length})
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <ul className="space-y-1 pl-1 text-sm">
-              {rest.map((p) => (
-                <li key={p.id}>
-                  <span className="text-muted-foreground">{TIMING[p.timing] ?? "Note"}:</span> {p.title}
-                </li>
-              ))}
-            </ul>
-          </CollapsibleContent>
-        </Collapsible>
+        <ul className="mt-1.5 space-y-1 text-sm">
+          {rest.map((p) => (
+            <li key={p.id}>
+              <span className="text-muted-foreground">{TIMING[p.timing] ?? "Note"}:</span> {p.title}
+            </li>
+          ))}
+        </ul>
       )}
+      {prereads.length > 0 && <CoursepackButton courseCode={c.courseCode} />}
     </article>
   );
 }
