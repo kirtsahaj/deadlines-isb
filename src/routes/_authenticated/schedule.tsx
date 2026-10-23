@@ -76,7 +76,7 @@ function CoursepackButton({ courseCode }: { courseCode: string }) {
 
   return (
     <>
-      <Button size="sm" className="coursepack-btn mt-3" onClick={onClick} disabled={loading}>
+      <Button size="sm" className="coursepack-btn mt-3 h-10 px-5 text-sm" onClick={onClick} disabled={loading}>
         {loading ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <BookOpen className="size-4" aria-hidden />}
         Coursepack
         {!loading && <ArrowUpRight className="size-4" aria-hidden />}
