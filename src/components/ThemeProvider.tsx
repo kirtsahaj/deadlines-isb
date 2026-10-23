@@ -35,6 +35,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setTheme(next);
     applyTheme(next);
     try { window.localStorage.setItem(STORAGE_KEY, next); } catch { /* Theme still works for this visit. */ }
+    // iOS Home Screen apps only read the status-bar colour on load, so reload there.
+    const standalone =
+      (navigator as Navigator & { standalone?: boolean }).standalone === true ||
+      window.matchMedia("(display-mode: standalone)").matches;
+    if (standalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      window.setTimeout(() => window.location.reload(), 150);
+    }
   };
   return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
 }
