@@ -11,9 +11,9 @@ export const CONFIDENCE_META: Record<Confidence, { symbol: string; label: string
   },
   shared: {
     symbol: "◐",
-    label: "Classmate update for your section",
+    label: "Course and section eLearn",
     className: "text-conf-shared",
-    explain: "Seen recently on a classmate's eLearn for your course and section.",
+    explain: "Seen recently on eLearn for your course and section.",
   },
   outline: {
     symbol: "○",

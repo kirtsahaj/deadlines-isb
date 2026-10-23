@@ -49,7 +49,7 @@ function SourceLine({ source, outlineKind, timezone }: { source: SourceRef; outl
     source.kind === "own_elearn"
       ? "Your eLearn"
       : source.kind === "shared_elearn"
-        ? "A classmate's eLearn (course details only)"
+        ? "Course and section eLearn"
         : (outlineKind && OUTLINE_KIND[outlineKind]) || "Course outline";
   return (
     <li className="rounded-lg bg-muted/60 p-3">
