@@ -21,7 +21,7 @@ export const Route = createFileRoute("/api/public/coursepack")({
         }
         target.searchParams.set("token", token);
         const res = await fetch(target, { redirect: "manual" });
-        if (!res.ok) console.error("coursepack fetch", res.status, res.headers.get("location")?.replace(/token=[^&]*/, "token=x"), target.pathname);
+        console.error("coursepack fetch", res.status, res.headers.get("content-type"), res.headers.get("location")?.replace(/token=[^&]*/, "token=x"), target.pathname);
         if (!res.ok || (res.headers.get("content-type") ?? "").includes("text/html")) {
           return new Response("Couldn't open this file from eLearn.", { status: 502 });
         }
