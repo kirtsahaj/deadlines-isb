@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ChevronDown, MapPin } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -12,9 +11,9 @@ import type { ScheduleClass } from "@/lib/term5.functions";
 export const Route = createFileRoute("/_authenticated/schedule")({
   head: () => ({
     meta: [
-      { title: "Your Term 5 schedule — ISB Deadline Tracker" },
-      { name: "description", content: "Your Term 5 Mohali classes with rooms, topics and what to prepare." },
-      { property: "og:title", content: "Your Term 5 schedule — ISB Deadline Tracker" },
+      { title: "Prereads — ISB Deadline Tracker" },
+      { name: "description", content: "Your Term 5 classes with rooms, topics and what to read before each." },
+      { property: "og:title", content: "Prereads — ISB Deadline Tracker" },
       { property: "og:description", content: "Classes, rooms, topics and preparation for your Term 5 sections." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -40,77 +39,57 @@ const REQUIREMENT: Record<string, string> = {
   assigned: "Required",
   recommended: "Recommended",
   optional: "Optional",
-  unspecified: "Not specified",
+  unspecified: "",
 };
+
+const PREREAD_KINDS = new Set(["reading", "case", "reference", "optional", "recommended", "watch", "listen"]);
 
 function ClassCard({ c }: { c: ScheduleClass }) {
   const [open, setOpen] = useState(false);
-  const inferred = c.mapping === "chronological_inference_requires_confirmation";
-  const blocked = !c.sessionTitle;
-  const groups = ["before_class", "in_class", "after_class", "context_only"]
-    .map((t) => ({ t, items: c.prep.filter((p) => p.timing === t) }))
-    .filter((g) => g.items.length);
+  const prereads = c.prep.filter((p) => p.timing === "before_class" && PREREAD_KINDS.has(p.kind));
+  const rest = c.prep.filter((p) => !prereads.includes(p));
   return (
     <article data-tile-type="preread" className="deadline-card px-3 py-3 sm:px-4">
-      <div className="flex items-start gap-2">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="course-code">{c.courseCode}</span>
-            <span className="text-xs text-muted-foreground">Section {c.section}</span>
-          </div>
-          <h3 className="mt-0.5 text-base font-semibold leading-snug">
-            {c.sessionTitle ?? "Topic not confirmed"}
-          </h3>
-          <p className="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">
-              {time(c.startsAt)}–{time(c.endsAt)}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="size-3.5" aria-hidden />
-              {c.room}
-            </span>
-          </p>
-        </div>
-        <span className="shrink-0 text-xs font-medium text-muted-foreground"
-          title={blocked ? "Topic can't be matched to this date yet" : "Topic matched from the outline by class order"}
-          aria-label={blocked ? "Topic not confirmed" : "Topic estimated from outline"}
-        >
-          {blocked ? "Unconfirmed" : "Outline"}
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+        <span className="course-code">{c.courseCode}</span>
+        <span className="font-medium text-foreground">{time(c.startsAt)}–{time(c.endsAt)}</span>
+        <span className="inline-flex items-center gap-1">
+          <MapPin className="size-3.5" aria-hidden />
+          {c.room}
         </span>
-      </div>
-      {c.prep.length > 0 && (
-        <Collapsible open={open} onOpenChange={setOpen} className="mt-2">
+      </p>
+      {c.sessionTitle && <h3 className="mt-1.5 text-base font-semibold leading-snug">“{c.sessionTitle}”</h3>}
+      {prereads.length > 0 && (
+        <div className="mt-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Prereads</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
+            {prereads.map((p) => (
+              <li key={p.id}>
+                {p.title}
+                {p.requirement !== "assigned" && REQUIREMENT[p.requirement] && (
+                  <span className="text-muted-foreground"> · {REQUIREMENT[p.requirement]}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {rest.length > 0 && (
+        <Collapsible open={open} onOpenChange={setOpen} className="mt-1">
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="-ml-2 text-preread">
+            <Button variant="ghost" size="sm" className="-ml-2 h-8 text-muted-foreground">
               <ChevronDown className={`size-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden />
-              Preparation ({c.prep.length})
+              More for this class ({rest.length})
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-3 pt-2">
-            {groups.map((g) => (
-              <div key={g.t}>
-                <p className="text-xs font-semibold uppercase text-muted-foreground">{TIMING[g.t] ?? g.t}</p>
-                <ul className="mt-1 space-y-1.5">
-                  {g.items.map((p) => (
-                    <li key={p.id} className="text-sm">
-                      <span>{p.title}</span>{" "}
-                      <Badge variant={p.requirement === "assigned" ? "secondary" : "outline"} className="ml-1 align-middle">
-                        {REQUIREMENT[p.requirement] ?? p.requirement}
-                      </Badge>
-                      {p.alsoFor.length > 0 && (
-                        <span className="block text-xs text-muted-foreground">
-                          Same reading also listed for session {p.alsoFor.join(", ")}
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-            <p className="text-xs text-muted-foreground">
-              Preparation is for your own planning — it isn't a submission.
-              {inferred ? " Topics are matched to dates by class order; your instructor may adjust." : ""}
-            </p>
+          <CollapsibleContent>
+            <ul className="space-y-1 pl-1 text-sm">
+              {rest.map((p) => (
+                <li key={p.id}>
+                  <span className="text-muted-foreground">{TIMING[p.timing] ?? "Note"}:</span> {p.title}
+                </li>
+              ))}
+            </ul>
           </CollapsibleContent>
         </Collapsible>
       )}
@@ -142,8 +121,8 @@ function SchedulePage() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end gap-3">
         <div className="mr-auto">
-          <h1 className="text-3xl font-semibold text-preread">Schedule</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Term 5 · Mohali · your sections</p>
+          <h1 className="text-3xl font-semibold">Prereads</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your classes and what to read before each</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => setShowPast((v) => !v)}>
           {showPast ? "Hide past classes" : "Show past classes"}

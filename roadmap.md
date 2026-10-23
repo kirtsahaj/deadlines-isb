@@ -15,4 +15,5 @@
 - [x] Rotating setup banner: connect, notifications, home screen
 - [x] Outline + eLearn merge with conflicts kept; shared section pool; merged reminders; one reminder when found inside 3 hours
 - [x] Rule tests (20) and signed-in phone checks
+- [x] Hyderabad Term 5 import (campus-isolated) + nav/prereads/night-mode bar changes
 - [ ] Live check of shared section updates across several connected classmates (pool currently empty; needs successful contributor refresh)
