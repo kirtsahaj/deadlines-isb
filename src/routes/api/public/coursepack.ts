@@ -16,7 +16,9 @@ export const Route = createFileRoute("/api/public/coursepack")({
         const token = await userToken(p.u);
         if (!token) return new Response("eLearn not connected", { status: 403 });
         const target = new URL(p.f);
-        target.pathname = target.pathname.replace("/pluginfile.php/", "/webservice/pluginfile.php/");
+        if (!target.pathname.includes("/webservice/pluginfile.php/")) {
+          target.pathname = target.pathname.replace("/pluginfile.php/", "/webservice/pluginfile.php/");
+        }
         target.searchParams.set("token", token);
         const res = await fetch(target, { redirect: "manual" });
         if (!res.ok || (res.headers.get("content-type") ?? "").includes("text/html")) {
