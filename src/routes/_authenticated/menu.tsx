@@ -19,9 +19,9 @@ export const Route = createFileRoute("/_authenticated/menu")({
   head: () => ({
     meta: [
       { title: "Menu — ISB Deadline Tracker" },
-      { name: "description", content: "Your eLearn connection, courses, reminders and night mode." },
+      { name: "description", content: "Your eLearn connection, courses, notifications and night mode." },
       { property: "og:title", content: "Menu — ISB Deadline Tracker" },
-      { property: "og:description", content: "Connection, courses, reminders and night mode." },
+      { property: "og:description", content: "Connection, courses, notifications and night mode." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -196,7 +196,7 @@ function MenuPage() {
         </section>
 
         <section className="scroll-mt-24 py-5 first:pt-0" id="home-screen">
-          <h2 className="mb-3 text-lg font-semibold">Reminders and home screen</h2>
+          <h2 className="mb-3 text-lg font-semibold">Notifications and home screen</h2>
           <div>
             <ReminderSettings />
           </div>
