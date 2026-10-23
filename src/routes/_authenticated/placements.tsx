@@ -94,7 +94,7 @@ function JobReminderToggle({ enabled }: { enabled?: boolean }) {
         <span className="font-medium">Application deadline reminders</span>
         <span className="block text-muted-foreground">12 and 3 hours before, when the email gives a time. Uses your existing notification setting.</span>
       </span>
-      <Switch checked={mutation.isPending ? mutation.variables : enabled} onCheckedChange={(v) => mutation.mutate(v)} aria-label="Application deadline reminders" />
+      <Switch checked={mutation.isPending && mutation.variables !== undefined ? mutation.variables : enabled} onCheckedChange={(v) => mutation.mutate(v)} aria-label="Application deadline reminders" />
     </label>
   );
 }
