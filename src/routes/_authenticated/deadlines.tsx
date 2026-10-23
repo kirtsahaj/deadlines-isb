@@ -17,7 +17,6 @@ import { getConnectionState, syncNow } from "@/lib/elearn.functions";
 import { DEFAULT_TIMEZONE, lastSyncedLabel } from "@/lib/format";
 import { firstPreferredName } from "@/lib/preferredName";
 import { selectedOrAll } from "@/lib/courseMetadata";
-import { prereadDeadlines } from "@/lib/term5/preparation";
 import { inView, mergeDeadlines, sortView, type DeadlineView, type OutlineOccurrence, type OwnRow } from "@/lib/term5/model";
 
 export const Route = createFileRoute("/_authenticated/deadlines")({
@@ -137,8 +136,8 @@ function DeadlinesPage() {
       ownCourses: courses.data ?? [],
       ownLastSuccessAt: connection.data?.connected ? connection.data.lastSuccessAt : null,
       shared: term5.data.shared,
-    }).map(i => ({ ...i, moodleCourseId: i.moodleCourseId ?? refs.find(c => c.short_name === `${i.courseCode}_PGPMOH_2026-27_T5`)?.moodle_course_id ?? null })),
-    ...prereadDeadlines(term5.data.classes, refs)].filter((i) => i.moodleCourseId === null || !hidden.has(i.moodleCourseId));
+      campus: term5.data.campus,
+    }).map(i => ({ ...i, moodleCourseId: i.moodleCourseId ?? refs.find(c => c.short_name === `${i.courseCode}_PGP${term5.data.campus}_2026-27_T5`)?.moodle_course_id ?? null }))].filter((i) => i.moodleCourseId === null || !hidden.has(i.moodleCourseId));
   }, [term5.data, deadlines.data, courses.data, connection.data, hidden]);
 
   const termOptions = useMemo(() => [...new Set(merged.map((i) => i.term))].sort(), [merged]);
@@ -240,7 +239,6 @@ function DeadlinesPage() {
             <SelectItem value="calendar">Calendar</SelectItem>
             <SelectItem value="text">Mentioned in text</SelectItem>
             {term5.data?.inRoster && <SelectItem value="outline">Outline deadlines</SelectItem>}
-            {term5.data?.inRoster && <SelectItem value="preread">Prereads</SelectItem>}
           </SelectContent>
         </Select>
       </div>
