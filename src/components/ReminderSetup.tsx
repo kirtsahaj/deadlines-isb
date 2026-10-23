@@ -73,7 +73,17 @@ export function ReminderSetupDialog() {
   const [open, setOpen] = useState(false);
   const state = useReminderState();
   useEffect(() => {
-    if (window.localStorage.getItem(REMINDER_SETUP_KEY) === "true") setOpen(true);
+    if (window.localStorage.getItem(REMINDER_SETUP_KEY) !== "true") return;
+    // Skip the popup when this device already has reminders on.
+    void currentSubscription()
+      .catch(() => null)
+      .then((sub) => {
+        if (sub && "Notification" in window && Notification.permission === "granted") {
+          window.localStorage.removeItem(REMINDER_SETUP_KEY);
+        } else {
+          setOpen(true);
+        }
+      });
   }, []);
   const close = (next: boolean) => {
     if (!next) window.localStorage.removeItem(REMINDER_SETUP_KEY);
