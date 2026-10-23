@@ -1,5 +1,5 @@
 import { applyEvent, companyKey, matchJob, type JobFacts } from "./merge";
-import { parseMime, bareAddress, partText, type MimePart } from "./mime";
+import { parseMime, bareAddress, type MimePart } from "./mime";
 import { classifyCas, extractCas, findInline, findOriginal, type OriginalMessage, type ParsedJobEvent } from "./parse";
 import { safeFilename, sha256Hex, sniffDocument } from "./files";
 
@@ -128,4 +128,3 @@ async function reconcile(store: JobStore, cKey: string) {
   }
 }
 
-export { partText };
