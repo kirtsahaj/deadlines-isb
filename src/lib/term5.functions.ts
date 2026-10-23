@@ -86,3 +86,29 @@ export const resetEnrollments = createServerFn({ method: "POST" })
     await context.supabase.from("term5_enrollment_overrides").delete().eq("user_id", context.userId);
     return { ok: true };
   });
+
+/** Course packs and readings for one of the student's courses, read live with their own eLearn key. */
+export const getCoursepacks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { courseCode: string }) => z.object({ courseCode: z.string().regex(/^[A-Z0-9]{2,12}$/) }).parse(d))
+  .handler(async ({ context, data }) => {
+    const email = await allowedEmail(context.claims);
+    const { enrollmentsFor, courseRefsFor } = await import("./term5/userDeadlines.server");
+    const { enrollments, campus } = await enrollmentsFor(context.userId, email);
+    const mine = enrollments.filter((e) => e.courseCode === data.courseCode);
+    if (!mine.length) return { status: "not_enrolled" as const, items: [] };
+    const refs = await courseRefsFor(mine, campus);
+    const { listCoursepacks } = await import("./elearn/coursepack.server");
+    try {
+      const all = [];
+      for (const r of refs) {
+        const items = await listCoursepacks(context.userId, Number(r.moodle_course_id));
+        if (items === null) return { status: "not_connected" as const, items: [] };
+        all.push(...items.map((i) => ({ ...i, url: i.kind === "file" ? `/api/public/coursepack?t=${i.url}` : i.url })));
+      }
+      return { status: "ok" as const, items: all };
+    } catch (e) {
+      console.error("coursepacks", e instanceof Error ? e.message : e);
+      return { status: "error" as const, items: [] };
+    }
+  });
