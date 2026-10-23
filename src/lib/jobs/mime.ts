@@ -96,7 +96,7 @@ export function parseParams(value: string): { value: string; params: Record<stri
       key = key.replace(/\*\d*\*?$/, "");
       const m = /^([^']*)'[^']*'(.*)$/.exec(val);
       try {
-        val = m ? decodeURIComponent(m[2]) : decodeURIComponent(val);
+        val = m ? decodeURIComponent(m[2] ?? "") : decodeURIComponent(val);
       } catch {
         /* keep raw */
       }

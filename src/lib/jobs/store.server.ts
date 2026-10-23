@@ -65,7 +65,7 @@ export function supabaseJobStore(): JobStore {
         deadline_date: job.deadlineDate, deadline_time: job.deadlineTime, deadline_at: istInstant(job.deadlineDate, job.deadlineTime),
         shortlist_date: job.shortlistDate, field_sent_at: job.fieldSentAt as Json, last_email_at: now, updated_at: now,
       };
-      if (!job.id) return must(await supabaseAdmin.from("jobs").insert(row).select("id").single(), "job_insert").id;
+      if (!job.id) return must(await supabaseAdmin.from("jobs").insert(row).select("id").single(), "job_insert")!.id;
       must(await supabaseAdmin.from("jobs").update(row).eq("id", job.id), "job_update");
       return job.id;
     },
@@ -90,6 +90,7 @@ export function supabaseJobStore(): JobStore {
       if (!files.length) return;
       await supabaseAdmin.from("job_files").update({ job_id: jobId }).eq("event_id", eventId);
       const pick = files.find((f) => /\b(jd|job|description)\b/i.test(f.filename)) ?? files[0];
+      if (!pick) return;
       must(await supabaseAdmin.from("jobs").update({ jd_file_id: pick.id }).eq("id", jobId), "jd_link");
     },
   };

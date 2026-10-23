@@ -27,7 +27,7 @@ export function matchJob(jobs: JobFacts[], ev: ParsedJobEvent): Match {
   const keys = [ev.role, ev.rename?.from, ev.rename?.to].filter((k): k is string => !!k).map(roleKey);
   if (!keys.length) return candidates.length ? { type: "ambiguous" } : { type: "none" };
   const hits = candidates.filter((j) => keys.some((k) => j.roleKeys.includes(k)));
-  if (hits.length === 1) return { type: "job", job: hits[0] };
+  if (hits.length === 1 && hits[0]) return { type: "job", job: hits[0] };
   if (hits.length > 1) return { type: "ambiguous" };
   return { type: "none" };
 }

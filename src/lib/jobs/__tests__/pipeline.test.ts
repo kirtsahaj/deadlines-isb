@@ -17,7 +17,8 @@ function broadcast(company: string, role: string, lines: string, o: { date?: str
   return forwardAsAttachment(casOriginal({ subject: `${role} | ${company} | Broadcasted`, body: `Company Name: ${company}\nRole: ${role}\n${lines}`, ...o }));
 }
 function modified(company: string, role: string, lines: string, date: string, messageId?: string) {
-  return forwardAsAttachment(casOriginal({ subject: `${role} | ${company} | Job Details Modified`, body: `Company Name: ${company}\n${lines}`, date, messageId }));
+  const extra = messageId ? { messageId } : {};
+  return forwardAsAttachment(casOriginal({ subject: `${role} | ${company} | Job Details Modified`, body: `Company Name: ${company}\n${lines}`, date, ...extra }));
 }
 
 describe("date parsing", () => {
@@ -43,10 +44,10 @@ describe("intake: message shapes", () => {
     const s = new MemoryStore();
     const raw = forwardAsAttachment(casOriginal({ subject: SYSTEMATIX_SUBJECT, body: SYSTEMATIX_BODY, html: true, messageId: "a1@isb", attachment: { name: "JD Systematix.pdf", mime: "application/octet-stream", bytes: pdf } }));
     expect((await ingest(s, inbound(raw), CFG)).reason).toBe("created");
-    expect(s.jobs[0].deadlineTime).toBe("11:00");
+    expect(s.jobs[0]!.deadlineTime).toBe("11:00");
     expect(s.files).toHaveLength(1);
     expect(s.files[0]).toMatchObject({ mime: "application/pdf", filename: "JD Systematix.pdf" });
-    expect(s.jd.get(s.jobs[0].id!)).toBe(s.files[0].id);
+    expect(s.jd.get(s.jobs[0]!.id!)).toBe(s.files[0]!.id);
   });
 
   it("rejects a disguised non-document attachment", async () => {
@@ -135,7 +136,7 @@ describe("Job Details Modified: explicit fields only", () => {
     expect(s.jobs[0]).toMatchObject({ role: "Senior Analyst", roleAliases: ["Analyst"] });
     await ingest(s, inbound(modified("Vector Consulting Group", "Analyst", "Application Deadline: 11-Nov-2026", "Sat, 24 Oct 2026 10:00:00 +0530")), CFG);
     expect(s.jobs).toHaveLength(1);
-    expect(s.jobs[0].deadlineDate).toBe("2026-11-11");
+    expect(s.jobs[0]!.deadlineDate).toBe("2026-11-11");
   });
 
   it("UBS: a repeated update with the same new value is a no-op", async () => {
@@ -167,8 +168,8 @@ describe("Job Details Modified: explicit fields only", () => {
     await ingest(s, inbound(broadcast("UBS", "Analyst", "Application Deadline: 10-Nov-2026 5:00 PM", { date: "Thu, 22 Oct 2026 10:00:00 +0530" })), CFG);
     await ingest(s, inbound(modified("UBS", "Analyst", "Application Deadline: 14-Nov-2026", "Sat, 24 Oct 2026 10:00:00 +0530")), CFG);
     await ingest(s, inbound(modified("UBS", "Analyst", "Application Deadline: 12-Nov-2026", "Fri, 23 Oct 2026 10:00:00 +0530")), CFG);
-    expect(s.jobs[0].deadlineDate).toBe("2026-11-14");
+    expect(s.jobs[0]!.deadlineDate).toBe("2026-11-14");
     expect((await ingest(s, inbound(modified("UBS", "Associate", "Application Deadline: 30-Nov-2026", "Sun, 25 Oct 2026 10:00:00 +0530")), CFG)).reason).toBe("pending");
-    expect(s.jobs[0].deadlineDate).toBe("2026-11-14");
+    expect(s.jobs[0]!.deadlineDate).toBe("2026-11-14");
   });
 });
