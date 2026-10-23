@@ -16,7 +16,8 @@ it("does not collapse different assessment numbers or generic labels", () => {
 });
 it("keeps different courses, sections and far-away occurrences separate", () => {
   expect(mergeDeadlines({ ...base, ownCourses: [{ ...base.ownCourses[0], moodle_course_id: 11057, short_name: "MKTS_PGPMOH_2026-27_T4", full_name: "Marketing" }] })).toHaveLength(2);
-  expect(mergeDeadlines({ ...base, own: [{ ...own, title: "Procter & Gamble India (Section H)" }] })).toHaveLength(2);
+  // An activity explicitly for another section is hidden; the student keeps only their own section's outline item.
+  expect(mergeDeadlines({ ...base, own: [{ ...own, title: "Procter & Gamble India (Section H)" }] }).map((i) => i.id)).toEqual(["outline:MKTS-PG-G"]);
   expect(mergeDeadlines({ ...base, own: [{ ...own, due_at: "2026-11-20T14:05:00+05:30" }] })).toHaveLength(2);
 });
 it("leaves ambiguous matches separate instead of choosing the first", () => {
