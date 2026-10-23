@@ -24,6 +24,9 @@ const MONTHS: Record<string, number> = {
   jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12,
 };
 
+type M = [string, string, string, string, string] & { index: number };
+const ex = (re: RegExp, s: string | undefined): M | null => re.exec(s ?? "") as unknown as M | null;
+
 const pad = (n: number) => String(n).padStart(2, "0");
 function validDate(y: number, m: number, d: number): string | undefined {
   if (y < 2020 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return undefined;
@@ -35,9 +38,9 @@ function validDate(y: number, m: number, d: number): string | undefined {
 export function parseDateParts(value: string): DateParts {
   const out: DateParts = {};
   let rest = value;
-  const tryMatch = (re: RegExp, fn: (m: RegExpExecArray) => string | undefined) => {
+  const tryMatch = (re: RegExp, fn: (m: M) => string | undefined) => {
     if (out.date) return;
-    const m = re.exec(rest);
+    const m = ex(re, rest);
     if (!m) return;
     const date = fn(m);
     if (date) {
@@ -56,7 +59,7 @@ export function parseDateParts(value: string): DateParts {
   });
   tryMatch(/\b(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})\b/, (m) => validDate(+m[3], +m[2], +m[1]));
 
-  const ampm = /\b(\d{1,2})(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)(?![a-z])/i.exec(rest);
+  const ampm = ex(/\b(\d{1,2})(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)(?![a-z])/i, rest);
   if (ampm) {
     let h = +ampm[1];
     const min = ampm[2] ? +ampm[2] : 0;
@@ -66,7 +69,7 @@ export function parseDateParts(value: string): DateParts {
       out.time = `${pad(h + (pm ? 12 : 0))}:${pad(min)}`;
     }
   } else {
-    const h24 = /\b([01]?\d|2[0-3]):([0-5]\d)\s*(?:hrs?|hours|ist)?\b/i.exec(rest);
+    const h24 = ex(/\b([01]?\d|2[0-3]):([0-5]\d)\s*(?:hrs?|hours|ist)?\b/i, rest);
     if (h24) out.time = `${pad(+h24[1])}:${h24[2]}`;
   }
   return out;
@@ -110,9 +113,9 @@ const LABELS = {
 const EMPTY = /^(tbd|tba|na|n\/a|nil|none|-+|not\s+applicable|to be (?:announced|decided|confirmed))\.?$/i;
 
 function changeValue(v: string): { old?: string; value: string } {
-  const from = /\bfrom\s+(.+?)\s+to\s+(.+)$/i.exec(v);
+  const from = ex(/\bfrom\s+(.+?)\s+to\s+(.+)$/i, v);
   if (from) return { old: from[1].trim(), value: from[2].trim() };
-  const arrow = /^(.+?)\s*(?:->|→|=>)\s*(.+)$/.exec(v);
+  const arrow = ex(/^(.+?)\s*(?:->|→|=>)\s*(.+)$/, v);
   if (arrow) return { old: arrow[1].trim(), value: arrow[2].trim() };
   return { value: v.trim() };
 }
@@ -125,7 +128,7 @@ export function extractCas(subjectRaw: string, text: string, kind: "broadcast" |
   let subjectRole: string | null = null;
   let subjectCompany: string | null = null;
   if (parts.length >= 3) {
-    subjectCompany = parts[parts.length - 2];
+    subjectCompany = parts[parts.length - 2] ?? null;
     subjectRole = parts.slice(0, parts.length - 2).join(" | ");
   }
 
@@ -138,11 +141,11 @@ export function extractCas(subjectRaw: string, text: string, kind: "broadcast" |
 
   for (const line of text.split(/\r?\n/).slice(0, 400)) {
     if (/^\s*>/.test(line)) continue;
-    let m: RegExpExecArray | null;
-    if ((m = LABELS.company.exec(line)) && !company) {
+    let m: M | null;
+    if ((m = ex(LABELS.company, line)) && !company) {
       const v = changeValue(m[3]).value;
       if (!EMPTY.test(v)) company = clean(v);
-    } else if ((m = LABELS.role.exec(line))) {
+    } else if ((m = ex(LABELS.role, line))) {
       const q = (m[1] ?? "").toLowerCase();
       const cv = changeValue(m[3]);
       if (EMPTY.test(cv.value)) continue;
@@ -152,12 +155,12 @@ export function extractCas(subjectRaw: string, text: string, kind: "broadcast" |
         newRole = clean(cv.value);
       } else if (/new|revised|updated|modified/.test(q)) newRole = clean(cv.value);
       else if (!role) role = clean(cv.value);
-    } else if ((m = LABELS.deadline.exec(line))) {
+    } else if ((m = ex(LABELS.deadline, line))) {
       if (/old|previous|earlier|existing/i.test(m[1] ?? "")) continue;
       const parsed = parseDateParts(changeValue(m[3]).value);
       if (parsed.date) deadline.date = parsed.date;
       if (parsed.time) deadline.time = parsed.time;
-    } else if ((m = LABELS.shortlist.exec(line))) {
+    } else if ((m = ex(LABELS.shortlist, line))) {
       if (/old|previous|earlier|existing/i.test(m[1] ?? "")) continue;
       const parsed = parseDateParts(changeValue(m[3]).value);
       if (parsed.date) shortlist = parsed.date;
@@ -215,16 +218,16 @@ export function findOriginal(root: MimePart, sender = ORIGINAL_SENDER): Original
 export function findInline(text: string, sender = ORIGINAL_SENDER): Omit<OriginalMessage, "attachments" | "via"> | null {
   const lines = text.split(/\r?\n/).map((l) => l.replace(/^\s*>+\s?/, ""));
   for (let i = 0, blocks = 0; i < lines.length && blocks < MAX_DEPTH * 2; i++) {
-    const fm = /^\s*\*?From:\*?\s*(.+)$/i.exec(lines[i]);
+    const fm = ex(/^\s*\*?From:\*?\s*(.+)$/i, lines[i]);
     if (!fm) continue;
     blocks++;
     let subject = "";
     let sent: string | null = null;
     let j = i + 1;
     for (; j < Math.min(lines.length, i + 10); j++) {
-      const l = lines[j];
-      const s = /^\s*\*?Subject:\*?\s*(.*)$/i.exec(l);
-      const d = /^\s*\*?(Sent|Date):\*?\s*(.+)$/i.exec(l);
+      const l = lines[j] ?? "";
+      const s = ex(/^\s*\*?Subject:\*?\s*(.*)$/i, l);
+      const d = ex(/^\s*\*?(Sent|Date):\*?\s*(.+)$/i, l);
       if (d) sent = d[2].trim();
       if (s) {
         subject = s[1].trim();
