@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
  * Resend "email.received" webhook for the Placements feed.
  * Verifies the Svix signature over the raw bytes, then fetches the message from Resend itself.
  * Responds with no mail data. Non-2xx only for transient failures so Resend retries.
+ * Secrets are read per request; the hosted preview picks up newly saved secrets on its next build.
  */
 export const Route = createFileRoute("/api/public/resend-inbound")({
   server: {
