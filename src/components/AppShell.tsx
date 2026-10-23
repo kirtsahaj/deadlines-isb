@@ -72,7 +72,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           style={{ bottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
           aria-label="Main"
         >
-          <div className="flex gap-1 rounded-full border border-border bg-card/95 p-1 shadow-lg backdrop-blur">
+          <div className="flex gap-1 rounded-full border border-border bg-muted/90 p-1 shadow-xl ring-1 ring-foreground/5 backdrop-blur-md dark:bg-secondary/90 dark:ring-foreground/10">
             {tabs.map((item) => {
               const active = pathname === item.to;
               return (
