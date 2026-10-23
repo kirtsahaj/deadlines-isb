@@ -36,6 +36,7 @@ describe("intake: message shapes", () => {
     const s = new MemoryStore();
     const r = await ingest(s, inbound(forwardInline(SYSTEMATIX_SUBJECT, SYSTEMATIX_BODY)), CFG);
     expect(r).toMatchObject({ status: "processed", reason: "created" });
+    expect(r.newJob?.company).toBe("Systematix Group");
     expect(s.jobs).toHaveLength(1);
     expect(s.jobs[0]).toMatchObject({ company: "Systematix Group", role: "Analyst- Institutional Equity Research", deadlineDate: "2026-11-04", deadlineTime: "11:00", shortlistDate: "2026-11-16" });
   });
