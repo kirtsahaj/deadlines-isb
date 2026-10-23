@@ -186,3 +186,15 @@ describe("transient failures and concurrent delivery", () => {
     for (const r of results) if (r.status === "rejected") expect(r.reason).toBeInstanceOf(InProgressError);
   });
 });
+
+describe("names are kept exactly as CAS wrote them", () => {
+  it("keeps a trailing period in the company (Infoedge India Ltd.) and the wrapped Nagarro Practice&Innovation role", async () => {
+    const s = new MemoryStore();
+    await ingest(s, inbound(realBroadcast("Infoedge India Ltd.", "Product Manager", "30-Oct-2026 10:00 AM", "2026-11-16", T0)), CFG);
+    await ingest(s, inbound(realBroadcast("Nagarro Software", "Consultant/Business Analyst/Business Consultant - Practice&Innovation", "30-Oct-2026 11:00 AM", "2026-11-15", T0)), CFG);
+    expect(s.jobs.map((j) => [j.company, j.role])).toEqual([
+      ["Infoedge India Ltd.", "Product Manager"],
+      ["Nagarro Software", "Consultant/Business Analyst/Business Consultant - Practice&Innovation"],
+    ]);
+  });
+});

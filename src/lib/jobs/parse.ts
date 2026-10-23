@@ -122,7 +122,7 @@ function changeValue(v: string): { old?: string; value: string } {
   return { value: v.trim() };
 }
 
-const clean = (s: string) => s.replace(/\s+/g, " ").replace(/^[\s"'“”]+|[\s"'“”.]+$/g, "").slice(0, 200);
+const clean = (s: string) => s.replace(/\s+/g, " ").replace(/^[\s"'“”]+|[\s"'“”]+$/g, "").slice(0, 200);
 
 export function extractCas(subjectRaw: string, text: string, kind: "broadcast" | "modified", html = ""): ParsedJobEvent | null {
   if (kind === "modified") {
