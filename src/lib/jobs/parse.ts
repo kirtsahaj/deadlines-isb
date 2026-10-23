@@ -1,4 +1,4 @@
-import { bareAddress, bodyText, decodeWords, fileAttachments, MAX_DEPTH, type MimePart } from "./mime";
+import { bareAddress, bodyHtml, bodyText, decodeWords, htmlToText, fileAttachments, MAX_DEPTH, type MimePart } from "./mime";
 
 export type DateParts = { date?: string; time?: string };
 export type ParsedJobEvent = {
@@ -16,6 +16,8 @@ export type OriginalMessage = {
   sentAt: string | null;
   messageId: string | null;
   text: string;
+  /** Original HTML when available; read only for the CAS change table. */
+  html?: string;
   attachments: MimePart[];
   via: "attachment" | "inline" | "direct";
 };
@@ -122,7 +124,11 @@ function changeValue(v: string): { old?: string; value: string } {
 
 const clean = (s: string) => s.replace(/\s+/g, " ").replace(/^[\s"'“”]+|[\s"'“”.]+$/g, "").slice(0, 200);
 
-export function extractCas(subjectRaw: string, text: string, kind: "broadcast" | "modified"): ParsedJobEvent | null {
+export function extractCas(subjectRaw: string, text: string, kind: "broadcast" | "modified", html = ""): ParsedJobEvent | null {
+  if (kind === "modified") {
+    const real = extractModified(subjectRaw, text, html);
+    if (real) return real;
+  }
   const subject = stripPrefixes(decodeWords(subjectRaw));
   const parts = subject.split("|").map((s) => s.trim()).filter(Boolean);
   let subjectRole: string | null = null;
@@ -182,6 +188,94 @@ export function extractCas(subjectRaw: string, text: string, kind: "broadcast" |
   return event;
 }
 
+export type ChangeRow = { field: string; previous: string; present: string };
+
+const cellText = (h: string) =>
+  htmlToText(h.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n"))
+    .split("\n").map((l) => l.replace(/[ \t\u00a0]+/g, " ").trim()).filter(Boolean).join("\n");
+
+/**
+ * The real CAS "Job Details Modified" table: Field | Previous Value | Present Value.
+ * Reads the innermost HTML table holding that header (values may span lines); plain-text fallback
+ * accepts only unambiguous single-line rows separated by tabs or 2+ spaces.
+ */
+export function changeTable(html: string, text: string): ChangeRow[] | null {
+  const lower = html.toLowerCase();
+  const at = lower.search(/<t[hd][^>]*>\s*previous\s+value\s*<\/t[hd]>/);
+  if (at >= 0) {
+    const start = lower.lastIndexOf("<table", at);
+    const end = lower.indexOf("</table>", at);
+    if (start >= 0 && end > at) {
+      const rows = [...html.slice(start, end).matchAll(/<tr[\s\S]*?<\/tr>/gi)]
+        .slice(0, 200)
+        .map((r) => [...r[0].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)].map((c) => cellText(c[1] ?? "")));
+      const head = (rows[0] ?? []).map((c) => c.toLowerCase());
+      if (head[0] === "field" && /previous/.test(head[1] ?? "") && /present|current|new/.test(head[2] ?? "")) {
+        return rows.slice(1).filter((r) => r.length >= 3).map((r) => ({ field: r[0]!, previous: r[1]!, present: r[2]! }));
+      }
+    }
+  }
+  const lines = text.split(/\r?\n/);
+  const h = lines.findIndex((l) => /^\s*field(?:\t+| {2,})previous value(?:\t+| {2,})present value\s*$/i.test(l));
+  if (h < 0) return null;
+  const out: ChangeRow[] = [];
+  for (const l of lines.slice(h + 1, h + 50)) {
+    const cells = l.trim().split(/\t+| {2,}/);
+    if (cells.length !== 3) break;
+    out.push({ field: cells[0]!, previous: cells[1]!, present: cells[2]! });
+  }
+  return out;
+}
+
+const ROLE_FIELDS = /^(job title|title|role|role name|job role|designation|position)$/;
+const TIME_FIELDS = /^((application )?(deadline|end|closing) time|time)$/;
+const DATE_FIELDS = /^((application )?(deadline|end|closing) date|date|last date( to apply)?)$/;
+const BOTH_FIELDS = /^(application )?deadline$/;
+
+/** Identity from "The following details of the Role - <role> for <company> has been modified", checked against the subject. */
+function modifiedIdentity(subjectRaw: string, text: string): { company: string; role: string } | null {
+  const m = /details of the role\s*-\s*(.+?)\s+has been modified/i.exec(text.replace(/\s+/g, " "));
+  if (!m?.[1]) return null;
+  const s = m[1];
+  const subject = stripPrefixes(decodeWords(subjectRaw)).replace(/\s*-\s*job details modified\s*$/i, "").replace(/\s+/g, " ").trim().toLowerCase();
+  const cuts: number[] = [];
+  for (let i = s.indexOf(" for "); i >= 0; i = s.indexOf(" for ", i + 1)) cuts.push(i);
+  for (const k of cuts) {
+    const role = s.slice(0, k).trim();
+    const company = s.slice(k + 5).trim();
+    if (subject === `${company} - ${role}`.toLowerCase()) return { company: clean(company), role: clean(role) };
+  }
+  if (cuts.length === 1) return { company: clean(s.slice(cuts[0]! + 5)), role: clean(s.slice(0, cuts[0])) };
+  return null;
+}
+
+function extractModified(subjectRaw: string, text: string, html: string): ParsedJobEvent | null {
+  const id = modifiedIdentity(subjectRaw, text);
+  if (!id) return null;
+  const event: ParsedJobEvent = { kind: "modified", company: id.company, role: id.role };
+  const deadline: DateParts = {};
+  for (const row of changeTable(html, text) ?? []) {
+    const f = row.field.toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+    const present = row.present.trim();
+    if (!present || EMPTY.test(present)) continue; // never erase a known fact
+    if (ROLE_FIELDS.test(f)) {
+      const from = clean(row.previous);
+      const to = clean(present);
+      if (from && from.toLowerCase() !== to.toLowerCase()) event.rename = { from, to };
+      event.role = to;
+    } else if (/shortlist/.test(f)) {
+      const d = parseDateParts(present).date;
+      if (d) event.shortlist = { date: d };
+    } else if (TIME_FIELDS.test(f) || DATE_FIELDS.test(f) || BOTH_FIELDS.test(f)) {
+      const parsed = parseDateParts(present);
+      if (!TIME_FIELDS.test(f) && parsed.date) deadline.date = parsed.date;
+      if (!DATE_FIELDS.test(f) && parsed.time) deadline.time = parsed.time;
+    }
+  }
+  if (deadline.date || deadline.time) event.deadline = deadline;
+  return event;
+}
+
 const ORIGINAL_SENDER = "cas@isb.edu";
 
 /**
@@ -195,6 +289,7 @@ export function findOriginal(root: MimePart, sender = ORIGINAL_SENDER): Original
     sentAt: parseSent(msg.headers["date"]),
     messageId: msg.headers["message-id"]?.trim() || null,
     text: bodyText(msg),
+    html: bodyHtml(msg),
     attachments: fileAttachments(msg),
     via,
   });
@@ -212,7 +307,7 @@ export function findOriginal(root: MimePart, sender = ORIGINAL_SENDER): Original
   }
 
   const inline = findInline(bodyText(root), sender);
-  return inline ? { ...inline, attachments: fileAttachments(root), via: "inline" } : null;
+  return inline ? { ...inline, html: bodyHtml(root), attachments: fileAttachments(root), via: "inline" } : null;
 }
 
 export function findInline(text: string, sender = ORIGINAL_SENDER): Omit<OriginalMessage, "attachments" | "via"> | null {

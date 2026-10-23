@@ -78,7 +78,7 @@ export async function ingest(store: JobStore, input: InboundInput, cfg: IngestCo
 
   const cls = classifyCas(original.subject, original.text);
   if (!cls.kind) return finish({ status: "ignored", reason: cls.reason }, meta);
-  const event = extractCas(original.subject, original.text, cls.kind);
+  const event = extractCas(original.subject, original.text, cls.kind, original.html ?? "");
   if (!event) return finish({ status: "quarantined", reason: "unparsed_template" }, meta);
 
   const sentAt = original.sentAt ?? new Date().toISOString();
