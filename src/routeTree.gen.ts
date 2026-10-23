@@ -15,9 +15,11 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated/connect'
 import { Route as AuthenticatedDeadlinesRouteImport } from './routes/_authenticated/deadlines'
 import { Route as AuthenticatedMenuRouteImport } from './routes/_authenticated/menu'
+import { Route as AuthenticatedPlacementsRouteImport } from './routes/_authenticated/placements'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as ApiPublicCoursepackRouteImport } from './routes/api/public/coursepack'
 import { Route as ApiPublicDeadlineRemindersRouteImport } from './routes/api/public/deadline-reminders'
+import { Route as ApiPublicResendInboundRouteImport } from './routes/api/public/resend-inbound'
 import { Route as ApiPublicScheduledAccountRouteImport } from './routes/api/public/scheduled-account'
 import { Route as ApiPublicScheduledSyncRouteImport } from './routes/api/public/scheduled-sync'
 
@@ -50,6 +52,11 @@ const AuthenticatedMenuRoute = AuthenticatedMenuRouteImport.update({
   path: '/menu',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPlacementsRoute = AuthenticatedPlacementsRouteImport.update({
+  id: '/placements',
+  path: '/placements',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
@@ -66,6 +73,11 @@ const ApiPublicDeadlineRemindersRoute =
     path: '/api/public/deadline-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicResendInboundRoute = ApiPublicResendInboundRouteImport.update({
+  id: '/api/public/resend-inbound',
+  path: '/api/public/resend-inbound',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicScheduledAccountRoute =
   ApiPublicScheduledAccountRouteImport.update({
     id: '/api/public/scheduled-account',
@@ -84,9 +96,11 @@ export interface FileRoutesByFullPath {
   '/connect': typeof AuthenticatedConnectRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/menu': typeof AuthenticatedMenuRoute
+  '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
+  '/api/public/resend-inbound': typeof ApiPublicResendInboundRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
   '/api/public/scheduled-sync': typeof ApiPublicScheduledSyncRoute
 }
@@ -96,9 +110,11 @@ export interface FileRoutesByTo {
   '/connect': typeof AuthenticatedConnectRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/menu': typeof AuthenticatedMenuRoute
+  '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
+  '/api/public/resend-inbound': typeof ApiPublicResendInboundRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
   '/api/public/scheduled-sync': typeof ApiPublicScheduledSyncRoute
 }
@@ -110,9 +126,11 @@ export interface FileRoutesById {
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/deadlines': typeof AuthenticatedDeadlinesRoute
   '/_authenticated/menu': typeof AuthenticatedMenuRoute
+  '/_authenticated/placements': typeof AuthenticatedPlacementsRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
+  '/api/public/resend-inbound': typeof ApiPublicResendInboundRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
   '/api/public/scheduled-sync': typeof ApiPublicScheduledSyncRoute
 }
@@ -124,9 +142,11 @@ export interface FileRouteTypes {
     | '/connect'
     | '/deadlines'
     | '/menu'
+    | '/placements'
     | '/schedule'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
+    | '/api/public/resend-inbound'
     | '/api/public/scheduled-account'
     | '/api/public/scheduled-sync'
   fileRoutesByTo: FileRoutesByTo
@@ -136,9 +156,11 @@ export interface FileRouteTypes {
     | '/connect'
     | '/deadlines'
     | '/menu'
+    | '/placements'
     | '/schedule'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
+    | '/api/public/resend-inbound'
     | '/api/public/scheduled-account'
     | '/api/public/scheduled-sync'
   id:
@@ -149,9 +171,11 @@ export interface FileRouteTypes {
     | '/_authenticated/connect'
     | '/_authenticated/deadlines'
     | '/_authenticated/menu'
+    | '/_authenticated/placements'
     | '/_authenticated/schedule'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
+    | '/api/public/resend-inbound'
     | '/api/public/scheduled-account'
     | '/api/public/scheduled-sync'
   fileRoutesById: FileRoutesById
@@ -161,6 +185,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ApiPublicCoursepackRoute: typeof ApiPublicCoursepackRoute
   ApiPublicDeadlineRemindersRoute: typeof ApiPublicDeadlineRemindersRoute
+  ApiPublicResendInboundRoute: typeof ApiPublicResendInboundRoute
   ApiPublicScheduledAccountRoute: typeof ApiPublicScheduledAccountRoute
   ApiPublicScheduledSyncRoute: typeof ApiPublicScheduledSyncRoute
 }
@@ -209,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMenuRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/placements': {
+      id: '/_authenticated/placements'
+      path: '/placements'
+      fullPath: '/placements'
+      preLoaderRoute: typeof AuthenticatedPlacementsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/schedule': {
       id: '/_authenticated/schedule'
       path: '/schedule'
@@ -228,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/deadline-reminders'
       fullPath: '/api/public/deadline-reminders'
       preLoaderRoute: typeof ApiPublicDeadlineRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/resend-inbound': {
+      id: '/api/public/resend-inbound'
+      path: '/api/public/resend-inbound'
+      fullPath: '/api/public/resend-inbound'
+      preLoaderRoute: typeof ApiPublicResendInboundRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/scheduled-account': {
@@ -252,6 +291,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConnectRoute: typeof AuthenticatedConnectRoute
   AuthenticatedDeadlinesRoute: typeof AuthenticatedDeadlinesRoute
   AuthenticatedMenuRoute: typeof AuthenticatedMenuRoute
+  AuthenticatedPlacementsRoute: typeof AuthenticatedPlacementsRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
 }
 
@@ -260,6 +300,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConnectRoute: AuthenticatedConnectRoute,
   AuthenticatedDeadlinesRoute: AuthenticatedDeadlinesRoute,
   AuthenticatedMenuRoute: AuthenticatedMenuRoute,
+  AuthenticatedPlacementsRoute: AuthenticatedPlacementsRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
 }
 
@@ -271,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ApiPublicCoursepackRoute: ApiPublicCoursepackRoute,
   ApiPublicDeadlineRemindersRoute: ApiPublicDeadlineRemindersRoute,
+  ApiPublicResendInboundRoute: ApiPublicResendInboundRoute,
   ApiPublicScheduledAccountRoute: ApiPublicScheduledAccountRoute,
   ApiPublicScheduledSyncRoute: ApiPublicScheduledSyncRoute,
 }

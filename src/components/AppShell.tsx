@@ -3,10 +3,9 @@ import { CalendarClock, Menu } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTerm5 } from "@/lib/useTerm5";
 
-const TABS = [
-  { to: "/deadlines", label: "Assignments" },
-  { to: "/schedule", label: "Classes" },
-] as const;
+const ASSIGNMENTS = { to: "/deadlines", label: "Assignments" } as const;
+const CLASSES = { to: "/schedule", label: "Classes" } as const;
+const PLACEMENTS = { to: "/placements", label: "Placements" } as const;
 
 export function AppFooter() {
   return (
@@ -20,8 +19,8 @@ export function AppFooter() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const term5 = useTerm5();
-  const showPrereads = !!term5.data?.inRoster;
-  const tabs = showPrereads ? TABS : [];
+  // Classes stays roster-only; Placements is for every signed-in school account.
+  const tabs = term5.data?.inRoster ? [ASSIGNMENTS, CLASSES, PLACEMENTS] : [ASSIGNMENTS, PLACEMENTS];
   const menuActive = pathname === "/menu";
 
   return (
@@ -68,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={item.to}
                   to={item.to}
                   aria-current={active ? "page" : undefined}
-                  className={`tap-target rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
+                  className={`tap-target rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${
                     active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >

@@ -14,6 +14,8 @@ import { formatDateTime } from "@/lib/format";
 import { useTheme } from "@/components/ThemeProvider";
 import { ReminderSettings } from "@/components/ReminderSetup";
 import { SetupNudges } from "@/components/SetupNudges";
+import { Switch } from "@/components/ui/switch";
+import { listJobs, setJobReminders } from "@/lib/jobs.functions";
 
 export const Route = createFileRoute("/_authenticated/menu")({
   head: () => ({
@@ -127,6 +129,27 @@ function MyCourses() {
   );
 }
 
+function JobReminderToggle() {
+  const queryClient = useQueryClient();
+  const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => listJobs() });
+  const save = useMutation({
+    mutationFn: (enabled: boolean) => setJobReminders({ data: { enabled } }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["jobs"] }),
+  });
+  const checked = save.isPending ? !!save.variables : (jobs.data?.jobReminders ?? true);
+  return (
+    <label className="mt-4 flex items-start gap-3 text-sm">
+      <span className="min-w-0 flex-1">
+        <span className="font-medium">Placement deadlines</span>
+        <span className="mt-0.5 block text-xs text-muted-foreground">
+          With reminders on, get a nudge 12 hours and 3 hours before a job application closes (when CAS gives a time).
+        </span>
+      </span>
+      <Switch checked={checked} disabled={!jobs.data} onCheckedChange={(v) => save.mutate(v)} aria-label="Placement deadline reminders" />
+    </label>
+  );
+}
+
 function MenuPage() {
   const { user, session } = useSession();
   const navigate = useNavigate();
@@ -200,6 +223,7 @@ function MenuPage() {
           <div>
             <ReminderSettings />
           </div>
+          <JobReminderToggle />
         </section>
       </div>
 
