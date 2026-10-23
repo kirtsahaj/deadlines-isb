@@ -17,3 +17,10 @@
 - [x] Rule tests (20) and signed-in phone checks
 - [x] Hyderabad Term 5 import (campus-isolated) + nav/prereads/night-mode bar changes
 - [ ] Live check of shared section updates across several connected classmates (pool currently empty; needs successful contributor refresh)
+
+# Placements feed
+- [x] Signed webhook intake, MIME parsing, explicit-field merging, private JD storage, stars, Placements tab, 12h/3h job reminders, 26 mocked tests
+- [ ] Owner adds RESEND_API_KEY and RESEND_WEBHOOK_SECRET and creates the Resend webhook (needs owner login)
+- [ ] First live end-to-end email through the webhook; reprocess sample 211991ef… once the key exists
+- [ ] Prove automatic Outlook rule forwarding (needs a new CAS broadcast)
+- [ ] Signed-in visual check of Placements (preview session could not be minted in this run)
