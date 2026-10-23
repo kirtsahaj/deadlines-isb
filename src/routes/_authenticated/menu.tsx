@@ -6,14 +6,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/useSession";
 import { useTerm5 } from "@/lib/useTerm5";
 import { disconnectElearn, getAccountAccess, getConnectionState } from "@/lib/elearn.functions";
 import { resetEnrollments, saveEnrollment } from "@/lib/term5.functions";
-import { DEFAULT_TIMEZONE, formatDateTime } from "@/lib/format";
+import { formatDateTime } from "@/lib/format";
+import { useTheme } from "@/components/ThemeProvider";
 import { ReminderSettings } from "@/components/ReminderSetup";
 import { SetupNudges } from "@/components/SetupNudges";
 
@@ -21,9 +21,9 @@ export const Route = createFileRoute("/_authenticated/menu")({
   head: () => ({
     meta: [
       { title: "Menu — ISB Deadline Tracker" },
-      { name: "description", content: "Your eLearn connection, courses, reminders, display options and help." },
+      { name: "description", content: "Your eLearn connection, courses, reminders and night mode." },
       { property: "og:title", content: "Menu — ISB Deadline Tracker" },
-      { property: "og:description", content: "Connection, courses, reminders, display options and help." },
+      { property: "og:description", content: "Connection, courses, reminders and night mode." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -31,7 +31,6 @@ export const Route = createFileRoute("/_authenticated/menu")({
   component: MenuPage,
 });
 
-const TIMEZONES = ["Asia/Kolkata", "Asia/Dubai", "Europe/London", "America/New_York", "UTC"];
 const WHATSAPP_URL = "https://wa.me/918890060456";
 
 function WhatsAppIcon({ className = "" }: { className?: string }) {
@@ -41,41 +40,6 @@ function WhatsAppIcon({ className = "" }: { className?: string }) {
     </svg>
   );
 }
-
-const FAQ = [
-  {
-    q: "Where do these dates come from?",
-    a: "Your own eLearn (when connected), course updates seen on classmates' eLearn for your section, and your Term 5 course outlines. Tap the ⓘ button on any card to see exactly which.",
-  },
-  {
-    q: "How sure are these dates?",
-    a: "The ⓘ button on every card shows where a date came from and when it was last seen — so you know how fresh it is before relying on it.",
-  },
-  {
-    q: "Setting up from a phone",
-    a: "Keep this tracker open. Open eLearn in the Google Chrome app and log in there. Hold the launch link, then choose Copy Link on iPhone or Copy link address on Android. Switch back to the tracker and tap Paste and connect. Cancel any Moodle app prompt.",
-  },
-  {
-    q: "The link isn't accepted",
-    a: "Copy the link's address, not its text — it starts with moodlemobile://. Each link works once, so open eLearn again for a fresh one. Reconnecting keeps your saved deadlines.",
-  },
-  {
-    q: "What is shared from my eLearn?",
-    a: "Only course deadline details (title, type and date) for Term 5 courses, so classmates in your section see them too. Never your link, name, submissions, grades or extensions.",
-  },
-  {
-    q: "Can this app submit work or change anything?",
-    a: "No. It only reads. It cannot submit, post, edit or delete anything in eLearn, and it never has your password.",
-  },
-  {
-    q: "How often does it refresh?",
-    a: "About every 2 hours, even when the tracker is closed. Refresh now asks for an extra update.",
-  },
-  {
-    q: "My connection stopped working",
-    a: "eLearn links expire. Choose Reconnect with a new link under eLearn connection. Your saved deadlines stay.",
-  },
-] as const;
 
 function MyCourses() {
   const term5 = useTerm5();
@@ -96,7 +60,7 @@ function MyCourses() {
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
         {term5.data.inRoster
-          ? "Matched from the Term 5 Mohali class list. Fix anything that's wrong."
+          ? `Matched from the Term 5 ${term5.data.campusName} class list. Fix anything that's wrong.`
           : "You're not on the class list we have. Add your courses and sections."}
       </p>
       <ul className="space-y-2">
@@ -169,7 +133,6 @@ function MenuPage() {
   const { user, session } = useSession();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [notice, setNotice] = useState<string | null>(null);
   const [open, setOpen] = useState<string[]>([]);
   useEffect(() => {
     const id = window.location.hash.slice(1);
@@ -180,35 +143,6 @@ function MenuPage() {
 
   const connection = useQuery({ queryKey: ["connection-state"], queryFn: () => getConnectionState() });
   const access = useQuery({ queryKey: ["account-access", session?.user.id], queryFn: () => getAccountAccess(), enabled: !!session });
-  const courses = useQuery({
-    queryKey: ["courses", user?.id],
-    queryFn: async () =>
-      (await supabase.from("courses").select("moodle_course_id, short_name, full_name").order("full_name")).data ?? [],
-    enabled: !!user,
-  });
-  const settings = useQuery({
-    queryKey: ["user-settings", user?.id],
-    queryFn: async () =>
-      (await supabase.from("user_settings").select("timezone, hidden_course_ids, explicit_deadline_marker_only").maybeSingle()).data,
-    enabled: !!user,
-  });
-  const [hidden, setHidden] = useState<number[]>([]);
-  useEffect(() => {
-    if (settings.data?.hidden_course_ids) setHidden(settings.data.hidden_course_ids);
-  }, [settings.data?.hidden_course_ids]);
-
-  const save = useMutation({
-    mutationFn: async (patch: Record<string, unknown>) => {
-      if (!user) throw new Error("no_user");
-      const { error } = await supabase.from("user_settings").upsert({ user_id: user.id, ...patch }, { onConflict: "user_id" });
-      if (error) throw error;
-    },
-    onSuccess: async () => {
-      setNotice("Saved.");
-      await queryClient.invalidateQueries({ queryKey: ["user-settings"] });
-    },
-    onError: () => setNotice("We couldn't save that. Please try again."),
-  });
   const disconnect = useMutation({
     mutationFn: () => disconnectElearn(),
     onSuccess: async () => {
@@ -224,6 +158,7 @@ function MenuPage() {
   }
 
   const state = connection.data;
+  const { theme, toggle: toggleTheme } = useTheme();
   const term5Info = useTerm5();
 
   return (
@@ -244,6 +179,11 @@ function MenuPage() {
           </section>
         )}
 
+        <section className="flex items-center justify-between gap-4 py-5 first:pt-0">
+          <Label htmlFor="night-mode" className="text-lg font-semibold">Night mode</Label>
+          <Switch id="night-mode" checked={theme === "dark"} onCheckedChange={toggleTheme} />
+        </section>
+
         <section className="scroll-mt-24 py-5 first:pt-0" id="home-screen">
           <h2 className="mb-3 text-lg font-semibold">Reminders and home screen</h2>
           <div>
@@ -263,75 +203,6 @@ function MenuPage() {
           </AccordionItem>
         </div>
         )}
-        <AccordionItem value="display">
-          <AccordionTrigger className="text-base font-semibold">Display</AccordionTrigger>
-          <AccordionContent className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="timezone">Time zone</Label>
-              <Select value={settings.data?.timezone ?? DEFAULT_TIMEZONE} onValueChange={(v) => save.mutate({ timezone: v })}>
-                <SelectTrigger id="timezone" className="w-full sm:w-64">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIMEZONES.map((z) => (
-                    <SelectItem key={z} value={z}>
-                      {z.replace("_", " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <Label htmlFor="marker-only">Only trust dates marked #deadline#</Label>
-                <p className="mt-1 text-xs text-muted-foreground">Ignore dates written loosely in eLearn course text.</p>
-              </div>
-              <Switch
-                id="marker-only"
-                checked={settings.data?.explicit_deadline_marker_only ?? false}
-                onCheckedChange={(c) => save.mutate({ explicit_deadline_marker_only: c })}
-              />
-            </div>
-            {!!courses.data?.length && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Hide eLearn courses</p>
-                <ul className="space-y-2">
-                  {courses.data.map((course) => (
-                    <li key={course.moodle_course_id} className="flex items-center gap-3">
-                      <Checkbox
-                        id={`course-${course.moodle_course_id}`}
-                        checked={hidden.includes(course.moodle_course_id)}
-                        onCheckedChange={(checked) => {
-                          const next = checked
-                            ? [...hidden, course.moodle_course_id]
-                            : hidden.filter((id) => id !== course.moodle_course_id);
-                          setHidden(next);
-                          save.mutate({ hidden_course_ids: next });
-                        }}
-                      />
-                      <Label htmlFor={`course-${course.moodle_course_id}`} className="text-sm font-normal">
-                        {course.short_name || course.full_name}
-                      </Label>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="help">
-          <AccordionTrigger className="text-base font-semibold">Help and troubleshooting</AccordionTrigger>
-          <AccordionContent>
-            <Accordion type="multiple" className="space-y-3">
-              {FAQ.map((f) => (
-                <AccordionItem key={f.q} value={f.q} className="rounded-xl border px-4 last:border-b">
-                  <AccordionTrigger className="text-sm font-medium">{f.q}</AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground">{f.a}</AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </AccordionContent>
-        </AccordionItem>
         {state?.connected && (
           <AccordionItem value="connection">
             <AccordionTrigger className="text-base font-semibold">eLearn connection</AccordionTrigger>
@@ -358,8 +229,6 @@ function MenuPage() {
           </AccordionItem>
         )}
       </Accordion>
-
-      {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
 
       <div className="divide-y divide-border border-t border-border">
         {access.data?.isAdmin && (
