@@ -81,7 +81,7 @@ function JobCard({ job, now }: { job: JobTile; now: number }) {
   );
 }
 
-function JobReminderToggle({ enabled }: { enabled?: boolean }) {
+function JobReminderToggle({ enabled }: { enabled: boolean | undefined }) {
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: (value: boolean) => setJobReminders({ data: { enabled: value } }),
