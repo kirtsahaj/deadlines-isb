@@ -5,7 +5,6 @@ import { RefreshCcw, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DeadlineCard } from "@/components/DeadlineCard";
 import { MultiSelectFilter } from "@/components/MultiSelectFilter";
 import { ReminderSetupDialog } from "@/components/ReminderSetup";
@@ -37,9 +36,7 @@ function DeadlinesPage() {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [selectedTerms, setSelectedTerms] = useState<Set<string> | null>(null);
   const [selectedCourses, setSelectedCourses] = useState<Set<string> | null>(null);
-  const [kindFilter, setKindFilter] = useState("all");
   const [view, setView] = useState<DeadlineView>("upcoming");
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   useEffect(() => {
@@ -140,11 +137,9 @@ function DeadlinesPage() {
     }).map(i => ({ ...i, moodleCourseId: i.moodleCourseId ?? refs.find(c => c.short_name === `${i.courseCode}_PGP${term5.data.campus}_2026-27_T5`)?.moodle_course_id ?? null }))].filter((i) => i.moodleCourseId === null || !hidden.has(i.moodleCourseId));
   }, [term5.data, deadlines.data, courses.data, connection.data, hidden]);
 
-  const termOptions = useMemo(() => [...new Set(merged.map((i) => i.term))].sort(), [merged]);
-  const activeTerms = selectedOrAll(termOptions, selectedTerms);
   const courseOptions = useMemo(
-    () => [...new Set(merged.filter((i) => activeTerms.has(i.term)).map((i) => i.courseKey))].sort(),
-    [merged, activeTerms],
+    () => [...new Set(merged.map((i) => i.courseKey))].sort(),
+    [merged],
   );
   const activeCourses = selectedOrAll(courseOptions, selectedCourses);
   const courseLabel = (key: string) => merged.find((i) => i.courseKey === key)?.courseCode ?? key;
@@ -154,15 +149,14 @@ function DeadlinesPage() {
     const now = Date.now();
     return sortView(
       merged.filter((i) => {
-        if (!activeTerms.has(i.term) || !activeCourses.has(i.courseKey)) return false;
-        if (kindFilter !== "all" && i.kind !== kindFilter) return false;
+        if (!activeCourses.has(i.courseKey)) return false;
         if (!inView(i, view, now)) return false;
         if (q && !`${i.title} ${i.courseName} ${i.courseCode}`.toLowerCase().includes(q)) return false;
         return true;
       }),
       view,
     );
-  }, [merged, activeTerms, activeCourses, kindFilter, search, view]);
+  }, [merged, activeCourses, search, view]);
 
   const name = firstPreferredName(user?.user_metadata, profile.data?.display_name);
   const loading = connection.isLoading || term5.isLoading || (connected && deadlines.isLoading);
@@ -216,31 +210,7 @@ function DeadlinesPage() {
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search deadlines" aria-label="Search deadlines" className="h-10 border-border bg-card pl-9" />
         </div>
-        <MultiSelectFilter
-          label="Term"
-          options={termOptions}
-          selected={activeTerms}
-          onChange={(next) => {
-            setSelectedTerms(next);
-            setSelectedCourses(null);
-          }}
-        />
         <MultiSelectFilter label="Course" options={courseOptions} selected={activeCourses} onChange={setSelectedCourses} getLabel={courseLabel} />
-        <Select value={kindFilter} onValueChange={setKindFilter}>
-          <SelectTrigger className="h-10 w-36 rounded-full bg-card px-4" aria-label="Filter by type">
-            <SelectValue placeholder="All types" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
-            <SelectItem value="assignment">Assignments</SelectItem>
-            <SelectItem value="quiz">Quizzes</SelectItem>
-            <SelectItem value="forum">Forums</SelectItem>
-            <SelectItem value="choice">Choices</SelectItem>
-            <SelectItem value="calendar">Calendar</SelectItem>
-            <SelectItem value="text">Mentioned in text</SelectItem>
-            {term5.data?.inRoster && <SelectItem value="outline">Outline deadlines</SelectItem>}
-          </SelectContent>
-        </Select>
       </div>
 
       {loading ? (

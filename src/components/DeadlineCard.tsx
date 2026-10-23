@@ -112,29 +112,22 @@ export function DeadlineCard({
               <DialogDescription>{item.title}</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 text-sm">
-              <p className="text-muted-foreground">{meta.explain} The dot shows how confident the tracker is, not a guarantee.</p>
               <ul className="space-y-2">
                 {item.sources.map((s, i) => (
                   <SourceLine key={i} source={s} outlineKind={outlineKind} timezone={timezone} />
                 ))}
               </ul>
               {item.conflict && (
-                <p className="rounded-lg bg-warning/15 p-3">
-                  These sources show different dates. Check eLearn or with your course team before relying on one.
-                </p>
+                <p className="rounded-lg bg-warning/15 p-3">Sources show different dates — check eLearn.</p>
               )}
               {item.otherSection && (
                 <p className="rounded-lg bg-muted p-3">
-                  Seen for section {item.otherSectionLabel ?? "another"} — your section's date may differ. Connect eLearn to see your own section's details.
+                  Seen for section {item.otherSectionLabel ?? "another"} — your section's date may differ.
                 </p>
               )}
               {item.own?.text_evidence && <p className="text-muted-foreground">“{item.own.text_evidence}”</p>}
-              {item.outline && item.outline.deadline_rule !== "explicit" && (
-                <p className="text-muted-foreground">
-                  {item.dateOnly || item.dueAt
-                    ? "The outline links this to a class; the exact cut-off isn't stated."
-                    : "The outline doesn't give a date yet."}
-                </p>
+              {item.outline && item.outline.deadline_rule !== "explicit" && !item.dateOnly && !item.dueAt && (
+                <p className="text-muted-foreground">No date in the outline yet.</p>
               )}
               <ConnectCta connected={connected} />
             </div>

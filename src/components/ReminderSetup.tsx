@@ -17,7 +17,7 @@ function HomeScreenSteps() {
           <li>Open <strong>deadlines-isb.lovable.app</strong> in Safari or Chrome.</li>
           <li>Tap <strong>Share</strong> (in Chrome, it's next to the address bar).</li>
           <li>Tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
-          <li>Open the app from your home screen and tap <strong>Turn on reminders</strong>.</li>
+          <li>Open the app from your home screen and tap <strong>Turn on notifications</strong>.</li>
         </ol>
       </TabsContent>
       <TabsContent value="android">
@@ -25,7 +25,7 @@ function HomeScreenSteps() {
           <li>Open <strong>deadlines-isb.lovable.app</strong> in <strong>Chrome</strong>.</li>
           <li>Tap the <strong>⋮</strong> menu.</li>
           <li>Tap <strong>Add to Home screen</strong> or <strong>Install app</strong>.</li>
-          <li>Open the app and tap <strong>Turn on reminders</strong>.</li>
+          <li>Open the app and tap <strong>Turn on notifications</strong>.</li>
         </ol>
       </TabsContent>
     </Tabs>
@@ -45,15 +45,15 @@ function useReminderState() {
     setBusy(true); setMessage(null);
     try {
       const r = await enableReminders();
-      if (r === "enabled") { setEnabled(true); setMessage("Reminders are on. A test notification is on its way."); }
+      if (r === "enabled") { setEnabled(true); setMessage("Notifications are on. A test notification is on its way."); }
       else if (r === "denied") setMessage("Notifications are blocked. Allow them in your browser or phone settings, then try again.");
-      else setMessage("This browser can't show reminders. Add the app to your home screen first.");
+      else setMessage("This browser can't show notifications. Add the app to your home screen first.");
     } catch { setMessage("Couldn't turn on reminders. Please try again."); }
     finally { setBusy(false); }
   };
   const turnOff = async () => {
     setBusy(true);
-    try { await disableReminders(); setEnabled(false); setMessage("Reminders are off on this device."); }
+    try { await disableReminders(); setEnabled(false); setMessage("Notifications are off on this device."); }
     finally { setBusy(false); }
   };
   return { support, enabled, busy, message, turnOn, turnOff };
@@ -64,7 +64,7 @@ function ReminderActions({ state }: { state: ReturnType<typeof useReminderState>
   return state.enabled ? (
     <Button variant="outline" onClick={state.turnOff} disabled={state.busy}><BellOff className="size-4" />Turn off on this device</Button>
   ) : (
-    <Button onClick={state.turnOn} disabled={state.busy}><Bell className="size-4" />{state.busy ? "Turning on…" : "Turn on reminders"}</Button>
+    <Button onClick={state.turnOn} disabled={state.busy}><Bell className="size-4" />{state.busy ? "Turning on…" : "Turn on notifications"}</Button>
   );
 }
 
@@ -94,7 +94,7 @@ export function ReminderSetupDialog() {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Get a nudge 3 hours before</DialogTitle>
-          <DialogDescription>Add the tracker to your phone's home screen, then turn on reminders.</DialogDescription>
+          <DialogDescription>Add the tracker to your phone's home screen, then turn on notifications.</DialogDescription>
         </DialogHeader>
         <HomeScreenSteps />
         {state.message && <p role="status" className="text-sm text-muted-foreground">{state.message}</p>}
