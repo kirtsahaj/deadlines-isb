@@ -5,6 +5,21 @@ import { savedTheme, type AppTheme } from "@/lib/theme";
 
 const ThemeContext = createContext<{ theme: AppTheme; toggle: () => void }>({ theme: "light", toggle: () => {} });
 const STORAGE_KEY = "deadline-tracker-theme";
+/** Browser chrome (status bar / address bar) colours matching the page background. */
+const CHROME: Record<AppTheme, string> = { light: "#fbf9fd", dark: "#17171c" };
+
+function applyTheme(next: AppTheme) {
+  const root = document.documentElement;
+  root.classList.toggle("dark", next === "dark");
+  root.style.colorScheme = next;
+  let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.name = "theme-color";
+    document.head.appendChild(meta);
+  }
+  meta.content = CHROME[next];
+}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<AppTheme>("light");
@@ -12,16 +27,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     try {
       const next = savedTheme(window.localStorage.getItem(STORAGE_KEY));
       setTheme(next);
-      document.documentElement.classList.toggle("dark", next === "dark");
+      applyTheme(next);
     } catch { /* Storage may be unavailable; day mode remains the default. */ }
   }, []);
   const toggle = () => {
     const next = theme === "light" ? "dark" : "light";
     setTheme(next);
-    document.documentElement.classList.toggle("dark", next === "dark");
+    applyTheme(next);
     try { window.localStorage.setItem(STORAGE_KEY, next); } catch { /* Theme still works for this visit. */ }
   };
   return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
+}
+
+export function useTheme() {
+  return useContext(ThemeContext);
 }
 
 export function ThemeToggle() {
