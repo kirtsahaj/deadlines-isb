@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { BookOpen, Loader2, MapPin } from "lucide-react";
+import { ArrowUpRight, BookOpen, Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -76,9 +76,10 @@ function CoursepackButton({ courseCode }: { courseCode: string }) {
 
   return (
     <>
-      <Button variant="outline" size="sm" className="mt-2 h-8" onClick={onClick} disabled={loading}>
+      <Button size="sm" className="coursepack-btn mt-3" onClick={onClick} disabled={loading}>
         {loading ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <BookOpen className="size-4" aria-hidden />}
         Coursepack
+        {!loading && <ArrowUpRight className="size-4" aria-hidden />}
       </Button>
       <Dialog open={dialog !== null} onOpenChange={(o) => !o && setDialog(null)}>
         <DialogContent className="max-w-md">
