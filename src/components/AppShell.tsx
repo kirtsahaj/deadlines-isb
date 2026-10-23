@@ -5,7 +5,7 @@ import { useTerm5 } from "@/lib/useTerm5";
 
 const TABS = [
   { to: "/deadlines", label: "Assignments" },
-  { to: "/schedule", label: "Prereads" },
+  { to: "/schedule", label: "Classes" },
 ] as const;
 
 export function AppFooter() {

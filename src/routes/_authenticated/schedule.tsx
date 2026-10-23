@@ -14,9 +14,9 @@ import { getCoursepacks, type ScheduleClass } from "@/lib/term5.functions";
 export const Route = createFileRoute("/_authenticated/schedule")({
   head: () => ({
     meta: [
-      { title: "Prereads — ISB Deadline Tracker" },
+      { title: "Classes & Prereads — ISB Deadline Tracker" },
       { name: "description", content: "Your Term 5 classes with rooms, topics and what to read before each." },
-      { property: "og:title", content: "Prereads — ISB Deadline Tracker" },
+      { property: "og:title", content: "Classes & Prereads — ISB Deadline Tracker" },
       { property: "og:description", content: "Classes, rooms, topics and preparation for your Term 5 sections." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -192,8 +192,8 @@ function SchedulePage() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end gap-3">
         <div className="mr-auto">
-          <h1 className="text-3xl font-semibold">Prereads</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Your classes and what to read before each</p>
+          <h1 className="text-3xl font-semibold">Classes &amp; Prereads</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and what to read before each class</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => setShowPast((v) => !v)}>
           {showPast ? "Hide past classes" : "Show past classes"}
