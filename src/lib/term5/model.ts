@@ -237,9 +237,16 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
   const structuredKeys = new Set(
     input.own.filter((r) => r.kind !== "text" && r.due_at).map((r) => `${r.moodle_course_id}|${r.title.trim().toLowerCase()}|${new Date(r.due_at as string).getTime()}`),
   );
-  const ownRows = input.own.filter(
-    (r) => r.kind !== "text" || !r.due_at || !structuredKeys.has(`${r.moodle_course_id}|${r.title.trim().toLowerCase()}|${new Date(r.due_at).getTime()}`),
-  );
+  const assignments = input.own.filter((r) => r.kind === "assignment" && r.due_at);
+  const ownRows = input.own.filter((r) => {
+    if (!r.due_at) return true;
+    const at = new Date(r.due_at).getTime();
+    if (r.kind === "text") return !structuredKeys.has(`${r.moodle_course_id}|${r.title.trim().toLowerCase()}|${at}`);
+    // Moodle's own "<assignment> is due" calendar echo of an assignment already listed.
+    if (r.kind === "calendar")
+      return !assignments.some((a) => a.moodle_course_id === r.moodle_course_id && new Date(a.due_at as string).getTime() === at && r.title.toLowerCase().includes(a.title.trim().toLowerCase()));
+    return true;
+  });
 
   for (const row of ownRows) {
     const course = input.ownCourses.find((c) => c.moodle_course_id === row.moodle_course_id);

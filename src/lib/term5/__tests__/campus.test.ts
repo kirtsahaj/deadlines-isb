@@ -57,3 +57,18 @@ describe("own eLearn duplicates", () => {
     expect(out.map((o) => o.id)).toEqual(["a"]);
   });
 });
+
+describe("calendar echoes", () => {
+  it("drops a '<assignment> is due' calendar copy at the same time", () => {
+    const base = { deadline_status: "dated", submission_status: "unknown", due_at: "2026-10-31T18:29:00Z", conflict: false, moodle_course_id: 7 };
+    const out = mergeDeadlines({
+      now: Date.parse("2026-10-23T10:00:00Z"), enrollments: [], courseTitles: {}, outline: [], shared: [], ownCourses: [], ownLastSuccessAt: null,
+      own: [
+        { ...base, id: "a", title: "Mid-Term Progress Report", kind: "assignment", deadline_type: "due", source_primary: "assign" },
+        { ...base, id: "c", title: "Mid-Term Progress Report is due", kind: "calendar", deadline_type: "due", source_primary: "calendar" },
+        { ...base, id: "x", title: "Mid-Term Progress Report", kind: "assignment", deadline_type: "cutoff", source_primary: "assign", due_at: "2026-11-01T03:30:00Z" },
+      ],
+    });
+    expect(out.map((o) => o.id)).toEqual(["a", "x"]);
+  });
+});
