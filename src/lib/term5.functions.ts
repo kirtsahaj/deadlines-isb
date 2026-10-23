@@ -21,10 +21,11 @@ export const getMyTerm5 = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const email = await allowedEmail(context.claims);
-    const { term5Catalog: cat, courseTitles } = await import("./term5/catalog.server");
+    const { catalogFor, courseTitles } = await import("./term5/catalog.server");
     const { enrollmentsFor, sharedFor } = await import("./term5/userDeadlines.server");
-    const { enrollments, inRoster } = await enrollmentsFor(context.userId, email);
-    const titles = courseTitles();
+    const { enrollments, inRoster, campus } = await enrollmentsFor(context.userId, email);
+    const cat = catalogFor(campus);
+    const titles = courseTitles(campus);
     const codes = new Set(enrollments.map((e) => e.courseCode));
     const { classesFor } = await import("./term5/preparation");
     const { courseRefsFor } = await import("./term5/userDeadlines.server");
@@ -37,19 +38,21 @@ export const getMyTerm5 = createServerFn({ method: "GET" })
       title: c.title,
       faculty: c.faculty,
       outlineKind: sourceKind(c.primary_source_id),
-      sections: cat.sections.filter((s) => s.course_code === c.course_code).map((s) => s.section_id),
+      sections: (cat.sections as { section_id: string; course_code: string }[]).filter((s) => s.course_code === c.course_code).map((s) => s.section_id),
     }));
 
     return {
       inRoster,
+      campus,
+      campusName: campus === "HYD" ? "Hyderabad" : "Mohali",
       enrollments,
       courseTitles: titles,
       courses,
       outline: cat.occurrences.filter((o) => codes.has(o.course_code)),
       outlineSourceKinds: Object.fromEntries(cat.courses.map((c) => [c.course_code, sourceKind(c.primary_source_id)])),
       classes,
-      courseRefs: await courseRefsFor(enrollments),
-      shared: await sharedFor(enrollments),
+      courseRefs: await courseRefsFor(enrollments, campus),
+      shared: await sharedFor(enrollments, campus),
       term: cat.meta,
     };
   });
@@ -60,8 +63,11 @@ export const saveEnrollment = createServerFn({ method: "POST" })
     z.object({ courseCode: z.string().regex(/^[A-Z0-9.]{2,12}$/), sectionId: z.string().max(20).nullable(), removed: z.boolean() }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await allowedEmail(context.claims);
-    const { term5Catalog: cat } = await import("./term5/catalog.server");
+    const email = await allowedEmail(context.claims);
+    const { campusFor, catalogFor } = await import("./term5/catalog.server");
+    const campus = campusFor(email);
+    if (!campus) throw new Error("not_on_class_list");
+    const cat = catalogFor(campus);
     if (!cat.courses.some((c) => c.course_code === data.courseCode)) throw new Error("unknown_course");
     if (data.sectionId && !cat.sections.some((s) => s.section_id === data.sectionId && s.course_code === data.courseCode))
       throw new Error("unknown_section");
