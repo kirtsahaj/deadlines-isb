@@ -4,8 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, ShieldCheck } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/useSession";
@@ -158,7 +156,7 @@ function MenuPage() {
   }
 
   const state = connection.data;
-  const { theme, toggle: toggleTheme } = useTheme();
+  const { preference, setPreference } = useTheme();
   const term5Info = useTerm5();
 
   return (
@@ -179,9 +177,22 @@ function MenuPage() {
           </section>
         )}
 
-        <section className="flex items-center justify-between gap-4 py-5 first:pt-0">
-          <Label htmlFor="night-mode" className="text-lg font-semibold">Night mode</Label>
-          <Switch id="night-mode" checked={theme === "dark"} onCheckedChange={toggleTheme} />
+        <section className="py-5 first:pt-0">
+          <h2 className="mb-3 text-lg font-semibold">Display</h2>
+          <div role="radiogroup" aria-label="Display" className="grid grid-cols-3 gap-1 rounded-full border border-border bg-muted p-1">
+            {([["system", "Device default"], ["light", "Light"], ["dark", "Dark"]] as const).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={preference === value}
+                onClick={() => setPreference(value)}
+                className={`rounded-full px-2 py-2 text-sm font-medium transition-colors ${preference === value ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </section>
 
         <section className="scroll-mt-24 py-5 first:pt-0" id="home-screen">

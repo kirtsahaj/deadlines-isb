@@ -1,9 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { savedTheme, type AppTheme } from "@/lib/theme";
+import { resolveTheme, savedPreference, type AppTheme, type ThemePreference } from "@/lib/theme";
 
-const ThemeContext = createContext<{ theme: AppTheme; toggle: () => void }>({ theme: "light", toggle: () => {} });
+type Ctx = { theme: AppTheme; preference: ThemePreference; setPreference: (p: ThemePreference) => void };
+const ThemeContext = createContext<Ctx>({ theme: "light", preference: "system", setPreference: () => {} });
 const STORAGE_KEY = "deadline-tracker-theme";
 /** Browser chrome (status bar / address bar) colours matching the page background. */
 const CHROME: Record<AppTheme, string> = { light: "#fbf9ff", dark: "#131317" };
@@ -12,8 +11,7 @@ function applyTheme(next: AppTheme) {
   const root = document.documentElement;
   root.classList.toggle("dark", next === "dark");
   root.style.colorScheme = next;
-  // Safari ignores in-place theme-color updates, so recreate the node — this is
-  // what makes the iPhone status bar repaint when night mode is toggled.
+  // Safari ignores in-place theme-color updates, so recreate the node.
   document.querySelector('meta[name="theme-color"]')?.remove();
   const meta = document.createElement("meta");
   meta.name = "theme-color";
@@ -21,39 +19,48 @@ function applyTheme(next: AppTheme) {
   document.head.appendChild(meta);
 }
 
+function isIosStandalone() {
+  const standalone =
+    (navigator as Navigator & { standalone?: boolean }).standalone === true ||
+    window.matchMedia("(display-mode: standalone)").matches;
+  return standalone && /iPhone|iPad|iPod/.test(navigator.userAgent);
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [preference, setPref] = useState<ThemePreference>("system");
   const [theme, setTheme] = useState<AppTheme>("light");
+
   useEffect(() => {
-    try {
-      const next = savedTheme(window.localStorage.getItem(STORAGE_KEY));
+    let pref: ThemePreference = "system";
+    try { pref = savedPreference(window.localStorage.getItem(STORAGE_KEY)); } catch { /* default */ }
+    setPref(pref);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const update = () => {
+      const next = resolveTheme(preference, mq.matches);
       setTheme(next);
       applyTheme(next);
-    } catch { /* Storage may be unavailable; day mode remains the default. */ }
-  }, []);
-  const toggle = () => {
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    applyTheme(next);
-    try { window.localStorage.setItem(STORAGE_KEY, next); } catch { /* Theme still works for this visit. */ }
-    // iOS Home Screen apps only read the status-bar colour on load, so reload there.
-    const standalone =
-      (navigator as Navigator & { standalone?: boolean }).standalone === true ||
-      window.matchMedia("(display-mode: standalone)").matches;
-    if (standalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      window.setTimeout(() => window.location.reload(), 150);
-    }
+    };
+    update();
+    if (preference !== "system") return;
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [preference]);
+
+  const setPreference = (p: ThemePreference) => {
+    const before = theme;
+    setPref(p);
+    try { window.localStorage.setItem(STORAGE_KEY, p); } catch { /* this visit only */ }
+    const after = resolveTheme(p, window.matchMedia("(prefers-color-scheme: dark)").matches);
+    // iOS Home Screen apps only read the status-bar colour on load.
+    if (after !== before && isIosStandalone()) window.setTimeout(() => window.location.reload(), 150);
   };
-  return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
+
+  return <ThemeContext.Provider value={{ theme, preference, setPreference }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {
   return useContext(ThemeContext);
-}
-
-export function ThemeToggle() {
-  const { theme, toggle } = useContext(ThemeContext);
-  const label = theme === "light" ? "Switch to night mode" : "Switch to day mode";
-  return <Button variant="ghost" size="icon" className="tap-target shrink-0" onClick={toggle} aria-label={label} title={label}>
-    {theme === "light" ? <Moon aria-hidden /> : <Sun aria-hidden />}
-  </Button>;
 }
