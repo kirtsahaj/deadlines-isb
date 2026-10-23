@@ -302,8 +302,13 @@ export async function runSync(
     }
     if (newDeadlines.length) {
       try {
-        const { notifyNewDeadlines } = await import("@/lib/push/newDeadlines.server");
+        const { notifyNewDeadlines, notifySectionmates } = await import("@/lib/push/newDeadlines.server");
         await notifyNewDeadlines(userId, newDeadlines);
+        await notifySectionmates(
+          userId,
+          newDeadlines,
+          courses.map((c) => ({ id: Number(c["id"]), shortname: typeof c["shortname"] === "string" ? c["shortname"] : null })),
+        );
       } catch {
         // Alerts are best-effort and never fail a sync.
       }
