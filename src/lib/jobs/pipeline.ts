@@ -20,14 +20,24 @@ export type IngestConfig = { recipient: string; forwarders: string[]; sender: st
 
 export type StoredEvent = { id: string; payload: ParsedJobEvent; sentAt: string };
 
+export type EventRow = { id: string; created: boolean; state: string; payload: ParsedJobEvent; sentAt: string };
+
+/** An unfinished event claimed longer ago than this is presumed abandoned (crashed worker). */
+export const EVENT_LEASE_MS = 2 * 60_000;
+
 export type FileInput = { eventId: string; bytes: Uint8Array; filename: string; mime: string; ext: string; sha256: string };
 
 export interface JobStore {
   /** False when this provider message already finished (idempotent retries). */
   claimInbound(providerId: string): Promise<boolean>;
   finishInbound(providerId: string, status: IngestStatus, reason: string, meta?: { subject?: string; messageId?: string | null; sentAt?: string | null }): Promise<void>;
-  /** Null when the same original CAS email was already recorded (duplicate forward). */
-  insertEvent(e: { originalKey: string; companyKey: string; kind: string; payload: ParsedJobEvent; sentAt: string }): Promise<string | null>;
+  /**
+   * Records the original CAS email once (keyed by originalKey) in state "applying", claimed by this caller.
+   * When it already exists, returns the stored row instead so unfinished work can be resumed.
+   */
+  insertEvent(e: { originalKey: string; companyKey: string; kind: string; payload: ParsedJobEvent; sentAt: string }): Promise<EventRow>;
+  /** Atomically takes over an unfinished event whose claim is older than staleBefore. */
+  claimEvent(id: string, staleBefore: string): Promise<boolean>;
   jobsForCompany(companyKey: string): Promise<JobFacts[]>;
   saveJob(job: JobFacts): Promise<string>;
   pendingEvents(companyKey: string): Promise<StoredEvent[]>;
@@ -37,6 +47,12 @@ export interface JobStore {
 }
 
 export type IngestStatus = "processed" | "ignored" | "quarantined";
+/** Thrown when another delivery is applying the same original right now; the caller should ask the provider to retry. */
+export class InProgressError extends Error {
+  constructor() {
+    super("in_progress");
+  }
+}
 export type IngestResult = { status: IngestStatus; reason: string };
 
 /** Provider signature proves Resend sent the event; this checks who forwarded it and to where. */
@@ -86,8 +102,14 @@ export async function ingest(store: JobStore, input: InboundInput, cfg: IngestCo
     ? `mid:${original.messageId.toLowerCase()}`
     : `sha:${await sha256Hex(`${original.subject}\n${original.sentAt ?? ""}\n${original.text.replace(/\s+/g, " ").trim()}`)}`;
   const cKey = companyKey(event.company);
-  const eventId = await store.insertEvent({ originalKey, companyKey: cKey, kind: event.kind, payload: event, sentAt });
-  if (!eventId) return finish({ status: "processed", reason: "duplicate_original" }, meta);
+  const row = await store.insertEvent({ originalKey, companyKey: cKey, kind: event.kind, payload: event, sentAt });
+  const eventId = row.id;
+  if (!row.created) {
+    if (row.state !== "applying") return finish({ status: "processed", reason: "duplicate_original" }, meta);
+    // A previous attempt stopped mid-way (or is running now): resume it once its claim has lapsed.
+    if (!(await store.claimEvent(row.id, new Date(Date.now() - EVENT_LEASE_MS).toISOString()))) throw new InProgressError();
+  }
+  const stored: StoredEvent = row.created ? { id: eventId, payload: event, sentAt } : { id: row.id, payload: row.payload, sentAt: row.sentAt };
 
   for (const att of original.attachments) {
     const sniff = sniffDocument(att.body, att.filename);
@@ -95,8 +117,8 @@ export async function ingest(store: JobStore, input: InboundInput, cfg: IngestCo
     await store.saveFile({ eventId, bytes: att.body, filename: safeFilename(att.filename, sniff.ext), mime: sniff.mime, ext: sniff.ext, sha256: await sha256Hex(att.body) });
   }
 
-  const outcome = await applyStored(store, cKey, { id: eventId, payload: event, sentAt });
-  if (outcome === "created") await reconcile(store, cKey);
+  const outcome = await applyStored(store, companyKey(stored.payload.company), stored);
+  await reconcile(store, companyKey(stored.payload.company));
   return finish({ status: "processed", reason: outcome }, meta);
 }
 
@@ -109,6 +131,9 @@ async function applyStored(store: JobStore, cKey: string, ev: StoredEvent): Prom
   }
   if (match.type === "none" && ev.payload.kind === "modified") {
     await store.markEvent(ev.id, "pending", null);
+    // The original may have landed concurrently; try once more so the update is not stranded.
+    const again = matchJob(await store.jobsForCompany(cKey), ev.payload);
+    if (again.type === "job") return applyStored(store, cKey, ev);
     return "pending";
   }
   const { job, outcome } = applyEvent(match.type === "job" ? match.job : null, ev.payload, ev.sentAt);
