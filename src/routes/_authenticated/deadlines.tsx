@@ -37,9 +37,7 @@ function DeadlinesPage() {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [selectedTerms, setSelectedTerms] = useState<Set<string> | null>(null);
   const [selectedCourses, setSelectedCourses] = useState<Set<string> | null>(null);
-  const [kindFilter, setKindFilter] = useState("all");
   const [view, setView] = useState<DeadlineView>("upcoming");
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   useEffect(() => {
@@ -140,11 +138,9 @@ function DeadlinesPage() {
     }).map(i => ({ ...i, moodleCourseId: i.moodleCourseId ?? refs.find(c => c.short_name === `${i.courseCode}_PGP${term5.data.campus}_2026-27_T5`)?.moodle_course_id ?? null }))].filter((i) => i.moodleCourseId === null || !hidden.has(i.moodleCourseId));
   }, [term5.data, deadlines.data, courses.data, connection.data, hidden]);
 
-  const termOptions = useMemo(() => [...new Set(merged.map((i) => i.term))].sort(), [merged]);
-  const activeTerms = selectedOrAll(termOptions, selectedTerms);
   const courseOptions = useMemo(
-    () => [...new Set(merged.filter((i) => activeTerms.has(i.term)).map((i) => i.courseKey))].sort(),
-    [merged, activeTerms],
+    () => [...new Set(merged.map((i) => i.courseKey))].sort(),
+    [merged],
   );
   const activeCourses = selectedOrAll(courseOptions, selectedCourses);
   const courseLabel = (key: string) => merged.find((i) => i.courseKey === key)?.courseCode ?? key;
@@ -154,15 +150,14 @@ function DeadlinesPage() {
     const now = Date.now();
     return sortView(
       merged.filter((i) => {
-        if (!activeTerms.has(i.term) || !activeCourses.has(i.courseKey)) return false;
-        if (kindFilter !== "all" && i.kind !== kindFilter) return false;
+        if (!activeCourses.has(i.courseKey)) return false;
         if (!inView(i, view, now)) return false;
         if (q && !`${i.title} ${i.courseName} ${i.courseCode}`.toLowerCase().includes(q)) return false;
         return true;
       }),
       view,
     );
-  }, [merged, activeTerms, activeCourses, kindFilter, search, view]);
+  }, [merged, activeCourses, search, view]);
 
   const name = firstPreferredName(user?.user_metadata, profile.data?.display_name);
   const loading = connection.isLoading || term5.isLoading || (connected && deadlines.isLoading);
