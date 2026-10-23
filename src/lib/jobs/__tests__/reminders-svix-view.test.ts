@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dueJobOffsets, jobReminderKey, planJobReminders } from "../reminders";
+import { dueJobOffsets, jobReminderKey, newJobWorthAnnouncing, planJobReminders } from "../reminders";
 import { signSvix, verifySvix } from "../svix";
 import { jobsInView } from "../view";
 import type { JobTile } from "@/lib/jobs.functions";
@@ -9,10 +9,8 @@ const now = Date.parse("2026-11-01T10:00:00Z");
 const at = (ms: number) => new Date(now + ms).toISOString();
 
 describe("job reminders: 12h and 3h", () => {
-  it("sends the 12-hour notice only in its own tick window (no late catch-up)", () => {
-    expect(dueJobOffsets(at(12 * H), now)).toEqual([12]);
-    expect(dueJobOffsets(at(12 * H - 10 * 60_000), now)).toEqual([12]);
-    expect(dueJobOffsets(at(12 * H + 60_000), now)).toEqual([]);
+  it("never sends a 12-hour notice; only the 3-hour one", () => {
+    expect(dueJobOffsets(at(12 * H), now)).toEqual([]);
     expect(dueJobOffsets(at(8 * H), now)).toEqual([]);
   });
   it("sends the 3-hour notice inside 3 hours, never after the deadline", () => {
@@ -32,12 +30,11 @@ describe("job reminders: 12h and 3h", () => {
     const moved = [{ id: "j1", deadlineAt: at(2 * H) }];
     expect(planJobReminders(moved, ["u1"], now, claimed)).toEqual([{ userId: "u1", jobId: "j1", dueAt: at(2 * H), offset: 3 }]);
   });
-  it("12h and 3h are independent claims for the same deadline", () => {
-    const due = at(12 * H);
-    const claimed = new Set([jobReminderKey("u1", "j1", due, 12)]);
-    expect(planJobReminders([{ id: "j1", deadlineAt: due }], ["u1"], now + 9 * H, claimed)).toEqual([{ userId: "u1", jobId: "j1", dueAt: due, offset: 3 }]);
+  it("announces new postings only while the deadline can still be met", () => {
+    expect(newJobWorthAnnouncing(undefined, now)).toBe(true);
+    expect(newJobWorthAnnouncing({ date: "2000-01-01" }, now)).toBe(false);
+    expect(newJobWorthAnnouncing({ date: "2999-01-01", time: "11:00" }, now)).toBe(true);
   });
-});
 
 describe("webhook signature", () => {
   const secret = "whsec_" + btoa("0123456789abcdef0123456789abcdef");
