@@ -3,7 +3,8 @@ import { resolveTheme, savedPreference, type AppTheme, type ThemePreference } fr
 
 type Ctx = { theme: AppTheme; preference: ThemePreference; setPreference: (p: ThemePreference) => void };
 const ThemeContext = createContext<Ctx>({ theme: "light", preference: "system", setPreference: () => {} });
-const STORAGE_KEY = "deadline-tracker-theme";
+const STORAGE_KEY = "deadline-tracker-theme-v2";
+const LEGACY_KEY = "deadline-tracker-theme";
 /** Browser chrome (status bar / address bar) colours matching the page background. */
 const CHROME: Record<AppTheme, string> = { light: "#fbf9ff", dark: "#131317" };
 
@@ -32,7 +33,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let pref: ThemePreference = "system";
-    try { pref = savedPreference(window.localStorage.getItem(STORAGE_KEY)); } catch { /* default */ }
+    try {
+      // One-time reset: drop choices saved before the Display setting existed.
+      window.localStorage.removeItem(LEGACY_KEY);
+      pref = savedPreference(window.localStorage.getItem(STORAGE_KEY));
+    } catch { /* default */ }
     setPref(pref);
   }, []);
 
