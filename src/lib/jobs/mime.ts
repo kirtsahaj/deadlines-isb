@@ -198,6 +198,19 @@ export function bodyText(msg: MimePart): string {
   return h ? htmlToText(h) : "";
 }
 
+/** Raw HTML body of a message part (own body only), used solely to read structured tables; never rendered or fetched. */
+export function bodyHtml(msg: MimePart): string {
+  let html: string | null = null;
+  const walk = (p: MimePart) => {
+    if (html !== null) return;
+    if (p.contentType.startsWith("multipart/")) return p.children.forEach(walk);
+    if (isAttachment(p) || p.contentType === "message/rfc822") return;
+    if (p.contentType === "text/html") html = partText(p);
+  };
+  walk(msg);
+  return (html as string | null) ?? "";
+}
+
 /** File attachments of a message (excluding nested messages, inline images and alternative bodies). */
 export function fileAttachments(msg: MimePart): MimePart[] {
   const out: MimePart[] = [];

@@ -91,7 +91,7 @@ export function inbound(raw: Uint8Array, o: Partial<InboundInput> = {}): Inbound
 
 export class MemoryStore implements JobStore {
   inbound = new Map<string, { status: string; reason?: string }>();
-  events: (StoredEvent & { originalKey: string; companyKey: string; state: string; jobId: string | null })[] = [];
+  events: (StoredEvent & { originalKey: string; companyKey: string; state: string; jobId: string | null; claimedAt: number })[] = [];
   jobs: JobFacts[] = [];
   files: (FileInput & { id: string; jobId: string | null })[] = [];
   jd = new Map<string, string>();
@@ -105,16 +105,31 @@ export class MemoryStore implements JobStore {
   async finishInbound(id: string, status: string, reason: string) {
     this.inbound.set(id, { status, reason });
   }
+  /** Names of store methods that should throw once (simulated transient failure). */
+  failOnce = new Set<string>();
+  now = () => Date.now();
+  private trip(name: string) {
+    if (this.failOnce.delete(name)) throw new Error(`transient_${name}`);
+  }
   async insertEvent(e: { originalKey: string; companyKey: string; payload: ParsedJobEvent; sentAt: string }) {
-    if (this.events.some((x) => x.originalKey === e.originalKey)) return null;
+    const old = this.events.find((x) => x.originalKey === e.originalKey);
+    if (old) return { id: old.id, created: false, state: old.state, payload: old.payload, sentAt: old.sentAt };
     const id = `ev${++this.n}`;
-    this.events.push({ id, originalKey: e.originalKey, companyKey: e.companyKey, payload: e.payload, sentAt: e.sentAt, state: "pending", jobId: null });
-    return id;
+    this.events.push({ id, originalKey: e.originalKey, companyKey: e.companyKey, payload: e.payload, sentAt: e.sentAt, state: "applying", jobId: null, claimedAt: this.now() });
+    this.trip("afterInsertEvent");
+    return { id, created: true, state: "applying", payload: e.payload, sentAt: e.sentAt };
+  }
+  async claimEvent(id: string, staleBefore: string) {
+    const e = this.events.find((x) => x.id === id);
+    if (!e || e.state !== "applying" || e.claimedAt >= new Date(staleBefore).getTime()) return false;
+    e.claimedAt = this.now();
+    return true;
   }
   async jobsForCompany(key: string) {
     return this.jobs.filter((j) => j.companyKey === key).map((j) => structuredClone(j));
   }
   async saveJob(job: JobFacts) {
+    this.trip("saveJob");
     if (!job.id) {
       const id = `job${++this.n}`;
       this.jobs.push({ ...job, id });
@@ -132,6 +147,8 @@ export class MemoryStore implements JobStore {
     e.jobId = jobId;
   }
   async saveFile(f: FileInput) {
+    this.trip("saveFile");
+    if (this.files.some((x) => x.eventId === f.eventId && x.sha256 === f.sha256)) return;
     this.files.push({ ...f, id: `file${++this.n}`, jobId: null });
   }
   async linkEventFiles(eventId: string, jobId: string) {

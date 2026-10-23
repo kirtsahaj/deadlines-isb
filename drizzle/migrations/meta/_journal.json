@@ -43,6 +43,13 @@
       "when": 1792784099117,
       "tag": "0005_jobs_field_times",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792785116028,
+      "tag": "0006_jobs_event_resume",
+      "breakpoints": true
     }
   ]
 }

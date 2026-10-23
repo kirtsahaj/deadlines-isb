@@ -51,8 +51,15 @@ export function supabaseJobStore(): JobStore {
         inbound_id: inboundId!, original_key: e.originalKey, company_key: e.companyKey, company: e.payload.company,
         role: e.payload.role, kind: e.kind, payload: e.payload as unknown as Json, sent_at: e.sentAt,
       }).select("id").maybeSingle();
-      if (r.error?.code === "23505") return null;
-      return must(r, "event_insert")!.id;
+      if (!r.error && r.data) return { id: r.data.id, created: true, state: "applying", payload: e.payload, sentAt: e.sentAt };
+      if (r.error?.code !== "23505") throw new Error("event_insert_failed");
+      const old = must(await supabaseAdmin.from("job_events").select("id, state, payload, sent_at").eq("original_key", e.originalKey).single(), "event_read")!;
+      return { id: old.id, created: false, state: old.state, payload: old.payload as unknown as ParsedJobEvent, sentAt: old.sent_at };
+    },
+    async claimEvent(id, staleBefore) {
+      const r = must(await supabaseAdmin.from("job_events").update({ claimed_at: new Date().toISOString() })
+        .eq("id", id).eq("state", "applying").lt("claimed_at", staleBefore).select("id"), "event_claim");
+      return (r ?? []).length === 1;
     },
     async jobsForCompany(key) {
       const rows = must(await supabaseAdmin.from("jobs").select("id, company, role, company_key, role_keys, role_aliases, deadline_date, deadline_time, shortlist_date, field_sent_at").eq("company_key", key), "jobs_read");
@@ -81,9 +88,9 @@ export function supabaseJobStore(): JobStore {
       const path = `events/${f.eventId}/${f.sha256}.${f.ext}`;
       const up = await supabaseAdmin.storage.from("job-files").upload(path, f.bytes, { contentType: f.mime, upsert: true });
       if (up.error) throw new Error("file_upload_failed");
-      must(await supabaseAdmin.from("job_files").insert({
+      must(await supabaseAdmin.from("job_files").upsert({
         event_id: f.eventId, storage_path: path, sha256: f.sha256, filename: f.filename, mime: f.mime, size_bytes: f.bytes.length,
-      }), "file_insert");
+      }, { onConflict: "event_id,sha256", ignoreDuplicates: true }), "file_insert");
     },
     async linkEventFiles(eventId, jobId) {
       const files = must(await supabaseAdmin.from("job_files").select("id, filename").eq("event_id", eventId), "files_read") ?? [];

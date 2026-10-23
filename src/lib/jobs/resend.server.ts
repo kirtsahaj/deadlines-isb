@@ -11,6 +11,7 @@ type Received = {
   subject?: string;
   text?: string | null;
   html?: string | null;
+  /** Verdicts computed by Resend's receiving server (present on GET /emails/receiving/:id, observed live). */
   authentication?: { spf?: string; dkim?: string; dmarc?: string } | null;
   raw?: { download_url?: string } | null;
 };
@@ -21,7 +22,8 @@ function trustedRawUrl(value: string | undefined): string | null {
   try {
     const u = new URL(value);
     const host = u.hostname.toLowerCase();
-    const ok = u.protocol === "https:" && (host.endsWith(".cloudfront.net") || host === "resend.com" || host.endsWith(".resend.com") || host.endsWith(".resend.app"));
+    // Observed live: Resend serves raw MIME from cdn.resend.app with a signed, expiring URL.
+    const ok = u.protocol === "https:" && host === "cdn.resend.app";
     return ok ? u.toString() : null;
   } catch {
     return null;
@@ -68,10 +70,13 @@ export async function fetchReceivedEmail(emailId: string): Promise<InboundInput>
   let raw: Uint8Array | null = null;
   const rawUrl = trustedRawUrl(data.raw?.download_url);
   if (rawUrl) {
-    const rawRes = await fetch(rawUrl);
+    const rawRes = await fetch(rawUrl, { redirect: "error" });
     if (rawRes.ok) raw = await readCapped(rawRes);
     else await rawRes.body?.cancel();
   }
+
+  // Without the stored raw MIME we cannot see attachments or verify the forward; retry rather than guess.
+  if (!raw) throw new Error("raw_unavailable");
 
   return {
     providerId: emailId,
