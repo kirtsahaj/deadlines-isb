@@ -6,19 +6,19 @@ import { savedTheme, type AppTheme } from "@/lib/theme";
 const ThemeContext = createContext<{ theme: AppTheme; toggle: () => void }>({ theme: "light", toggle: () => {} });
 const STORAGE_KEY = "deadline-tracker-theme";
 /** Browser chrome (status bar / address bar) colours matching the page background. */
-const CHROME: Record<AppTheme, string> = { light: "#fbf9fd", dark: "#17171c" };
+const CHROME: Record<AppTheme, string> = { light: "#fbf9ff", dark: "#131317" };
 
 function applyTheme(next: AppTheme) {
   const root = document.documentElement;
   root.classList.toggle("dark", next === "dark");
   root.style.colorScheme = next;
-  let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-  if (!meta) {
-    meta = document.createElement("meta");
-    meta.name = "theme-color";
-    document.head.appendChild(meta);
-  }
+  // Safari ignores in-place theme-color updates, so recreate the node — this is
+  // what makes the iPhone status bar repaint when night mode is toggled.
+  document.querySelector('meta[name="theme-color"]')?.remove();
+  const meta = document.createElement("meta");
+  meta.name = "theme-color";
   meta.content = CHROME[next];
+  document.head.appendChild(meta);
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
