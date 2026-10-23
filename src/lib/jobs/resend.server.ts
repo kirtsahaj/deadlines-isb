@@ -75,6 +75,9 @@ export async function fetchReceivedEmail(emailId: string): Promise<InboundInput>
     else await rawRes.body?.cancel();
   }
 
+  // Without the stored raw MIME we cannot see attachments or verify the forward; retry rather than guess.
+  if (!raw) throw new Error("raw_unavailable");
+
   return {
     providerId: emailId,
     to: data.to ?? [],
