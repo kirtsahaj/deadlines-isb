@@ -218,6 +218,7 @@ export type Database = {
       job_events: {
         Row: {
           company: string
+          company_key: string
           created_at: string
           id: string
           inbound_id: string
@@ -231,6 +232,7 @@ export type Database = {
         }
         Insert: {
           company: string
+          company_key?: string
           created_at?: string
           id?: string
           inbound_id: string
@@ -244,6 +246,7 @@ export type Database = {
         }
         Update: {
           company?: string
+          company_key?: string
           created_at?: string
           id?: string
           inbound_id?: string
@@ -381,6 +384,7 @@ export type Database = {
           deadline_at: string | null
           deadline_date: string | null
           deadline_time: string | null
+          field_sent_at: Json
           first_seen_at: string
           id: string
           jd_file_id: string | null
@@ -397,6 +401,7 @@ export type Database = {
           deadline_at?: string | null
           deadline_date?: string | null
           deadline_time?: string | null
+          field_sent_at?: Json
           first_seen_at?: string
           id?: string
           jd_file_id?: string | null
@@ -413,6 +418,7 @@ export type Database = {
           deadline_at?: string | null
           deadline_date?: string | null
           deadline_time?: string | null
+          field_sent_at?: Json
           first_seen_at?: string
           id?: string
           jd_file_id?: string | null
