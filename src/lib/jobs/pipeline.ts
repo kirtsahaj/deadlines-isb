@@ -53,7 +53,7 @@ export class InProgressError extends Error {
     super("in_progress");
   }
 }
-export type IngestResult = { status: IngestStatus; reason: string };
+export type IngestResult = { status: IngestStatus; reason: string; newJob?: { company: string; role: string | null; deadline?: ParsedJobEvent["deadline"] } };
 
 /** Provider signature proves Resend sent the event; this checks who forwarded it and to where. */
 export function checkEnvelope(input: InboundInput, cfg: IngestConfig): IngestResult | null {
@@ -119,7 +119,10 @@ export async function ingest(store: JobStore, input: InboundInput, cfg: IngestCo
 
   const outcome = await applyStored(store, companyKey(stored.payload.company), stored);
   await reconcile(store, companyKey(stored.payload.company));
-  return finish({ status: "processed", reason: outcome }, meta);
+  const result = await finish({ status: "processed", reason: outcome }, meta);
+  return outcome === "created" && stored.payload.kind === "broadcast"
+    ? { ...result, newJob: { company: stored.payload.company, role: stored.payload.role, deadline: stored.payload.deadline } }
+    : result;
 }
 
 async function applyStored(store: JobStore, cKey: string, ev: StoredEvent): Promise<string> {
