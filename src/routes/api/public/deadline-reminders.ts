@@ -54,14 +54,7 @@ export const Route = createFileRoute("/api/public/deadline-reminders")({
             // One account's failure must not block other reminders.
           }
         }
-        let jobSent = 0;
-        try {
-          const { sendJobReminders } = await import("@/lib/jobs/reminders.server");
-          jobSent = await sendJobReminders(subs, now);
-        } catch {
-          // Job reminders are independent; academic reminders above are already done.
-        }
-        return Response.json({ sent, jobSent }, { headers: { "Cache-Control": "no-store" } });
+        return Response.json({ sent }, { headers: { "Cache-Control": "no-store" } });
       },
     },
   },
