@@ -66,11 +66,8 @@ export function checkEnvelope(input: InboundInput, cfg: IngestConfig): IngestRes
   return null;
 }
 
-function locateOriginal(input: InboundInput, sender: string): OriginalMessage | null {
-  if (input.raw) {
-    const root: MimePart = parseMime(input.raw);
-    return findOriginal(root, sender);
-  }
+function locateOriginal(input: InboundInput, root: MimePart | null, sender: string): OriginalMessage | null {
+  if (root) return findOriginal(root, sender);
   if (input.fallback) {
     const inline = findInline(input.fallback.text, sender);
     return inline ? { ...inline, attachments: [], via: "inline" } : null;
@@ -88,7 +85,10 @@ export async function ingest(store: JobStore, input: InboundInput, cfg: IngestCo
   const envelope = checkEnvelope(input, cfg);
   if (envelope) return finish(envelope);
 
-  const original = locateOriginal(input, cfg.sender);
+  const root = input.raw ? parseMime(input.raw) : null;
+  // The raw message Resend stored must itself be from the authenticated forwarder, not just the API summary.
+  if (root && bareAddress(root.headers["from"]) !== bareAddress(input.from)) return finish({ status: "quarantined", reason: "raw_sender_mismatch" });
+  const original = locateOriginal(input, root, cfg.sender);
   if (!original) return finish({ status: "ignored", reason: "not_cas" });
   const meta = { subject: original.subject.slice(0, 300), messageId: original.messageId, sentAt: original.sentAt };
 
