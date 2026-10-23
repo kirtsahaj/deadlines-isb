@@ -177,6 +177,12 @@
     border-color: var(--color-border);
   }
 
+  /* The iPhone status bar area shows through behind the page, so the root
+     element must carry the page background, not just the body. */
+  html {
+    background-color: var(--color-background);
+  }
+
   body {
     background-color: var(--color-background);
     background-image:
