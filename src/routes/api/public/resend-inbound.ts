@@ -41,6 +41,17 @@ export const Route = createFileRoute("/api/public/resend-inbound")({
           const input = await fetchReceivedEmail(emailId);
           const result = await ingest(supabaseJobStore(), input, ingestConfig());
           console.log(`[placements] ${result.status}: ${result.reason}`);
+          if (result.newJob) {
+            const { newJobWorthAnnouncing } = await import("@/lib/jobs/reminders");
+            if (newJobWorthAnnouncing(result.newJob.deadline, Date.now())) {
+              try {
+                const { notifyNewJob } = await import("@/lib/jobs/reminders.server");
+                await notifyNewJob(result.newJob);
+              } catch {
+                // Alerts are best-effort; the job is already saved.
+              }
+            }
+          }
           return Response.json({ ok: true });
         } catch (error) {
           if (error instanceof Error && error.message === "in_progress") return new Response("in progress, retry", { status: 503 });

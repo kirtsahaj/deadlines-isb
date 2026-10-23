@@ -1,14 +1,12 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, Search, Star } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Download, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getJobJdLink, listJobs, setJobReminders, setJobStar, type JobTile } from "@/lib/jobs.functions";
-import { deadlinePassed, jobsInView, type JobFilter, type JobSort, type JobView } from "@/lib/jobs/view";
+import { getJobJdLink, listJobs, type JobTile } from "@/lib/jobs.functions";
+import { jobsInView } from "@/lib/jobs/view";
 import { relativeTime } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/placements")({
@@ -34,127 +32,53 @@ function formatDate(date: string | null, time?: string | null): string {
   return `${d}, ${t}`;
 }
 
-function JobCard({ job, now }: { job: JobTile; now: number }) {
-  const queryClient = useQueryClient();
-  const star = useMutation({
-    mutationFn: (starred: boolean) => setJobStar({ data: { jobId: job.id, starred } }),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["jobs"] }),
-  });
+function JobCard({ job }: { job: JobTile }) {
   const jd = useMutation({
     mutationFn: () => getJobJdLink({ data: { jobId: job.id } }),
     onSuccess: ({ url }) => window.open(url, "_blank", "noopener,noreferrer"),
   });
-  const starred = star.isPending ? !!star.variables : job.starred;
-  const passed = deadlinePassed(job, now);
 
   return (
-    <article className="surface-card flex gap-3 p-3">
-      <div className="min-w-0 flex-1 space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{job.company}</p>
-        <h2 className="text-base font-semibold leading-snug">{job.role}</h2>
-        <dl className="grid gap-x-3 text-sm sm:grid-cols-[auto_1fr]">
-          <dt className="text-muted-foreground">Apply by</dt>
-          <dd>
-            {formatDate(job.deadlineDate, job.deadlineTime)}
-            {passed && <span className="text-muted-foreground"> · passed per email</span>}
-          </dd>
-          <dt className="text-muted-foreground">Expected shortlist</dt>
-          <dd>{formatDate(job.shortlistDate)}</dd>
-        </dl>
-        {job.hasJd && (
-          <Button variant="outline" size="sm" className="mt-1 h-8 rounded-full" onClick={() => jd.mutate()} disabled={jd.isPending}>
-            <Download className="size-3.5" aria-hidden /> {jd.isPending ? "Opening…" : "Job description"}
-          </Button>
-        )}
-        {jd.isError && <p className="text-xs text-destructive">Couldn't open the file. Try again.</p>}
-      </div>
-      <button
-        type="button"
-        aria-pressed={starred}
-        aria-label={starred ? `Unstar ${job.role}` : `Star ${job.role}`}
-        onClick={() => star.mutate(!starred)}
-        className="tap-target grid size-10 shrink-0 place-items-center rounded-full hover:bg-muted"
-      >
-        <Star className={`size-5 ${starred ? "fill-primary text-primary" : "text-muted-foreground"}`} aria-hidden />
-      </button>
+    <article className="surface-card space-y-1 p-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{job.company}</p>
+      <h2 className="text-base font-semibold leading-snug">{job.role}</h2>
+      <dl className="grid gap-x-3 text-sm sm:grid-cols-[auto_1fr]">
+        <dt className="text-muted-foreground">Apply by</dt>
+        <dd>{formatDate(job.deadlineDate, job.deadlineTime)}</dd>
+        <dt className="text-muted-foreground">Expected shortlist</dt>
+        <dd>{formatDate(job.shortlistDate)}</dd>
+      </dl>
+      {job.hasJd && (
+        <Button variant="outline" size="sm" className="mt-1 h-8 rounded-full" onClick={() => jd.mutate()} disabled={jd.isPending}>
+          <Download className="size-3.5" aria-hidden /> {jd.isPending ? "Opening…" : "Job description"}
+        </Button>
+      )}
+      {jd.isError && <p className="text-xs text-destructive">Couldn't open the file. Try again.</p>}
     </article>
   );
 }
 
-function JobReminderToggle({ enabled }: { enabled: boolean | undefined }) {
-  const queryClient = useQueryClient();
-  const mutation = useMutation({
-    mutationFn: (value: boolean) => setJobReminders({ data: { enabled: value } }),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["jobs"] }),
-  });
-  if (enabled === undefined) return null;
-  return (
-    <label className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3">
-      <span className="text-sm">
-        <span className="font-medium">Application deadline reminders</span>
-        <span className="block text-muted-foreground">12 and 3 hours before, when the email gives a time. Uses your existing notification setting.</span>
-      </span>
-      <Switch checked={mutation.isPending && mutation.variables !== undefined ? mutation.variables : enabled} onCheckedChange={(v) => mutation.mutate(v)} aria-label="Application deadline reminders" />
-    </label>
-  );
-}
-
 function PlacementsPage() {
-  const [view, setView] = useState<JobView>("upcoming");
-  const [sort, setSort] = useState<JobSort>("deadline");
-  const [filter, setFilter] = useState<JobFilter>("all");
   const [search, setSearch] = useState("");
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => listJobs() });
-  const now = Date.now();
   const visible = useMemo(
-    () => jobsInView(jobs.data?.jobs ?? [], { view, sort, filter, search, now }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [jobs.data, view, sort, filter, search],
+    () => jobsInView(jobs.data?.jobs ?? [], { view: "upcoming", sort: "deadline", filter: "all", search, now: Date.now() }),
+    [jobs.data, search],
   );
 
   return (
     <div className="space-y-3">
       <header>
         <h1 className="text-3xl font-semibold">Placements</h1>
-        <p className="mt-1 text-sm font-medium text-muted-foreground">
-          From CAS emails{jobs.data?.feedUpdatedAt ? ` · last email ${relativeTime(jobs.data.feedUpdatedAt)}` : ""}. Not checked against the portal — confirm there before applying.
-        </p>
+        {jobs.data?.feedUpdatedAt && (
+          <p className="mt-1 text-sm font-medium text-muted-foreground">Last updated {relativeTime(jobs.data.feedUpdatedAt)}</p>
+        )}
+        <p className="text-xs text-muted-foreground">Please refer to the placement portal for more info.</p>
       </header>
 
-      <JobReminderToggle enabled={jobs.data?.jobReminders} />
-
-      <div className="inline-flex rounded-full bg-muted p-1" role="tablist" aria-label="Job view">
-        {(["upcoming", "older"] as JobView[]).map((value) => (
-          <Button key={value} type="button" role="tab" aria-selected={view === value} variant={view === value ? "default" : "ghost"} size="sm" onClick={() => setView(value)}>
-            {value === "upcoming" ? "Upcoming" : "Past & undated"}
-          </Button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-48 flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search company or role" aria-label="Search jobs" className="h-10 border-border bg-card pl-9" />
-        </div>
-        <Select value={filter} onValueChange={(v) => setFilter(v as JobFilter)}>
-          <SelectTrigger className="h-10 w-36 rounded-full bg-card px-4" aria-label="Filter jobs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All jobs</SelectItem>
-            <SelectItem value="starred">Starred</SelectItem>
-            <SelectItem value="jd">With JD</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={sort} onValueChange={(v) => setSort(v as JobSort)}>
-          <SelectTrigger className="h-10 w-40 rounded-full bg-card px-4" aria-label="Sort jobs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="deadline">By deadline</SelectItem>
-            <SelectItem value="recent">Recently updated</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search company or role" aria-label="Search jobs" className="h-10 border-border bg-card pl-9" />
       </div>
 
       {jobs.isLoading ? (
@@ -166,14 +90,14 @@ function PlacementsPage() {
         <div className="surface-card p-6 text-center text-sm text-muted-foreground">Couldn't load jobs just now. Please try again.</div>
       ) : visible.length === 0 ? (
         <div className="surface-card p-6 text-center">
-          <h2 className="text-base font-semibold">{view === "upcoming" ? "No upcoming deadlines" : "Nothing here"}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{jobs.data?.jobs.length ? "Nothing matches your search or filter." : "New CAS job emails will appear here."}</p>
+          <h2 className="text-base font-semibold">No upcoming deadlines</h2>
+          {search && <p className="mt-1 text-sm text-muted-foreground">Nothing matches your search.</p>}
         </div>
       ) : (
         <ul className="space-y-2">
           {visible.map((job) => (
             <li key={job.id}>
-              <JobCard job={job} now={now} />
+              <JobCard job={job} />
             </li>
           ))}
         </ul>

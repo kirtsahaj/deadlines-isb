@@ -35,7 +35,8 @@ describe("intake: message shapes", () => {
   it("inline forward (the verified live sample shape) creates one job", async () => {
     const s = new MemoryStore();
     const r = await ingest(s, inbound(forwardInline(SYSTEMATIX_SUBJECT, SYSTEMATIX_BODY)), CFG);
-    expect(r).toEqual({ status: "processed", reason: "created" });
+    expect(r).toMatchObject({ status: "processed", reason: "created" });
+    expect(r.newJob?.company).toBe("Systematix Group");
     expect(s.jobs).toHaveLength(1);
     expect(s.jobs[0]).toMatchObject({ company: "Systematix Group", role: "Analyst- Institutional Equity Research", deadlineDate: "2026-11-04", deadlineTime: "11:00", shortlistDate: "2026-11-16" });
   });

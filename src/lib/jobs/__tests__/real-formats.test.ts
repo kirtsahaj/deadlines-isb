@@ -145,7 +145,7 @@ describe("transient failures and concurrent delivery", () => {
     await expect(ingest(s, input, CFG)).rejects.toBeInstanceOf(InProgressError);
     // Once the claim lapses, the retry resumes the recorded event.
     s.events[0]!.claimedAt -= EVENT_LEASE_MS + 1;
-    expect(await ingest(s, input, CFG)).toEqual({ status: "processed", reason: "created" });
+    expect(await ingest(s, input, CFG)).toMatchObject({ status: "processed", reason: "created" });
     expect(s.jobs).toHaveLength(1);
     expect(s.events[0]!.state).toBe("applied");
     expect(s.files).toHaveLength(1);
