@@ -334,7 +334,7 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
             dueAt: s.due_at,
             date: null,
             observedAt: s.last_confirmed_at,
-            note: sameSection ? null : `From a classmate in section ${s.contributor_section}; may differ for your section`,
+            note: sameSection ? null : `From section ${s.contributor_section} eLearn; may differ for your section`,
           },
           ...(match ? [outlineSource(match)] : []),
         ],
