@@ -64,7 +64,8 @@ function CoursepackButton({ courseCode }: { courseCode: string }) {
       if (r.status === "not_connected") return setDialog("connect");
       if (r.status !== "ok") return setDialog("error");
       setItems(r.items);
-      if (r.items.length === 1) window.open(r.items[0].url, "_blank", "noopener");
+      const only = r.items.length === 1 ? r.items[0] : undefined;
+      if (only) window.open(only.url, "_blank", "noopener");
       else setDialog(r.items.length ? "list" : "empty");
     } catch {
       setDialog("error");
