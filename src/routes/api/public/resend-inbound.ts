@@ -42,6 +42,7 @@ export const Route = createFileRoute("/api/public/resend-inbound")({
           console.log(`[placements] ${result.status}: ${result.reason}`);
           return Response.json({ ok: true });
         } catch (error) {
+          if (error instanceof Error && error.message === "in_progress") return new Response("in progress, retry", { status: 503 });
           console.error(`[placements] intake failed: ${error instanceof Error ? error.message : "unknown"}`);
           return new Response("retry", { status: 500 });
         }
