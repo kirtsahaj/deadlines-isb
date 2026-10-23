@@ -72,3 +72,16 @@ describe("calendar echoes", () => {
     expect(out.map((o) => o.id)).toEqual(["a", "x"]);
   });
 });
+
+describe("section segregation", () => {
+  it("hides own eLearn activities explicitly for another section", () => {
+    const base = { deadline_status: "dated", submission_status: "unknown", due_at: "2026-10-30T18:29:00Z", conflict: false, moodle_course_id: 5, kind: "choice", deadline_type: "close", source_primary: "choice" };
+    const out = mergeDeadlines({
+      now: Date.parse("2026-10-23T10:00:00Z"), courseTitles: {}, outline: [], shared: [], ownLastSuccessAt: null,
+      enrollments: [{ courseCode: "MKTS", sectionId: "MKTS_G", studyGroup: null }],
+      ownCourses: [{ moodle_course_id: 5, short_name: "MKTS_PGPMOH_2026-27_T5", full_name: "MKTS" }],
+      own: [{ ...base, id: "g", title: "Group Selection_G" }, { ...base, id: "h", title: "Group Selection_H" }, { ...base, id: "all", title: "Final report" }],
+    });
+    expect(out.map((o) => o.id).sort()).toEqual(["all", "g"]);
+  });
+});
