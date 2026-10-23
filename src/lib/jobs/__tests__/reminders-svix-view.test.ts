@@ -8,7 +8,7 @@ const H = 3600_000;
 const now = Date.parse("2026-11-01T10:00:00Z");
 const at = (ms: number) => new Date(now + ms).toISOString();
 
-describe("job reminders: 12h and 3h", () => {
+describe("job reminders: 3h only", () => {
   it("never sends a 12-hour notice; only the 3-hour one", () => {
     expect(dueJobOffsets(at(12 * H), now)).toEqual([]);
     expect(dueJobOffsets(at(8 * H), now)).toEqual([]);
@@ -35,6 +35,7 @@ describe("job reminders: 12h and 3h", () => {
     expect(newJobWorthAnnouncing({ date: "2000-01-01" }, now)).toBe(false);
     expect(newJobWorthAnnouncing({ date: "2999-01-01", time: "11:00" }, now)).toBe(true);
   });
+});
 
 describe("webhook signature", () => {
   const secret = "whsec_" + btoa("0123456789abcdef0123456789abcdef");
