@@ -76,10 +76,10 @@ function CoursepackButton({ courseCode }: { courseCode: string }) {
 
   return (
     <>
-      <Button size="sm" className="coursepack-btn mt-3 h-10 px-5 text-sm" onClick={onClick} disabled={loading}>
+      <Button variant="outline" size="sm" className="mt-2 h-8" onClick={onClick} disabled={loading}>
         {loading ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <BookOpen className="size-4" aria-hidden />}
         Coursepack
-        {!loading && <ArrowUpRight className="size-4" aria-hidden />}
+        {!loading && <ArrowUpRight className="size-3.5" aria-hidden />}
       </Button>
       <Dialog open={dialog !== null} onOpenChange={(o) => !o && setDialog(null)}>
         <DialogContent className="max-w-md">
