@@ -15,6 +15,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated/connect'
 import { Route as AuthenticatedDeadlinesRouteImport } from './routes/_authenticated/deadlines'
 import { Route as AuthenticatedMenuRouteImport } from './routes/_authenticated/menu'
+import { Route as AuthenticatedPlacementsRouteImport } from './routes/_authenticated/placements'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as ApiPublicCoursepackRouteImport } from './routes/api/public/coursepack'
 import { Route as ApiPublicDeadlineRemindersRouteImport } from './routes/api/public/deadline-reminders'
@@ -49,6 +50,11 @@ const AuthenticatedDeadlinesRoute = AuthenticatedDeadlinesRouteImport.update({
 const AuthenticatedMenuRoute = AuthenticatedMenuRouteImport.update({
   id: '/menu',
   path: '/menu',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlacementsRoute = AuthenticatedPlacementsRouteImport.update({
+  id: '/placements',
+  path: '/placements',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/connect': typeof AuthenticatedConnectRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/menu': typeof AuthenticatedMenuRoute
+  '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/connect': typeof AuthenticatedConnectRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/menu': typeof AuthenticatedMenuRoute
+  '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/deadlines': typeof AuthenticatedDeadlinesRoute
   '/_authenticated/menu': typeof AuthenticatedMenuRoute
+  '/_authenticated/placements': typeof AuthenticatedPlacementsRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/deadlines'
     | '/menu'
+    | '/placements'
     | '/schedule'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/deadlines'
     | '/menu'
+    | '/placements'
     | '/schedule'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/_authenticated/connect'
     | '/_authenticated/deadlines'
     | '/_authenticated/menu'
+    | '/_authenticated/placements'
     | '/_authenticated/schedule'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
@@ -222,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMenuRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/placements': {
+      id: '/_authenticated/placements'
+      path: '/placements'
+      fullPath: '/placements'
+      preLoaderRoute: typeof AuthenticatedPlacementsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/schedule': {
       id: '/_authenticated/schedule'
       path: '/schedule'
@@ -272,6 +291,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConnectRoute: typeof AuthenticatedConnectRoute
   AuthenticatedDeadlinesRoute: typeof AuthenticatedDeadlinesRoute
   AuthenticatedMenuRoute: typeof AuthenticatedMenuRoute
+  AuthenticatedPlacementsRoute: typeof AuthenticatedPlacementsRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
 }
 
@@ -280,6 +300,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConnectRoute: AuthenticatedConnectRoute,
   AuthenticatedDeadlinesRoute: AuthenticatedDeadlinesRoute,
   AuthenticatedMenuRoute: AuthenticatedMenuRoute,
+  AuthenticatedPlacementsRoute: AuthenticatedPlacementsRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
 }
 
