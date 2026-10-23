@@ -2,10 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { CalendarClock, Menu } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTerm5 } from "@/lib/useTerm5";
-
-const ASSIGNMENTS = { to: "/deadlines", label: "Assignments" } as const;
-const CLASSES = { to: "/schedule", label: "Classes" } as const;
-const PLACEMENTS = { to: "/placements", label: "Placements" } as const;
+import { navTabs } from "@/lib/navTabs";
 
 export function AppFooter() {
   return (
@@ -19,8 +16,7 @@ export function AppFooter() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const term5 = useTerm5();
-  // Classes stays roster-only; Placements is for every signed-in school account.
-  const tabs = term5.data?.inRoster ? [ASSIGNMENTS, CLASSES, PLACEMENTS] : [ASSIGNMENTS, PLACEMENTS];
+  const tabs = navTabs(term5);
   const menuActive = pathname === "/menu";
 
   return (
