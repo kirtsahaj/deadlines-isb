@@ -124,7 +124,9 @@ export function DeadlineCard({
                 </p>
               )}
               {item.otherSection && (
-                <p className="rounded-lg bg-muted p-3">Seen for another section — it may not apply to yours.</p>
+                <p className="rounded-lg bg-muted p-3">
+                  Seen for section {item.otherSectionLabel ?? "another"} — your section's date may differ. Connect eLearn to see your own section's details.
+                </p>
               )}
               {item.own?.text_evidence && <p className="text-muted-foreground">“{item.own.text_evidence}”</p>}
               {item.outline && item.outline.deadline_rule !== "explicit" && (
@@ -147,6 +149,11 @@ export function DeadlineCard({
         </span>
         {item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>}
       </div>
+      {item.otherSection && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          Section {item.otherSectionLabel ?? "other"} date{!connected && " · connect eLearn for your section"}
+        </p>
+      )}
 
       {item.preparation && <ul className="mt-1.5 space-y-0.5 text-sm">
         {item.preparation.map(p => <li key={p.id}>{p.title} <span className="text-xs text-muted-foreground">· {p.requirement === "assigned" ? "Required" : p.requirement}</span></li>)}

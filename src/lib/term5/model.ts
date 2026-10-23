@@ -102,6 +102,8 @@ export type UnifiedDeadline = {
   provisional: boolean;
   remindable: boolean;
   otherSection: boolean;
+  /** Section the item was seen for when it is not the student's own (e.g. "H"). */
+  otherSectionLabel?: string | null;
   own?: OwnRow | undefined;
   outline?: OutlineOccurrence | undefined;
   preparation?: import("./preparation").PrepItem[];
@@ -253,6 +255,9 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
     const code = term5CodeFromShortName(course?.short_name, input.campus);
     const enrollment = code ? myCodes.get(code) : undefined;
     const hint = sectionHintFromTitle(row.title, input.campus);
+    const mySection = sectionLetter(enrollment?.sectionId ?? null);
+    // Combined eLearn courses list every section's activities; keep only the student's own section.
+    if (hint && mySection && hint !== mySection) continue;
     const applicable = !hint || hint === sectionLetter(enrollment?.sectionId ?? null);
     const match = code && enrollment && applicable && row.deadline_type !== "cutoff" ? findOutline(code, row.title, row.due_at) : undefined;
     if (match) used.add(match.occurrence_id);
@@ -337,6 +342,7 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
         provisional: false,
         remindable: !!s.due_at && sameSection,
         otherSection: !sameSection,
+        otherSectionLabel: sameSection ? null : s.section_hint ?? s.contributor_section,
         outline: match,
       });
     }
