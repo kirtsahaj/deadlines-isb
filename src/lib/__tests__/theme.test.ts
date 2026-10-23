@@ -1,13 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { savedTheme } from "../theme";
+import { resolveTheme, savedPreference } from "../theme";
 
-describe("day/night preference", () => {
-  it("defaults to day mode without a saved choice", () => {
-    expect(savedTheme(null)).toBe("light");
-    expect(savedTheme("system")).toBe("light");
+describe("display preference", () => {
+  it("defaults to device default", () => {
+    expect(savedPreference(null)).toBe("system");
+    expect(savedPreference("junk")).toBe("system");
   });
-  it("preserves an explicit night choice", () => {
-    expect(savedTheme("dark")).toBe("dark");
-    expect(savedTheme("light")).toBe("light");
+  it("keeps explicit light/dark", () => {
+    expect(savedPreference("dark")).toBe("dark");
+    expect(savedPreference("light")).toBe("light");
+  });
+  it("device default follows the phone", () => {
+    expect(resolveTheme("system", true)).toBe("dark");
+    expect(resolveTheme("system", false)).toBe("light");
+  });
+  it("explicit choice overrides the phone", () => {
+    expect(resolveTheme("light", true)).toBe("light");
+    expect(resolveTheme("dark", false)).toBe("dark");
   });
 });
