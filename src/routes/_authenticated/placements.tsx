@@ -126,7 +126,7 @@ function PlacementsPage() {
       <div className="inline-flex rounded-full bg-muted p-1" role="tablist" aria-label="Job view">
         {(["upcoming", "older"] as JobView[]).map((value) => (
           <Button key={value} type="button" role="tab" aria-selected={view === value} variant={view === value ? "default" : "ghost"} size="sm" onClick={() => setView(value)}>
-            {value === "upcoming" ? "Upcoming" : "Older"}
+            {value === "upcoming" ? "Upcoming" : "Past & undated"}
           </Button>
         ))}
       </div>
@@ -166,7 +166,7 @@ function PlacementsPage() {
         <div className="surface-card p-6 text-center text-sm text-muted-foreground">Couldn't load jobs just now. Please try again.</div>
       ) : visible.length === 0 ? (
         <div className="surface-card p-6 text-center">
-          <h2 className="text-base font-semibold">{view === "upcoming" ? "No open jobs" : "No older jobs"}</h2>
+          <h2 className="text-base font-semibold">{view === "upcoming" ? "No upcoming deadlines" : "Nothing here"}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{jobs.data?.jobs.length ? "Nothing matches your search or filter." : "New CAS job emails will appear here."}</p>
         </div>
       ) : (

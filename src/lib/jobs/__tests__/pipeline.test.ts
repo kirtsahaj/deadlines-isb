@@ -172,4 +172,20 @@ describe("Job Details Modified: explicit fields only", () => {
     expect((await ingest(s, inbound(modified("UBS", "Associate", "Application Deadline: 30-Nov-2026", "Sun, 25 Oct 2026 10:00:00 +0530")), CFG)).reason).toBe("pending");
     expect(s.jobs[0]!.deadlineDate).toBe("2026-11-14");
   });
+
+  it("backfill in any order reconciles to the same effective deadline, one job, and replays are no-ops", async () => {
+    const mails = [
+      broadcast("Bain", "Associate", "Application Deadline: 10-Nov-2026 5:00 PM\nExpected Shortlist Date: 2026-11-20", { date: "Thu, 22 Oct 2026 10:00:00 +0530", messageId: "<b1@isb>" }),
+      modified("Bain", "Associate", "Application Deadline: 12-Nov-2026", "Fri, 23 Oct 2026 10:00:00 +0530", "<b2@isb>"),
+      modified("Bain", "Associate", "Application Deadline: 9:00 AM", "Sat, 24 Oct 2026 10:00:00 +0530", "<b3@isb>"),
+    ];
+    const orders = [[0, 1, 2], [2, 1, 0], [1, 0, 2], [2, 0, 1]];
+    for (const order of orders) {
+      const s = new MemoryStore();
+      for (const i of order) await ingest(s, inbound(mails[i]!), CFG);
+      for (const i of order) await ingest(s, inbound(mails[i]!), CFG);
+      expect(s.jobs).toHaveLength(1);
+      expect(s.job("Bain")).toMatchObject({ deadlineDate: "2026-11-12", deadlineTime: "09:00", shortlistDate: "2026-11-20" });
+    }
+  });
 });

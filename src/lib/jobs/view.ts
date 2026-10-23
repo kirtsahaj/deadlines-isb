@@ -4,6 +4,11 @@ export type JobView = "upcoming" | "older";
 export type JobSort = "deadline" | "recent";
 export type JobFilter = "all" | "starred" | "jd";
 
+/** Main list: only jobs whose effective (reconciled) email deadline is still ahead. */
+export function deadlineUpcoming(job: Pick<JobTile, "deadlineAt" | "deadlineDate">, now: number): boolean {
+  return Boolean(job.deadlineAt || job.deadlineDate) && !deadlinePassed(job, now);
+}
+
 const todayIst = (now: number) => new Date(now + 5.5 * 3600_000).toISOString().slice(0, 10);
 
 /** Passed per the email-stated deadline; not proof that the portal has closed. */
@@ -18,7 +23,7 @@ const sortKey = (j: JobTile) => j.deadlineAt ?? (j.deadlineDate ? `${j.deadlineD
 export function jobsInView(jobs: JobTile[], o: { view: JobView; sort: JobSort; filter: JobFilter; search: string; now: number }): JobTile[] {
   const q = o.search.trim().toLowerCase();
   const list = jobs.filter((j) => {
-    if ((o.view === "older") !== deadlinePassed(j, o.now)) return false;
+    if ((o.view === "upcoming") !== deadlineUpcoming(j, o.now)) return false;
     if (o.filter === "starred" && !j.starred) return false;
     if (o.filter === "jd" && !j.hasJd) return false;
     return !q || `${j.company} ${j.role}`.toLowerCase().includes(q);

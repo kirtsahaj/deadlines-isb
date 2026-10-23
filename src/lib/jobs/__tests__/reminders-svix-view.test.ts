@@ -68,8 +68,8 @@ describe("placements list", () => {
   ];
   const base = { view: "upcoming" as const, sort: "deadline" as const, filter: "all" as const, search: "", now };
   it("shows the nearest future deadline first; undated last; passed ones in Older", () => {
-    expect(jobsInView(jobs, base).map((j) => j.id)).toEqual(["dateonly", "soon", "late", "undated"]);
-    expect(jobsInView(jobs, { ...base, view: "older" }).map((j) => j.id)).toEqual(["past"]);
+    expect(jobsInView(jobs, base).map((j) => j.id)).toEqual(["dateonly", "soon", "late"]);
+    expect(jobsInView(jobs, { ...base, view: "older" }).map((j) => j.id)).toEqual(["past", "undated"]);
   });
   it("filters starred and JD-only", () => {
     expect(jobsInView(jobs, { ...base, filter: "starred" }).map((j) => j.id)).toEqual(["soon"]);
