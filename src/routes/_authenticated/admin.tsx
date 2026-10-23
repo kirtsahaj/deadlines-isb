@@ -126,7 +126,7 @@ function AdminPage() {
                   r.connected ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
                 }`}
               >
-                {r.connected ? `Connected · ${r.activeDeadlines} deadlines` : "Not connected"}
+                {r.connected ? "Connected" : "Not connected"}
               </span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
