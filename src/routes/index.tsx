@@ -68,7 +68,7 @@ function Landing() {
           <CalendarClock className="mb-8 size-12 text-foreground" aria-hidden />
           <p className="text-xs font-semibold uppercase text-muted-foreground">For ISB students</p>
           <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">ISB Deadline Tracker<span className="text-accent">.</span></h1>
-          <p className="mt-5 max-w-lg text-lg text-muted-foreground">All your eLearn deadlines in one list.</p>
+          <p className="mt-5 max-w-lg text-lg text-muted-foreground">All your academic and job application deadlines in one place.</p>
           <div className="mt-8 space-y-3">
             <Button size="lg" className="tap-target w-full sm:w-auto" onClick={signIn} disabled={signingIn || loading}>{signingIn ? "Opening Microsoft…" : "Continue with Microsoft"}</Button>
             {domains.length > 0 && <p className="text-xs text-muted-foreground">Use your {domains.map((domain) => `@${domain}`).join(" or ")} account.</p>}
