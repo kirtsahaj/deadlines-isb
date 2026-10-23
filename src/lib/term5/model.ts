@@ -9,6 +9,14 @@ const OWN_FRESH_MS = 6 * 3600_000;
 const SHARED_FRESH_MS = 12 * 3600_000;
 const REMINDER_LEAD_MS = 3 * 3600_000;
 
+export type Campus = "MOH" | "HYD";
+const CAMPUS_SECTIONS: Record<Campus, string> = { MOH: "G-L", HYD: "A-C" };
+
+/** Shared-pool key: Hyderabad and Mohali offerings with the same short code are different courses. */
+export function sharedCourseKey(campus: Campus, code: string) {
+  return campus === "MOH" ? code : `${campus}.${code}`;
+}
+
 export type Confidence = "own" | "shared" | "outline" | "provisional";
 
 export type OutlineOccurrence = {
@@ -100,9 +108,9 @@ export type UnifiedDeadline = {
   classRoom?: string;
 };
 
-/** Full course code for a Mohali 2026-27 Term 5 eLearn course; never a prefix match. */
-export function term5CodeFromShortName(shortName: string | null | undefined): string | null {
-  const m = /^([A-Za-z0-9.]+)_PGPMOH_2026-27_T5$/.exec((shortName ?? "").trim());
+/** Full course code for this campus's 2026-27 Term 5 eLearn course; never a prefix match or cross-campus. */
+export function term5CodeFromShortName(shortName: string | null | undefined, campus: Campus = "MOH"): string | null {
+  const m = new RegExp(`^([A-Za-z0-9.]+)_PGP${campus}_2026-27_T5$`).exec((shortName ?? "").trim());
   return m?.[1] ? m[1].toUpperCase() : null;
 }
 
@@ -113,11 +121,12 @@ export function sectionLetter(sectionId: string | null): string | null {
 }
 
 /** Section named explicitly in an eLearn title such as "Group Selection_G" or "(Section H)". */
-export function sectionHintFromTitle(title: string): string | null {
+export function sectionHintFromTitle(title: string, campus: Campus = "MOH"): string | null {
   const t = title.trim();
-  const sec = /\bsec(?:tion)?\.?\s*([G-L])\b/i.exec(t);
+  const r = CAMPUS_SECTIONS[campus];
+  const sec = new RegExp(`\\bsec(?:tion)?\\.?\\s*([${r}])\\b`, "i").exec(t);
   if (sec?.[1]) return sec[1].toUpperCase();
-  const tail = /[_(\-\s]([G-L])\)?$/.exec(t);
+  const tail = new RegExp(`[_(\\-\\s]([${r}])\\)?$`).exec(t);
   return tail?.[1] ?? null;
 }
 
@@ -197,6 +206,7 @@ export type MergeInput = {
   ownCourses: CourseRef[];
   ownLastSuccessAt: string | null;
   shared: SharedRow[];
+  campus?: Campus;
 };
 
 export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
@@ -224,9 +234,9 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
 
   for (const row of input.own) {
     const course = input.ownCourses.find((c) => c.moodle_course_id === row.moodle_course_id);
-    const code = term5CodeFromShortName(course?.short_name);
+    const code = term5CodeFromShortName(course?.short_name, input.campus);
     const enrollment = code ? myCodes.get(code) : undefined;
-    const hint = sectionHintFromTitle(row.title);
+    const hint = sectionHintFromTitle(row.title, input.campus);
     const applicable = !hint || hint === sectionLetter(enrollment?.sectionId ?? null);
     const match = code && enrollment && applicable && row.deadline_type !== "cutoff" ? findOutline(code, row.title, row.due_at) : undefined;
     if (match) used.add(match.occurrence_id);

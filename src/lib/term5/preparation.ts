@@ -1,4 +1,4 @@
-import type { CourseRef, Enrollment, UnifiedDeadline } from "./model";
+import type { Campus, CourseRef, Enrollment, UnifiedDeadline } from "./model";
 import { term5CodeFromShortName } from "./model";
 
 export type PrepItem = {
@@ -34,7 +34,7 @@ export function classesFor(cat: PrepCatalog, enrollments: Enrollment[], titles: 
 }
 
 /** One preread bundle per class; a reading shared across sessions appears only at its first class. */
-export function prereadDeadlines(classes: ScheduleClass[], courses: CourseRef[]): UnifiedDeadline[] {
+export function prereadDeadlines(classes: ScheduleClass[], courses: CourseRef[], campus: Campus = "MOH"): UnifiedDeadline[] {
   const seen = new Set<string>();
   const result: UnifiedDeadline[] = [];
   for (const c of [...classes].sort((a, b) => a.startsAt.localeCompare(b.startsAt))) {
@@ -42,7 +42,7 @@ export function prereadDeadlines(classes: ScheduleClass[], courses: CourseRef[])
     const prep = c.prep.filter(p => p.timing === "before_class" && ["reading", "case", "reference", "optional", "recommended", "watch", "listen"].includes(p.kind) && !seen.has(`${c.courseCode}:${p.id}`));
     if (!prep.length) continue;
     prep.forEach(p => seen.add(`${c.courseCode}:${p.id}`));
-    const course = courses.find(r => term5CodeFromShortName(r.short_name) === c.courseCode);
+    const course = courses.find(r => term5CodeFromShortName(r.short_name, campus) === c.courseCode);
     const provisional = c.mapping.includes("inference");
     result.push({
       id: `preread:${c.id}`, notifyKeys: prep.map(p => `preread:${c.courseCode}:${p.id}`),
