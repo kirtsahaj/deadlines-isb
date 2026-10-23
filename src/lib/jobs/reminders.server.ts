@@ -43,7 +43,7 @@ export async function sendJobReminders(subs: (PushTarget & { user_id: string })[
 }
 
 /** Instant "new job" alert to every school account with device notifications on. */
-export async function notifyNewJob(job: { company: string; role: string | null; deadline?: { date?: string; time?: string } }): Promise<number> {
+export async function notifyNewJob(job: { company: string; role: string | null; deadline?: { date?: string; time?: string } | undefined }): Promise<number> {
   const { data: subs } = await supabaseAdmin.from("push_subscriptions").select("user_id, endpoint, p256dh, auth");
   if (!subs?.length) return 0;
   const eligible = new Set(await eligibleUsers([...new Set(subs.map((s) => s.user_id))]));
