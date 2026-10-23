@@ -232,7 +232,16 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
     note: o.provisional ? "Estimated from the outline and class schedule" : null,
   });
 
-  for (const row of input.own) {
+  // A date only "mentioned in course text" is dropped when the same course already has a structured
+  // activity with the same title and due time (e.g. a Choice activity echoed in the course page).
+  const structuredKeys = new Set(
+    input.own.filter((r) => r.kind !== "text" && r.due_at).map((r) => `${r.moodle_course_id}|${r.title.trim().toLowerCase()}|${new Date(r.due_at as string).getTime()}`),
+  );
+  const ownRows = input.own.filter(
+    (r) => r.kind !== "text" || !r.due_at || !structuredKeys.has(`${r.moodle_course_id}|${r.title.trim().toLowerCase()}|${new Date(r.due_at).getTime()}`),
+  );
+
+  for (const row of ownRows) {
     const course = input.ownCourses.find((c) => c.moodle_course_id === row.moodle_course_id);
     const code = term5CodeFromShortName(course?.short_name, input.campus);
     const enrollment = code ? myCodes.get(code) : undefined;

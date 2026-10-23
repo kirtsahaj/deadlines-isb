@@ -42,3 +42,18 @@ describe("Hyderabad campus", () => {
     expect(catalogFor("HYD").occurrences.some((o) => (o.date ?? "").startsWith("2024"))).toBe(false);
   });
 });
+
+import { mergeDeadlines } from "../model";
+describe("own eLearn duplicates", () => {
+  it("drops a course-text echo of a structured activity with the same title and time", () => {
+    const base = { deadline_status: "dated", submission_status: "unknown", due_at: "2026-10-23T18:29:00Z", conflict: false, moodle_course_id: 9, title: "Group Choice - Link for Sec-A" };
+    const out = mergeDeadlines({
+      now: Date.parse("2026-10-23T10:00:00Z"), enrollments: [], courseTitles: {}, outline: [], shared: [], ownCourses: [], ownLastSuccessAt: null, campus: "HYD",
+      own: [
+        { ...base, id: "a", kind: "choice", deadline_type: "close", source_primary: "choice" },
+        { ...base, id: "b", kind: "text", deadline_type: "text", source_primary: "text" },
+      ],
+    });
+    expect(out.map((o) => o.id)).toEqual(["a"]);
+  });
+});
