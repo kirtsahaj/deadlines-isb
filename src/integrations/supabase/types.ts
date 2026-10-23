@@ -215,6 +215,216 @@ export type Database = {
         }
         Relationships: []
       }
+      job_events: {
+        Row: {
+          company: string
+          created_at: string
+          id: string
+          inbound_id: string
+          job_id: string | null
+          kind: string
+          original_key: string
+          payload: Json
+          role: string | null
+          sent_at: string
+          state: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          id?: string
+          inbound_id: string
+          job_id?: string | null
+          kind: string
+          original_key: string
+          payload?: Json
+          role?: string | null
+          sent_at: string
+          state?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          id?: string
+          inbound_id?: string
+          job_id?: string | null
+          kind?: string
+          original_key?: string
+          payload?: Json
+          role?: string | null
+          sent_at?: string
+          state?: string
+        }
+        Relationships: []
+      }
+      job_files: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          filename: string
+          id: string
+          job_id: string | null
+          mime: string
+          sha256: string
+          size_bytes: number
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          filename: string
+          id?: string
+          job_id?: string | null
+          mime: string
+          sha256: string
+          size_bytes: number
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          filename?: string
+          id?: string
+          job_id?: string | null
+          mime?: string
+          sha256?: string
+          size_bytes?: number
+          storage_path?: string
+        }
+        Relationships: []
+      }
+      job_inbound_messages: {
+        Row: {
+          attempts: number
+          id: string
+          original_message_id: string | null
+          original_sent_at: string | null
+          processed_at: string | null
+          provider_email_id: string
+          reason: string | null
+          received_at: string
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          attempts?: number
+          id?: string
+          original_message_id?: string | null
+          original_sent_at?: string | null
+          processed_at?: string | null
+          provider_email_id: string
+          reason?: string | null
+          received_at?: string
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          attempts?: number
+          id?: string
+          original_message_id?: string | null
+          original_sent_at?: string | null
+          processed_at?: string | null
+          provider_email_id?: string
+          reason?: string | null
+          received_at?: string
+          status?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      job_reminders: {
+        Row: {
+          due_at: string
+          job_id: string
+          offset_hours: number
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          due_at: string
+          job_id: string
+          offset_hours: number
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          due_at?: string
+          job_id?: string
+          offset_hours?: number
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      job_stars: {
+        Row: {
+          created_at: string
+          job_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          job_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          job_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          company: string
+          company_key: string
+          deadline_at: string | null
+          deadline_date: string | null
+          deadline_time: string | null
+          first_seen_at: string
+          id: string
+          jd_file_id: string | null
+          last_email_at: string
+          role: string
+          role_aliases: string[]
+          role_keys: string[]
+          shortlist_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          company_key: string
+          deadline_at?: string | null
+          deadline_date?: string | null
+          deadline_time?: string | null
+          first_seen_at?: string
+          id?: string
+          jd_file_id?: string | null
+          last_email_at?: string
+          role: string
+          role_aliases?: string[]
+          role_keys?: string[]
+          shortlist_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          company_key?: string
+          deadline_at?: string | null
+          deadline_date?: string | null
+          deadline_time?: string | null
+          first_seen_at?: string
+          id?: string
+          jd_file_id?: string | null
+          last_email_at?: string
+          role?: string
+          role_aliases?: string[]
+          role_keys?: string[]
+          shortlist_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -421,6 +631,7 @@ export type Database = {
           created_at: string
           explicit_deadline_marker_only: boolean
           hidden_course_ids: number[]
+          job_reminders: boolean
           sort_order: string
           timezone: string
           updated_at: string
@@ -430,6 +641,7 @@ export type Database = {
           created_at?: string
           explicit_deadline_marker_only?: boolean
           hidden_course_ids?: number[]
+          job_reminders?: boolean
           sort_order?: string
           timezone?: string
           updated_at?: string
@@ -439,6 +651,7 @@ export type Database = {
           created_at?: string
           explicit_deadline_marker_only?: boolean
           hidden_course_ids?: number[]
+          job_reminders?: boolean
           sort_order?: string
           timezone?: string
           updated_at?: string
