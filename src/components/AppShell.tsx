@@ -86,7 +86,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 >
                   {item.label}
                   {item.to === "/placements" && hasNewJobs && (
-                    <span aria-label="New postings" className="absolute left-1/2 top-0.5 size-2 -translate-x-1/2 rounded-full bg-destructive" />
+                    <span aria-label="New postings" className="absolute right-1.5 top-1 size-2 rounded-full bg-primary" />
                   )}
                 </Link>
               );
