@@ -70,8 +70,9 @@ export async function fetchReceivedEmail(emailId: string): Promise<InboundInput>
   let raw: Uint8Array | null = null;
   const rawUrl = trustedRawUrl(data.raw?.download_url);
   if (rawUrl) {
-    const rawRes = await fetch(rawUrl, { redirect: "error" });
-    if (rawRes.ok) raw = await readCapped(rawRes);
+    // Workers only support "follow"/"manual"; "manual" plus an exact 200 still refuses any redirect.
+    const rawRes = await fetch(rawUrl, { redirect: "manual" });
+    if (rawRes.status === 200) raw = await readCapped(rawRes);
     else await rawRes.body?.cancel();
   }
 
