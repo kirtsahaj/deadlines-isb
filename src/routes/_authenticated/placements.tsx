@@ -177,14 +177,11 @@ function PlacementsPage() {
             {isLive(jobs.data.lastForwardedAt, Date.now()) && (
               <>
                 <span className="size-2 rounded-full bg-success" aria-hidden />
-                <span className="text-foreground">Live</span>
-                <span aria-hidden>·</span>
               </>
             )}
             Last new posting {relativeTime(jobs.data.lastNewPostingAt)}
           </p>
         )}
-        <p className="text-xs text-muted-foreground">Please refer to the placement portal for more info.</p>
       </header>
 
       <div className="flex items-center gap-2">
