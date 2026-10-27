@@ -11,7 +11,7 @@ const SEEN_KEY = "placements-seen-v1";
 export function AppFooter() {
   return (
     <p className="text-xs text-muted-foreground">
-      Unofficial student tool. Read-only. Verify critical deadlines in eLearn.
+      Unofficial student tool. Read-only. Verify critical deadlines.
     </p>
   );
 }
