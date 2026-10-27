@@ -218,7 +218,7 @@ function SchedulePage() {
     <div className="space-y-3">
       <header>
         <h1 className="text-3xl font-semibold">Classes &amp; Prereads</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and what to read before each class</p>
+        <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and prereads</p>
       </header>
       <SetupNudges />
       {term5.isLoading ? (
