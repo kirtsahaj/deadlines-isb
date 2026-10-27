@@ -26,7 +26,7 @@ function tap() {
 
 /**
  * No top bar: pages start with their own heading, padded for notches and status bars.
- * One floating bottom pill holds the text tabs plus a Menu icon at the end.
+ * A plain bottom bar holds the text tabs (sized by their words) plus a narrow Menu icon.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -49,10 +49,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Three tabs plus Menu must fit a 360px phone; tighten only on the smallest screens.
   const itemPadding = tabs.length > 2 ? "px-2.5 text-[13px] min-[400px]:px-3.5 min-[400px]:text-sm sm:px-4" : "px-5 text-sm";
 
+  const itemClass = (active: boolean) =>
+    `tap-target relative rounded-full font-semibold transition-colors ${
+      active ? "bg-primary/12 text-primary dark:bg-primary/15" : "text-muted-foreground hover:text-foreground"
+    }`;
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <main
-        className="mx-auto w-full max-w-3xl flex-1 pb-28"
+        className="mx-auto w-full max-w-3xl flex-1 pb-6"
         style={{
           paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)",
           paddingLeft: "max(1rem, env(safe-area-inset-left))",
@@ -62,16 +67,21 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <footer className="mx-auto w-full max-w-3xl px-4 pb-32">
+      <footer
+        className="mx-auto w-full max-w-3xl px-4"
+        style={{ paddingBottom: "calc(max(0.5rem, env(safe-area-inset-bottom)) + 4.5rem)" }}
+      >
         <AppFooter />
       </footer>
 
+      {/* A plain bar on the bottom edge in the card colour; its bottom padding keeps the tabs
+          clear of the iPhone home bar and Android gesture pill. */}
       <nav
-        className="fixed inset-x-0 z-20 flex justify-center px-3"
-        style={{ bottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 backdrop-blur"
+        style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
         aria-label="Main"
       >
-        <div className="nav-pill flex items-center gap-0.5 rounded-full p-1 min-[400px]:gap-1">
+        <div className="flex items-center justify-center gap-0.5 px-3 pt-1.5 min-[400px]:gap-1">
           {tabs.map((item) => {
             const active = pathname === item.to;
             return (
@@ -80,9 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={item.to}
                 onClick={tap}
                 aria-current={active ? "page" : undefined}
-                className={`nav-item tap-target relative rounded-full ${itemPadding} py-2.5 font-semibold transition-colors ${
-                  active ? "bg-primary text-primary-foreground" : ""
-                }`}
+                className={`${itemClass(active)} ${itemPadding} py-2.5`}
               >
                 {item.label}
                 {item.to === "/placements" && hasNewJobs && (
@@ -91,16 +99,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             );
           })}
-          {tabs.length > 0 && <span aria-hidden className="h-6 w-px shrink-0 bg-[var(--nav-border)] min-[400px]:mx-0.5" />}
           <Link
             to="/menu"
             onClick={tap}
             aria-label="Menu"
             title="Menu"
             aria-current={menuActive ? "page" : undefined}
-            className={`nav-item tap-target grid size-10 place-items-center rounded-full transition-colors ${
-              menuActive ? "bg-primary text-primary-foreground" : ""
-            }`}
+            className={`${itemClass(menuActive)} grid size-10 place-items-center`}
           >
             <Menu className="size-5" aria-hidden />
           </Link>
