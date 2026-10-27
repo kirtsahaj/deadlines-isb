@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [pathname, jobs.data]);
   const hasNewJobs = !!seen && pathname !== "/placements" && jobIds.some((id) => !seen.has(id));
   // Three tabs plus Menu must fit a 360px phone; tighten only on the smallest screens.
-  const itemPadding = tabs.length > 2 ? "px-2.5 text-[13px] min-[400px]:px-3.5 min-[400px]:text-sm sm:px-4" : "px-5 text-sm";
+  const itemPadding = tabs.length > 2 ? "px-2 text-[13px] min-[400px]:px-3 min-[400px]:text-sm sm:px-3.5" : "px-4 text-sm";
 
   const itemClass = (active: boolean) =>
     `tap-target relative rounded-full font-semibold transition-colors ${
@@ -69,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <footer
         className="mx-auto w-full max-w-3xl px-4"
-        style={{ paddingBottom: "calc(max(0.5rem, env(safe-area-inset-bottom)) + 5rem)" }}
+        style={{ paddingBottom: "calc(max(0.75rem, calc(env(safe-area-inset-bottom) + 6px)) + 4.5rem)" }}
       >
         <AppFooter />
       </footer>
@@ -78,10 +78,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           clear of the iPhone home bar and Android gesture pill. */}
       <nav
         className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 backdrop-blur"
-        style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
+        style={{ paddingBottom: "max(0.75rem, calc(env(safe-area-inset-bottom) + 6px))" }}
         aria-label="Main"
       >
-        <div className="flex items-center justify-center gap-0.5 px-3 pt-1.5 min-[400px]:gap-1">
+        <div className="flex items-center justify-center px-3 pt-1.5">
           {tabs.map((item) => {
             const active = pathname === item.to;
             return (
@@ -90,11 +90,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={item.to}
                 onClick={tap}
                 aria-current={active ? "page" : undefined}
-                className={`${itemClass(active)} ${itemPadding} flex h-[52px] items-center`}
+                className={`${itemClass(active)} ${itemPadding} flex h-12 items-center`}
               >
                 {item.label}
                 {item.to === "/placements" && hasNewJobs && (
-                  <span aria-label="New postings" className="absolute right-1.5 top-2.5 size-2 rounded-full bg-primary" />
+                  <span aria-label="New postings" className="absolute right-1 top-2 size-2 rounded-full bg-primary" />
                 )}
               </Link>
             );
@@ -105,7 +105,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-label="Menu"
             title="Menu"
             aria-current={menuActive ? "page" : undefined}
-            className={`${itemClass(menuActive)} grid h-[52px] w-12 place-items-center`}
+            className={`${itemClass(menuActive)} grid h-12 w-11 place-items-center`}
           >
             <Menu className="size-5" aria-hidden />
           </Link>
