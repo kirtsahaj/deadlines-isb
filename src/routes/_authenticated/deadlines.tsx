@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeadlineCard } from "@/components/DeadlineCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { ReminderSetupDialog } from "@/components/ReminderSetup";
 import { SetupNudges } from "@/components/SetupNudges";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +36,7 @@ function DeadlinesPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<DeadlineView>("upcoming");
+  const isMobile = useIsMobile();
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   useEffect(() => {
     const notice = window.sessionStorage.getItem("deadline-tracker-sync-notice");
@@ -178,25 +180,27 @@ function DeadlinesPage() {
       )}
       {syncMessage && <p role="status" className="text-sm text-muted-foreground">{syncMessage}</p>}
 
-      <div className="inline-flex rounded-full bg-muted p-1" role="tablist" aria-label="Deadline view">
-        {(["upcoming", "past"] as DeadlineView[]).map((value) => (
-          <Button
-            key={value}
-            type="button"
-            role="tab"
-            aria-selected={view === value}
-            variant={view === value ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setView(value)}
-          >
-            {value === "upcoming" ? "Upcoming" : "Past"}
-          </Button>
-        ))}
-      </div>
-
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search deadlines" aria-label="Search deadlines" className="h-10 border-border bg-card pl-9" />
+      <div className="flex items-center gap-2">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={isMobile ? "Search" : "Search deadlines"} aria-label="Search deadlines" className="h-10 border-border bg-card pl-9" />
+        </div>
+        <div className="flex h-10 shrink-0 items-center rounded-full bg-muted p-1" role="tablist" aria-label="Deadline view">
+          {(["upcoming", "past"] as DeadlineView[]).map((value) => (
+            <Button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={view === value}
+              variant={view === value ? "default" : "ghost"}
+              size="sm"
+              className="h-8 rounded-full px-2.5 sm:px-3"
+              onClick={() => setView(value)}
+            >
+              {value === "upcoming" ? "Upcoming" : "Past"}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {loading ? (

@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, BellOff, Download, Search } from "lucide-react";
+import { ArrowUpDown, Bell, BellOff, Download, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getJobJdLink, listJobs, setJobReminders, type JobTile } from "@/lib/jobs.functions";
 import { jobsInView, type JobSort } from "@/lib/jobs/view";
@@ -164,22 +172,32 @@ function PlacementsPage() {
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={isMobile ? "Search" : "Search company or role"} aria-label="Search jobs" className="h-10 border-border bg-card pl-9" />
         </div>
-        <div className="flex h-10 shrink-0 items-center rounded-full bg-muted p-1" role="tablist" aria-label="Sort jobs by">
-          {SORTS.map((option) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button
-              key={option.value}
               type="button"
-              role="tab"
-              aria-selected={sort === option.value}
-              variant={sort === option.value ? "default" : "ghost"}
-              size="sm"
-              className="h-8 rounded-full px-2.5 sm:px-3"
-              onClick={() => setSort(option.value)}
+              variant="outline"
+              className="h-10 shrink-0 gap-1.5 rounded-full bg-card px-3"
+              aria-label={`Sort by ${SORTS.find((o) => o.value === sort)?.label}`}
             >
-              {option.label}
+              <ArrowUpDown className="size-4 text-muted-foreground" aria-hidden />
+              {SORTS.find((o) => o.value === sort)?.label}
             </Button>
-          ))}
-        </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {SORTS.map((option) => (
+              <DropdownMenuCheckboxItem
+                key={option.value}
+                checked={sort === option.value}
+                onCheckedChange={() => setSort(option.value)}
+              >
+                {option.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <JobAlertsBell accountOn={jobs.data?.jobReminders} />
       </div>
 
