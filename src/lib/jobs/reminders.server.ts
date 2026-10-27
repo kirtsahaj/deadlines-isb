@@ -2,11 +2,14 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { PushTarget } from "@/lib/push/webpush.server";
 import { sendPush } from "@/lib/push/webpush.server";
 import { emailAllowed } from "@/lib/elearn/config.server";
-import { planJobReminders } from "./reminders";
+import { jobAlertsOn, planJobReminders } from "./reminders";
 
+/** School accounts that haven't turned job alerts off with the Placements bell. */
 async function eligibleUsers(userIds: string[]): Promise<string[]> {
+  const { data: settings, error } = await supabaseAdmin.from("user_settings").select("user_id, job_reminders").in("user_id", userIds);
+  if (error) throw new Error("settings_read_failed");
   const out: string[] = [];
-  for (const id of userIds) {
+  for (const id of jobAlertsOn(userIds, settings ?? [])) {
     const { data } = await supabaseAdmin.auth.admin.getUserById(id);
     if (emailAllowed(data.user?.email ?? "")) out.push(id);
   }

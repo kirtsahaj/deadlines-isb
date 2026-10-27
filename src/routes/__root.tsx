@@ -12,7 +12,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider, useTheme } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -107,11 +108,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
+        rel: "preload",
+        href: "/fonts/plus-jakarta-sans-latin-wght-normal.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
       },
     ],
   }),
@@ -135,6 +137,12 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** Short pop-up messages, matching the current day/night theme. */
+function ThemedToaster() {
+  const { theme } = useTheme();
+  return <Toaster position="top-center" theme={theme} duration={2500} />;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -145,7 +153,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <ThemeProvider><Outlet /></ThemeProvider>
+      <ThemeProvider><Outlet /><ThemedToaster /></ThemeProvider>
     </QueryClientProvider>
   );
 }

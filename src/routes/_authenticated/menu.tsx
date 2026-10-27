@@ -3,6 +3,17 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, ShieldCheck } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
@@ -232,9 +243,30 @@ function MenuPage() {
                 <Button asChild variant="secondary">
                   <Link to="/connect">Reconnect with a new link</Link>
                 </Button>
-                <Button variant="outline" onClick={() => disconnect.mutate()} disabled={disconnect.isPending}>
-                  {disconnect.isPending ? "Disconnecting…" : "Disconnect and delete synced data"}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" disabled={disconnect.isPending}>
+                      {disconnect.isPending ? "Disconnecting…" : "Disconnect and delete synced data"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-md rounded-2xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Disconnect eLearn?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This removes your eLearn link and deletes the deadlines synced from it. You can reconnect anytime with a new link.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => disconnect.mutate()}
+                      >
+                        Disconnect
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </AccordionContent>
           </AccordionItem>

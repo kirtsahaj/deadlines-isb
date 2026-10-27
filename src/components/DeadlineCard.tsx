@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatDateTime, relativeTime } from "@/lib/format";
-import type { SourceRef, UnifiedDeadline } from "@/lib/term5/model";
+import { showPastDue, type SourceRef, type UnifiedDeadline } from "@/lib/term5/model";
 import { CONFIDENCE_META, ConfidenceMark, ConnectCta } from "@/components/Confidence";
 
 const KIND_LABELS: Record<string, string> = {
@@ -74,8 +74,7 @@ export function DeadlineCard({
   connected: boolean;
   outlineKind: string | null;
 }) {
-  const at = item.dueAt ?? (item.dateOnly ? `${item.dateOnly}T23:59:59+05:30` : null);
-  const overdue = !!at && new Date(at).getTime() < Date.now() && item.submissionStatus !== "submitted";
+  const overdue = showPastDue(item, Date.now());
   const meta = CONFIDENCE_META[item.confidence];
   const isText = item.kind === "text";
   const destination = elearnDestination(item);
@@ -159,7 +158,7 @@ export function DeadlineCard({
         {item.submissionStatus === "submitted" && (
           <Badge className="bg-success text-success-foreground">Submitted</Badge>
         )}
-        {overdue && item.kind !== "preread" && <Badge variant="destructive">Past due</Badge>}
+        {overdue && <Badge variant="destructive">Past due</Badge>}
         {isText && <Badge variant="outline">Mentioned in course text</Badge>}
         {item.conflict && (
           <Badge className="bg-warning text-warning-foreground">

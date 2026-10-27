@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeadlineCard } from "@/components/DeadlineCard";
-import { MultiSelectFilter } from "@/components/MultiSelectFilter";
 import { ReminderSetupDialog } from "@/components/ReminderSetup";
 import { SetupNudges } from "@/components/SetupNudges";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +14,6 @@ import { useTerm5 } from "@/lib/useTerm5";
 import { getConnectionState, syncNow } from "@/lib/elearn.functions";
 import { DEFAULT_TIMEZONE, lastSyncedLabel } from "@/lib/format";
 import { firstPreferredName } from "@/lib/preferredName";
-import { selectedOrAll } from "@/lib/courseMetadata";
 import { inView, mergeDeadlines, sortView, type DeadlineView, type OutlineOccurrence, type OwnRow } from "@/lib/term5/model";
 
 export const Route = createFileRoute("/_authenticated/deadlines")({
@@ -36,7 +34,6 @@ function DeadlinesPage() {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [selectedCourses, setSelectedCourses] = useState<Set<string> | null>(null);
   const [view, setView] = useState<DeadlineView>("upcoming");
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   useEffect(() => {
@@ -137,26 +134,18 @@ function DeadlinesPage() {
     }).map(i => ({ ...i, moodleCourseId: i.moodleCourseId ?? refs.find(c => c.short_name === `${i.courseCode}_PGP${term5.data.campus}_2026-27_T5`)?.moodle_course_id ?? null }))].filter((i) => i.moodleCourseId === null || !hidden.has(i.moodleCourseId));
   }, [term5.data, deadlines.data, courses.data, connection.data, hidden]);
 
-  const courseOptions = useMemo(
-    () => [...new Set(merged.map((i) => i.courseKey))].sort(),
-    [merged],
-  );
-  const activeCourses = selectedOrAll(courseOptions, selectedCourses);
-  const courseLabel = (key: string) => merged.find((i) => i.courseKey === key)?.courseCode ?? key;
-
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
     const now = Date.now();
     return sortView(
       merged.filter((i) => {
-        if (!activeCourses.has(i.courseKey)) return false;
         if (!inView(i, view, now)) return false;
         if (q && !`${i.title} ${i.courseName} ${i.courseCode}`.toLowerCase().includes(q)) return false;
         return true;
       }),
       view,
     );
-  }, [merged, activeCourses, search, view]);
+  }, [merged, search, view]);
 
   const name = firstPreferredName(user?.user_metadata, profile.data?.display_name);
   const loading = connection.isLoading || term5.isLoading || (connected && deadlines.isLoading);
@@ -205,12 +194,9 @@ function DeadlinesPage() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <div className="relative min-w-48 flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search deadlines" aria-label="Search deadlines" className="h-10 border-border bg-card pl-9" />
-        </div>
-        <MultiSelectFilter label="Course" options={courseOptions} selected={activeCourses} onChange={setSelectedCourses} getLabel={courseLabel} />
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search deadlines" aria-label="Search deadlines" className="h-10 border-border bg-card pl-9" />
       </div>
 
       {loading ? (
@@ -222,7 +208,7 @@ function DeadlinesPage() {
         <div className="surface-card p-6 text-center">
           <h2 className="text-base font-semibold">{view === "upcoming" ? "No upcoming deadlines" : "No past deadlines"}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {merged.length ? "No deadlines match your current search or filters." : "Nothing here yet."}
+            {merged.length ? "No deadlines match your search." : "Nothing here yet."}
           </p>
         </div>
       ) : (

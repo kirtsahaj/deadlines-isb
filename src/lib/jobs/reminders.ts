@@ -41,3 +41,9 @@ export function newJobWorthAnnouncing(deadline: { date?: string; time?: string }
   const end = Date.parse(`${deadline.date}T${deadline.time ?? "23:59"}:00+05:30`);
   return !Number.isFinite(end) || end > now;
 }
+
+/** Job alerts default to on; only an explicit "off" (the Placements bell) opts a user out. */
+export function jobAlertsOn(userIds: string[], settings: { user_id: string; job_reminders: boolean | null }[]): string[] {
+  const off = new Set(settings.filter((s) => s.job_reminders === false).map((s) => s.user_id));
+  return userIds.filter((id) => !off.has(id));
+}

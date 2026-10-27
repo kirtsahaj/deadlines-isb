@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dueJobOffsets, jobReminderKey, newJobWorthAnnouncing, planJobReminders } from "../reminders";
+import { dueJobOffsets, jobAlertsOn, jobReminderKey, newJobWorthAnnouncing, planJobReminders } from "../reminders";
 import { signSvix, verifySvix } from "../svix";
 import { jobsInView } from "../view";
 import type { JobTile } from "@/lib/jobs.functions";
@@ -56,7 +56,7 @@ describe("webhook signature", () => {
 });
 
 describe("placements list", () => {
-  const tile = (p: Partial<JobTile>): JobTile => ({ id: p.id ?? "x", company: "Co", role: "Role", deadlineDate: null, deadlineTime: null, deadlineAt: null, shortlistDate: null, hasJd: false, updatedAt: "2026-10-01T00:00:00Z", starred: false, ...p });
+  const tile = (p: Partial<JobTile>): JobTile => ({ id: p.id ?? "x", company: "Co", role: "Role", deadlineDate: null, deadlineTime: null, deadlineAt: null, shortlistDate: null, hasJd: false, updatedAt: "2026-10-01T00:00:00Z", addedAt: "2026-10-01T00:00:00Z", starred: false, ...p });
   const jobs = [
     tile({ id: "late", deadlineDate: "2026-11-09", deadlineAt: "2026-11-09T05:30:00Z" }),
     tile({ id: "soon", deadlineDate: "2026-11-02", deadlineAt: "2026-11-02T05:30:00Z", starred: true }),
@@ -72,5 +72,26 @@ describe("placements list", () => {
   it("filters starred and JD-only", () => {
     expect(jobsInView(jobs, { ...base, filter: "starred" }).map((j) => j.id)).toEqual(["soon"]);
     expect(jobsInView(jobs, { ...base, view: "older", filter: "jd" }).map((j) => j.id)).toEqual(["past"]);
+  });
+  it("Added on sorts newest CAS email first, still upcoming only", () => {
+    const added = [
+      tile({ id: "old", deadlineAt: "2026-11-05T05:30:00Z", deadlineDate: "2026-11-05", addedAt: "2026-10-20T04:00:00Z" }),
+      tile({ id: "new", deadlineAt: "2026-11-09T05:30:00Z", deadlineDate: "2026-11-09", addedAt: "2026-10-27T04:00:00Z" }),
+      tile({ id: "mid", deadlineAt: "2026-11-02T05:30:00Z", deadlineDate: "2026-11-02", addedAt: "2026-10-24T04:00:00Z" }),
+      tile({ id: "gone", deadlineAt: "2026-10-21T05:30:00Z", deadlineDate: "2026-10-21", addedAt: "2026-10-28T04:00:00Z" }),
+    ];
+    expect(jobsInView(added, { ...base, sort: "added" }).map((j) => j.id)).toEqual(["new", "mid", "old"]);
+    expect(jobsInView(added, base).map((j) => j.id)).toEqual(["mid", "old", "new"]);
+  });
+});
+
+describe("job alerts bell", () => {
+  it("keeps everyone except users who explicitly turned job alerts off", () => {
+    const settings = [
+      { user_id: "off", job_reminders: false },
+      { user_id: "on", job_reminders: true },
+      { user_id: "unset", job_reminders: null },
+    ];
+    expect(jobAlertsOn(["off", "on", "unset", "no-row"], settings)).toEqual(["on", "unset", "no-row"]);
   });
 });

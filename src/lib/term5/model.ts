@@ -387,6 +387,20 @@ export function inView(item: Pick<UnifiedDeadline, "dueAt" | "dateOnly" | "submi
   return view === "upcoming" ? at >= now : at < now;
 }
 
+/**
+ * "Past due" only when we actually know it wasn't submitted: the student's own eLearn assignment
+ * with a reported, non-submitted status. Quizzes, forums, outline and classmate items never know.
+ */
+export function showPastDue(
+  item: Pick<UnifiedDeadline, "dueAt" | "dateOnly" | "kind" | "submissionStatus" | "own">,
+  now: number,
+): boolean {
+  const at = sortInstant(item);
+  if (at === null || at >= now) return false;
+  if (!item.own || item.kind !== "assignment") return false;
+  return !["submitted", "unknown", ""].includes(item.submissionStatus);
+}
+
 export function sortView<T extends Pick<UnifiedDeadline, "dueAt" | "dateOnly" | "title">>(rows: T[], view: DeadlineView): T[] {
   return [...rows].sort((a, b) => {
     const x = sortInstant(a);

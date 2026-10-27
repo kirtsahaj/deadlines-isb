@@ -1,13 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Download, Search } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Bell, BellOff, Download, Search } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getJobJdLink, listJobs, type JobTile } from "@/lib/jobs.functions";
-import { jobsInView } from "@/lib/jobs/view";
+import { getJobJdLink, listJobs, setJobReminders, type JobTile } from "@/lib/jobs.functions";
+import { jobsInView, type JobSort } from "@/lib/jobs/view";
 import { relativeTime } from "@/lib/format";
+import { currentSubscription, enableReminders, pushSupport } from "@/lib/pushClient";
 
 export const Route = createFileRoute("/_authenticated/placements")({
   head: () => ({
@@ -32,6 +34,9 @@ function formatDate(date: string | null, time?: string | null): string {
   return `${d}, ${t}`;
 }
 
+const addedLabel = (iso: string) =>
+  new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" }).format(new Date(iso));
+
 function JobCard({ job }: { job: JobTile }) {
   const jd = useMutation({
     mutationFn: () => getJobJdLink({ data: { jobId: job.id } }),
@@ -40,7 +45,10 @@ function JobCard({ job }: { job: JobTile }) {
 
   return (
     <article className="surface-card space-y-1 p-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{job.company}</p>
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-muted-foreground">{job.company}</p>
+        <p className="shrink-0 text-xs text-muted-foreground">Added {addedLabel(job.addedAt)}</p>
+      </div>
       <h2 className="text-base font-semibold leading-snug">{job.role}</h2>
       <dl className="grid gap-x-3 text-sm sm:grid-cols-[auto_1fr]">
         <dt className="text-muted-foreground">Apply by</dt>
@@ -58,12 +66,85 @@ function JobCard({ job }: { job: JobTile }) {
   );
 }
 
+/**
+ * One tap toggles new-job alerts and "apply by" reminders for the account (all devices).
+ * It counts as on only when this device can actually receive them; turning it on asks for
+ * notification permission first when needed. Assignment and class reminders are unaffected.
+ */
+function JobAlertsBell({ accountOn }: { accountOn: boolean | undefined }) {
+  const queryClient = useQueryClient();
+  const [deviceOn, setDeviceOn] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    void currentSubscription()
+      .catch(() => null)
+      .then((sub) => setDeviceOn(!!sub && "Notification" in window && Notification.permission === "granted"));
+  }, []);
+  const on = !!accountOn && !!deviceOn;
+
+  async function save(enabled: boolean) {
+    await setJobReminders({ data: { enabled } });
+    queryClient.setQueryData(["jobs"], (old: Awaited<ReturnType<typeof listJobs>> | undefined) =>
+      old ? { ...old, jobReminders: enabled } : old,
+    );
+  }
+
+  async function toggle() {
+    setBusy(true);
+    try {
+      if (on) {
+        await save(false);
+        toast("Job alerts off");
+        return;
+      }
+      if (!deviceOn) {
+        const support = pushSupport();
+        if (support === "needs-home-screen") return void toast("Add the app to your home screen to get job alerts");
+        if (support === "unsupported") return void toast("This browser can't show notifications");
+        const result = await enableReminders();
+        if (result === "denied") return void toast("Notifications are blocked. Allow them in your settings, then try again.");
+        if (result !== "enabled") return void toast("Couldn't turn on notifications. Please try again.");
+        setDeviceOn(true);
+      }
+      if (!accountOn) await save(true);
+      toast("Job alerts on");
+    } catch {
+      toast("Couldn't change job alerts. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const Icon = on ? Bell : BellOff;
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="icon"
+      className={`size-10 shrink-0 rounded-full bg-card ${on ? "text-primary" : "text-muted-foreground"}`}
+      onClick={toggle}
+      disabled={busy || accountOn === undefined || deviceOn === null}
+      aria-pressed={on}
+      aria-label={on ? "Job alerts on. Tap to turn off" : "Job alerts off. Tap to turn on"}
+      title={on ? "Job alerts on" : "Job alerts off"}
+    >
+      <Icon className="size-4" aria-hidden />
+    </Button>
+  );
+}
+
+const SORTS: { value: JobSort; label: string }[] = [
+  { value: "deadline", label: "Deadline" },
+  { value: "added", label: "Added on" },
+];
+
 function PlacementsPage() {
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<JobSort>("deadline");
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => listJobs() });
   const visible = useMemo(
-    () => jobsInView(jobs.data?.jobs ?? [], { view: "upcoming", sort: "deadline", filter: "all", search, now: Date.now() }),
-    [jobs.data, search],
+    () => jobsInView(jobs.data?.jobs ?? [], { view: "upcoming", sort, filter: "all", search, now: Date.now() }),
+    [jobs.data, search, sort],
   );
 
   return (
@@ -76,9 +157,28 @@ function PlacementsPage() {
         <p className="text-xs text-muted-foreground">Please refer to the placement portal for more info.</p>
       </header>
 
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search company or role" aria-label="Search jobs" className="h-10 border-border bg-card pl-9" />
+      <div className="flex gap-2">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search company or role" aria-label="Search jobs" className="h-10 border-border bg-card pl-9" />
+        </div>
+        <JobAlertsBell accountOn={jobs.data?.jobReminders} />
+      </div>
+
+      <div className="inline-flex rounded-full bg-muted p-1" role="tablist" aria-label="Sort jobs by">
+        {SORTS.map((option) => (
+          <Button
+            key={option.value}
+            type="button"
+            role="tab"
+            aria-selected={sort === option.value}
+            variant={sort === option.value ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setSort(option.value)}
+          >
+            {option.label}
+          </Button>
+        ))}
       </div>
 
       {jobs.isLoading ? (

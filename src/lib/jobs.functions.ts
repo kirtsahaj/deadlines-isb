@@ -18,6 +18,8 @@ export type JobTile = {
   shortlistDate: string | null;
   hasJd: boolean;
   updatedAt: string;
+  /** When the original CAS email was sent (falls back to when the app first saw the job). */
+  addedAt: string;
   starred: boolean;
 };
 
@@ -27,13 +29,20 @@ export const listJobs = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertSchoolUser(context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [jobs, stars, setting] = await Promise.all([
-      supabaseAdmin.from("jobs").select("id, company, role, deadline_date, deadline_time, deadline_at, shortlist_date, jd_file_id, last_email_at").limit(1000),
+    const [jobs, stars, setting, events] = await Promise.all([
+      supabaseAdmin.from("jobs").select("id, company, role, deadline_date, deadline_time, deadline_at, shortlist_date, jd_file_id, last_email_at, first_seen_at").limit(1000),
       context.supabase.from("job_stars").select("job_id"),
       supabaseAdmin.from("user_settings").select("job_reminders").eq("user_id", context.userId).maybeSingle(),
+      supabaseAdmin.from("job_events").select("job_id, sent_at").not("job_id", "is", null).limit(10000),
     ]);
     if (jobs.error) throw new Error("jobs_unavailable");
     const starred = new Set((stars.data ?? []).map((s) => s.job_id));
+    const firstEmail = new Map<string, string>();
+    for (const e of events.data ?? []) {
+      if (!e.job_id) continue;
+      const prev = firstEmail.get(e.job_id);
+      if (!prev || e.sent_at < prev) firstEmail.set(e.job_id, e.sent_at);
+    }
     const tiles: JobTile[] = (jobs.data ?? []).map((j) => ({
       id: j.id,
       company: j.company,
@@ -44,6 +53,7 @@ export const listJobs = createServerFn({ method: "GET" })
       shortlistDate: j.shortlist_date,
       hasJd: !!j.jd_file_id,
       updatedAt: j.last_email_at,
+      addedAt: firstEmail.get(j.id) ?? j.first_seen_at,
       starred: starred.has(j.id),
     }));
     const feedUpdatedAt = tiles.reduce<string | null>((max, t) => (!max || t.updatedAt > max ? t.updatedAt : max), null);

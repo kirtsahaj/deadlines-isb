@@ -1,7 +1,7 @@
 import type { JobTile } from "@/lib/jobs.functions";
 
 export type JobView = "upcoming" | "older";
-export type JobSort = "deadline" | "recent";
+export type JobSort = "deadline" | "added";
 export type JobFilter = "all" | "starred" | "jd";
 
 /** Main list: only jobs whose effective (reconciled) email deadline is still ahead. */
@@ -28,7 +28,8 @@ export function jobsInView(jobs: JobTile[], o: { view: JobView; sort: JobSort; f
     if (o.filter === "jd" && !j.hasJd) return false;
     return !q || `${j.company} ${j.role}`.toLowerCase().includes(q);
   });
-  if (o.sort === "recent") return list.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  // Newest CAS email first.
+  if (o.sort === "added") return list.sort((a, b) => b.addedAt.localeCompare(a.addedAt) || a.company.localeCompare(b.company));
   const dir = o.view === "older" ? -1 : 1;
   return list.sort((a, b) => {
     const ka = sortKey(a);

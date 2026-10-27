@@ -319,6 +319,7 @@ export async function runSync(
         userId,
         deadlines,
         courses.map((c) => ({ id: Number(c["id"]), shortname: typeof c["shortname"] === "string" ? c["shortname"] : null })),
+        { complete: mayRemoveMissing(complete) },
       );
     } catch {
       // Shared section updates are best-effort and never fail a sync.
