@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getAdminMetrics, type AdminUserRow } from "@/lib/admin.functions";
+import { getAdminMetrics, getIntakeHealth, type AdminUserRow } from "@/lib/admin.functions";
+import { relativeTime } from "@/lib/format";
 import { useSession } from "@/lib/useSession";
 import { isAdminEmail } from "@/lib/admin";
 
@@ -52,6 +53,8 @@ function AdminPage() {
   const allowed = isAdminEmail(user?.email);
   const fetchMetrics = useServerFn(getAdminMetrics);
   const metrics = useQuery({ queryKey: ["admin-metrics"], queryFn: () => fetchMetrics(), enabled: allowed });
+  const fetchIntake = useServerFn(getIntakeHealth);
+  const intake = useQuery({ queryKey: ["admin-intake"], queryFn: () => fetchIntake(), enabled: allowed });
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "connected" | "not" | "notify">("all");
 
@@ -84,7 +87,7 @@ function AdminPage() {
           <h1 className="font-display text-2xl font-semibold">Admin</h1>
           <p className="text-sm text-muted-foreground">First → last time for each step. Times in IST.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => void metrics.refetch()} disabled={metrics.isFetching}>
+        <Button variant="outline" size="sm" onClick={() => { void metrics.refetch(); void intake.refetch(); }} disabled={metrics.isFetching}>
           {metrics.isFetching ? "Loading…" : "Reload"}
         </Button>
       </div>
@@ -97,6 +100,8 @@ function AdminPage() {
           </div>
         ))}
       </div>
+
+      <IntakeCard data={intake.data} failed={intake.isError} />
 
       <div className="flex flex-wrap gap-2">
         <Input
@@ -160,5 +165,89 @@ function AdminPage() {
         {metrics.data && rows.length === 0 && <p className="text-sm text-muted-foreground">No matching students.</p>}
       </div>
     </div>
+  );
+}
+
+type IntakeData = Awaited<ReturnType<typeof getIntakeHealth>>;
+
+const INTAKE_COUNTS: [keyof IntakeData["counts"], string][] = [
+  ["added", "Added"],
+  ["updated", "Updated"],
+  ["noChange", "No change"],
+  ["ignored", "Ignored"],
+  ["rejected", "Rejected"],
+  ["attention", "Needs attention"],
+];
+
+/** Placements email intake: heartbeat, last 7 days, and emails to re-forward from Outlook. */
+function IntakeCard({ data, failed }: { data: IntakeData | undefined; failed: boolean }) {
+  return (
+    <section className="surface-card space-y-3 p-4" aria-label="Placements email intake">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-base font-semibold">Placements email intake</h2>
+        <p className="text-xs text-muted-foreground">Last 7 days</p>
+      </div>
+      {failed ? (
+        <p className="text-sm text-destructive">Couldn't load intake health.</p>
+      ) : !data ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Last forwarded email</p>
+              <p className="text-sm">
+                {data.lastForwardedAt ? (
+                  <>
+                    {relativeTime(data.lastForwardedAt)} · <When value={data.lastForwardedAt} />
+                  </>
+                ) : "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Last new job</p>
+              <p className="text-sm">
+                {data.lastNewJobAt ? (
+                  <>
+                    {relativeTime(data.lastNewJobAt)} · <When value={data.lastNewJobAt} />
+                  </>
+                ) : "—"}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {INTAKE_COUNTS.map(([key, label]) => (
+              <span
+                key={key}
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  (key === "rejected" || key === "attention") && data.counts[key] > 0
+                    ? "bg-destructive/15 text-destructive"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {label} {data.counts[key]}
+              </span>
+            ))}
+          </div>
+          {data.problems.length > 0 ? (
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">Needs a look (re-forward from Outlook if a job is missing)</p>
+              <ul className="space-y-1.5">
+                {data.problems.map((p) => (
+                  <li key={p.id} className="rounded-lg bg-muted/60 p-2 text-sm">
+                    <p className="font-medium">{p.subject ?? "Subject unknown (failed before it could be read)"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.label} · <When value={p.receivedAt} />
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No problems in the last 7 days.</p>
+          )}
+        </>
+      )}
+    </section>
   );
 }

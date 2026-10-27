@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpDown, Bell, BellOff, Download, Search } from "lucide-react";
+import { ArrowUpDown, Bell, BellOff, ExternalLink, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { getJobJdLink, listJobs, setJobReminders, type JobTile } from "@/lib/jobs.functions";
 import { jobsInView, type JobSort } from "@/lib/jobs/view";
+import { isLive } from "@/lib/jobs/intake";
 import { relativeTime } from "@/lib/format";
 import { currentSubscription, enableReminders, pushSupport } from "@/lib/pushClient";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -53,7 +54,7 @@ function JobCard({ job }: { job: JobTile }) {
   });
 
   return (
-    <article className="surface-card space-y-1 p-3">
+    <article className="surface-card relative space-y-1 p-3">
       <div className="flex items-baseline justify-between gap-3">
         <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-muted-foreground">{job.company}</p>
         <p className="shrink-0 text-xs text-muted-foreground">Added {addedLabel(job.addedAt)}</p>
@@ -66,8 +67,17 @@ function JobCard({ job }: { job: JobTile }) {
         <dd>{formatDate(job.shortlistDate)}</dd>
       </dl>
       {job.hasJd && (
-        <Button variant="outline" size="sm" className="mt-1 h-8 rounded-full" onClick={() => jd.mutate()} disabled={jd.isPending}>
-          <Download className="size-3.5" aria-hidden /> {jd.isPending ? "Opening…" : "Job description"}
+        <Button
+          variant="outline"
+          size="sm"
+          className="absolute bottom-3 right-3 h-6 gap-1 rounded-full px-2.5 text-xs"
+          onClick={() => jd.mutate()}
+          disabled={jd.isPending}
+          title="Open job description"
+          aria-label={`Open job description for ${job.role}`}
+        >
+          <ExternalLink className="size-3" aria-hidden />
+          {jd.isPending ? "…" : "JD"}
         </Button>
       )}
       {jd.isError && <p className="text-xs text-destructive">Couldn't open the file. Try again.</p>}
@@ -151,7 +161,8 @@ function PlacementsPage() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<JobSort>("deadline");
   const isMobile = useIsMobile();
-  const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => listJobs() });
+  // Refresh every minute while the tab is open, so new postings appear without leaving the page.
+  const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => listJobs(), refetchInterval: 60_000 });
   const visible = useMemo(
     () => jobsInView(jobs.data?.jobs ?? [], { view: "upcoming", sort, filter: "all", search, now: Date.now() }),
     [jobs.data, search, sort],
@@ -161,8 +172,17 @@ function PlacementsPage() {
     <div className="space-y-3">
       <header>
         <h1 className="text-3xl font-semibold">Placements</h1>
-        {jobs.data?.feedUpdatedAt && (
-          <p className="mt-1 text-sm font-medium text-muted-foreground">Last updated {relativeTime(jobs.data.feedUpdatedAt)}</p>
+        {jobs.data?.lastNewPostingAt && (
+          <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+            {isLive(jobs.data.lastForwardedAt, Date.now()) && (
+              <>
+                <span className="size-2 rounded-full bg-success" aria-hidden />
+                <span className="text-foreground">Live</span>
+                <span aria-hidden>·</span>
+              </>
+            )}
+            Last new posting {relativeTime(jobs.data.lastNewPostingAt)}
+          </p>
         )}
         <p className="text-xs text-muted-foreground">Please refer to the placement portal for more info.</p>
       </header>

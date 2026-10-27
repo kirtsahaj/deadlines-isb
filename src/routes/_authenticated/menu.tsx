@@ -172,7 +172,6 @@ function MenuPage() {
 
   return (
     <div className="space-y-3">
-      <h1 className="text-3xl font-semibold">Menu</h1>
       <SetupNudges />
 
       <div className="divide-y divide-border">

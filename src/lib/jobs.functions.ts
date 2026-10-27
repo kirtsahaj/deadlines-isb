@@ -35,6 +35,9 @@ export const listJobs = createServerFn({ method: "GET" })
       supabaseAdmin.from("user_settings").select("job_reminders").eq("user_id", context.userId).maybeSingle(),
       supabaseAdmin.from("job_events").select("job_id, sent_at").not("job_id", "is", null).limit(10000),
     ]);
+    const { FORWARDED_FILTER } = await import("./jobs/intake");
+    const { data: lastForwarded } = await supabaseAdmin.from("job_inbound_messages").select("received_at").or(FORWARDED_FILTER)
+      .order("received_at", { ascending: false }).limit(1).maybeSingle();
     if (jobs.error) throw new Error("jobs_unavailable");
     const starred = new Set((stars.data ?? []).map((s) => s.job_id));
     const firstEmail = new Map<string, string>();
@@ -57,7 +60,15 @@ export const listJobs = createServerFn({ method: "GET" })
       starred: starred.has(j.id),
     }));
     const feedUpdatedAt = tiles.reduce<string | null>((max, t) => (!max || t.updatedAt > max ? t.updatedAt : max), null);
-    return { jobs: tiles, feedUpdatedAt, jobReminders: setting.data?.job_reminders ?? true };
+    const lastNewPostingAt = tiles.reduce<string | null>((max, t) => (!max || t.addedAt > max ? t.addedAt : max), null);
+    return {
+      jobs: tiles,
+      feedUpdatedAt,
+      lastNewPostingAt,
+      /** Last email that came through the owner's forward: the feed's heartbeat. */
+      lastForwardedAt: lastForwarded?.received_at ?? null,
+      jobReminders: setting.data?.job_reminders ?? true,
+    };
   });
 
 export const setJobStar = createServerFn({ method: "POST" })

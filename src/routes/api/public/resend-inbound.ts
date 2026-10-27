@@ -55,7 +55,16 @@ export const Route = createFileRoute("/api/public/resend-inbound")({
           return Response.json({ ok: true });
         } catch (error) {
           if (error instanceof Error && error.message === "in_progress") return new Response("in progress, retry", { status: 503 });
-          console.error(`[placements] intake failed: ${error instanceof Error ? error.message : "unknown"}`);
+          const code = (error instanceof Error ? error.message : "unknown").slice(0, 60);
+          console.error(`[placements] intake failed: ${code}`);
+          try {
+            // Leave a trace (shown on Admin) even when the email failed before the pipeline recorded it.
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            await supabaseAdmin.from("job_inbound_messages").upsert({ provider_email_id: emailId }, { onConflict: "provider_email_id", ignoreDuplicates: true });
+            await supabaseAdmin.from("job_inbound_messages").update({ reason: `error:${code}` }).eq("provider_email_id", emailId).eq("status", "received");
+          } catch {
+            // Logging must never change the retry response.
+          }
           return new Response("retry", { status: 500 });
         }
       },

@@ -14,7 +14,14 @@ export const Route = createFileRoute("/api/public/placement-reminders")({
         const { data: subs } = await supabaseAdmin.from("push_subscriptions").select("user_id, endpoint, p256dh, auth");
         if (!subs?.length) return Response.json({ sent: 0 });
         const sent = await sendJobReminders(subs);
-        return Response.json({ sent });
+        let intakeAlerts = 0;
+        try {
+          const { alertOwnerAboutIntake } = await import("@/lib/jobs/intakeAlerts.server");
+          intakeAlerts = await alertOwnerAboutIntake(subs);
+        } catch {
+          // Owner health alerts are best-effort and never block job reminders.
+        }
+        return Response.json({ sent, intakeAlerts });
       },
     },
   },
