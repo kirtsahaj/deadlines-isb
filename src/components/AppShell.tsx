@@ -69,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <footer
         className="mx-auto w-full max-w-3xl px-4"
-        style={{ paddingBottom: "calc(max(0.5rem, env(safe-area-inset-bottom)) + 4.5rem)" }}
+        style={{ paddingBottom: "calc(max(0.5rem, env(safe-area-inset-bottom)) + 5rem)" }}
       >
         <AppFooter />
       </footer>
@@ -90,11 +90,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={item.to}
                 onClick={tap}
                 aria-current={active ? "page" : undefined}
-                className={`${itemClass(active)} ${itemPadding} py-2.5`}
+                className={`${itemClass(active)} ${itemPadding} flex h-[52px] items-center`}
               >
                 {item.label}
                 {item.to === "/placements" && hasNewJobs && (
-                  <span aria-label="New postings" className="absolute right-1.5 top-1 size-2 rounded-full bg-primary" />
+                  <span aria-label="New postings" className="absolute right-1.5 top-2.5 size-2 rounded-full bg-primary" />
                 )}
               </Link>
             );
@@ -105,7 +105,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-label="Menu"
             title="Menu"
             aria-current={menuActive ? "page" : undefined}
-            className={`${itemClass(menuActive)} grid size-10 place-items-center`}
+            className={`${itemClass(menuActive)} grid h-[52px] w-12 place-items-center`}
           >
             <Menu className="size-5" aria-hidden />
           </Link>

@@ -53,13 +53,14 @@ function AdminPage() {
   const fetchMetrics = useServerFn(getAdminMetrics);
   const metrics = useQuery({ queryKey: ["admin-metrics"], queryFn: () => fetchMetrics(), enabled: allowed });
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "connected" | "not">("all");
+  const [filter, setFilter] = useState<"all" | "connected" | "not" | "notify">("all");
 
   const rows = useMemo(() => {
     const q = query.toLowerCase().trim();
     return (metrics.data?.rows ?? []).filter((r: AdminUserRow) => {
       if (filter === "connected" && !r.connected) return false;
       if (filter === "not" && r.connected) return false;
+      if (filter === "notify" && r.notifyDevices === 0) return false;
       if (!q) return true;
       return `${r.name ?? ""} ${r.email ?? ""}`.toLowerCase().includes(q);
     });
@@ -73,7 +74,7 @@ function AdminPage() {
     { label: "Sign-ups", value: all.length },
     { label: "eLearn connected", value: all.filter((r) => r.connected).length },
     { label: "Opened in 24h", value: all.filter((r) => r.openedLast && new Date(r.openedLast).getTime() > dayAgo).length },
-    { label: "Deadlines tracked", value: all.reduce((n, r) => n + r.activeDeadlines, 0) },
+    { label: "Notifications on", value: all.filter((r) => r.notifyDevices > 0).length },
   ];
 
   return (
@@ -104,9 +105,9 @@ function AdminPage() {
           onChange={(e) => setQuery(e.target.value)}
           className="max-w-xs"
         />
-        {(["all", "connected", "not"] as const).map((f) => (
+        {(["all", "connected", "not", "notify"] as const).map((f) => (
           <Button key={f} size="sm" variant={filter === f ? "secondary" : "ghost"} onClick={() => setFilter(f)}>
-            {f === "all" ? "All" : f === "connected" ? "Connected" : "Not connected"}
+            {f === "all" ? "All" : f === "connected" ? "Connected" : f === "not" ? "Not connected" : "Notifications on"}
           </Button>
         ))}
       </div>
@@ -121,13 +122,18 @@ function AdminPage() {
                 <p className="font-medium">{r.name ?? "Unnamed"}</p>
                 <p className="truncate text-xs text-muted-foreground">{r.email}</p>
               </div>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  r.connected ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {r.connected ? "Connected" : "Not connected"}
-              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {r.notifyDevices > 0 && (
+                  <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">Notifications on</span>
+                )}
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    r.connected ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {r.connected ? "Connected" : "Not connected"}
+                </span>
+              </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Pair label="Microsoft sign-in" first={r.signInFirst} last={r.signInLast} />
@@ -139,6 +145,14 @@ function AdminPage() {
               <p className="text-xs text-muted-foreground">
                 Last sync result: {r.syncLastOutcome ?? "—"} · Last successful refresh:{" "}
                 <When value={r.successfulSyncLast} />
+              </p>
+            )}
+            {(r.notifyDevices > 0 || r.jobAlertsOff) && (
+              <p className="text-xs text-muted-foreground">
+                {[
+                  r.notifyDevices > 0 ? `Notifications on ${r.notifyDevices} device${r.notifyDevices === 1 ? "" : "s"}` : null,
+                  r.jobAlertsOff ? "Job alerts off" : null,
+                ].filter(Boolean).join(" · ")}
               </p>
             )}
           </div>

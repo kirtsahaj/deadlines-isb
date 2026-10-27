@@ -130,7 +130,7 @@ function JobAlertsBell({ accountOn }: { accountOn: boolean | undefined }) {
       type="button"
       variant="outline"
       size="icon"
-      className={`size-10 shrink-0 rounded-full bg-card ${on ? "text-primary" : "text-muted-foreground"}`}
+      className="size-10 shrink-0 rounded-full bg-card text-muted-foreground"
       onClick={toggle}
       disabled={busy || accountOn === undefined || deviceOn === null}
       aria-pressed={on}

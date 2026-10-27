@@ -20,6 +20,10 @@ export type AdminUserRow = {
   successfulSyncLast: string | null;
   syncCount: number;
   activeDeadlines: number;
+  /** Devices with notifications turned on (saved push subscriptions). */
+  notifyDevices: number;
+  /** Turned job alerts off with the Placements bell. */
+  jobAlertsOff: boolean;
 };
 
 function minMax(acc: { min: string | null; max: string | null }, value: string | null) {
@@ -36,7 +40,7 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
     if (!isAdminEmail(typeof email === "string" ? email : "")) throw new Error("forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const [usersRes, profilesRes, connRes, runsRes, itemsRes] = await Promise.all([
+    const [usersRes, profilesRes, connRes, runsRes, itemsRes, subsRes, settingsRes] = await Promise.all([
       supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
       supabaseAdmin.from("profiles").select("user_id, display_name, first_opened_at, last_active_at"),
       supabaseAdmin
@@ -48,6 +52,8 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
         .order("started_at", { ascending: true })
         .limit(20000),
       supabaseAdmin.from("deadline_items").select("user_id").eq("active", true).limit(50000),
+      supabaseAdmin.from("push_subscriptions").select("user_id").limit(20000),
+      supabaseAdmin.from("user_settings").select("user_id, job_reminders"),
     ]);
     if (usersRes.error) throw new Error("users_unavailable");
 
@@ -63,6 +69,9 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
     }
     const deadlines = new Map<string, number>();
     for (const d of itemsRes.data ?? []) deadlines.set(d.user_id, (deadlines.get(d.user_id) ?? 0) + 1);
+    const devices = new Map<string, number>();
+    for (const s of subsRes.data ?? []) devices.set(s.user_id, (devices.get(s.user_id) ?? 0) + 1);
+    const jobAlertsOff = new Set((settingsRes.data ?? []).filter((s) => s.job_reminders === false).map((s) => s.user_id));
 
     const rows: AdminUserRow[] = usersRes.data.users.map((u) => {
       const p = profiles.get(u.id);
@@ -88,6 +97,8 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
         successfulSyncLast: c?.last_success_at ?? null,
         syncCount: r?.count ?? 0,
         activeDeadlines: deadlines.get(u.id) ?? 0,
+        notifyDevices: devices.get(u.id) ?? 0,
+        jobAlertsOff: jobAlertsOff.has(u.id),
       };
     });
     rows.sort((a, b) => (b.signInLast ?? "").localeCompare(a.signInLast ?? ""));
