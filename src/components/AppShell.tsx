@@ -46,7 +46,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, jobs.data]);
   const hasNewJobs = !!seen && pathname !== "/placements" && jobIds.some((id) => !seen.has(id));
-  const itemPadding = tabs.length > 2 ? "px-3.5 sm:px-4" : "px-5";
+  // Three tabs plus Menu must fit a 360px phone; tighten only on the smallest screens.
+  const itemPadding = tabs.length > 2 ? "px-2.5 text-[13px] min-[400px]:px-3.5 min-[400px]:text-sm sm:px-4" : "px-5 text-sm";
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -66,11 +67,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       </footer>
 
       <nav
-        className="fixed inset-x-0 z-20 flex justify-center px-4"
+        className="fixed inset-x-0 z-20 flex justify-center px-3"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
         aria-label="Main"
       >
-        <div className="nav-pill flex items-center gap-1 rounded-full p-1">
+        <div className="nav-pill flex items-center gap-0.5 rounded-full p-1 min-[400px]:gap-1">
           {tabs.map((item) => {
             const active = pathname === item.to;
             return (
@@ -79,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={item.to}
                 onClick={tap}
                 aria-current={active ? "page" : undefined}
-                className={`nav-item tap-target relative rounded-full ${itemPadding} py-2.5 text-sm font-semibold transition-colors ${
+                className={`nav-item tap-target relative rounded-full ${itemPadding} py-2.5 font-semibold transition-colors ${
                   active ? "bg-primary text-primary-foreground" : ""
                 }`}
               >
@@ -90,7 +91,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             );
           })}
-          {tabs.length > 0 && <span aria-hidden className="mx-0.5 h-6 w-px bg-[var(--nav-border)]" />}
+          {tabs.length > 0 && <span aria-hidden className="h-6 w-px shrink-0 bg-[var(--nav-border)] min-[400px]:mx-0.5" />}
           <Link
             to="/menu"
             onClick={tap}
