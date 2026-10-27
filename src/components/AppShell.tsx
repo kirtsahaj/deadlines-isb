@@ -81,7 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         style={{ paddingBottom: "max(0.75rem, calc(env(safe-area-inset-bottom) + 6px))" }}
         aria-label="Main"
       >
-        <div className="flex items-center justify-center px-3 pt-1.5">
+        <div className="flex items-center justify-center gap-0.5 px-3 pt-1.5 min-[400px]:gap-1">
           {tabs.map((item) => {
             const active = pathname === item.to;
             return (
