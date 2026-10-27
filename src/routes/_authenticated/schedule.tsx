@@ -169,36 +169,56 @@ function ClassCard({ c }: { c: ScheduleClass }) {
   );
 }
 
+type ClassView = "upcoming" | "past";
+
+/** Same switch as Upcoming / Past on Assignments. */
+function ViewToggle({ view, onChange }: { view: ClassView; onChange: (v: ClassView) => void }) {
+  return (
+    <div className="flex h-10 shrink-0 items-center rounded-full bg-muted p-1" role="tablist" aria-label="Class view">
+      {(["upcoming", "past"] as ClassView[]).map((value) => (
+        <Button
+          key={value}
+          type="button"
+          role="tab"
+          aria-selected={view === value}
+          variant={view === value ? "default" : "ghost"}
+          size="sm"
+          className="h-8 rounded-full px-2.5 sm:px-3"
+          onClick={() => onChange(value)}
+        >
+          {value === "upcoming" ? "Upcoming" : "Past"}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
 function SchedulePage() {
   const term5 = useTerm5();
   const navigate = useNavigate();
   useEffect(() => {
     if (term5.data && !term5.data.inRoster) void navigate({ to: "/deadlines", replace: true });
   }, [term5.data, navigate]);
-  const [showPast, setShowPast] = useState(false);
+  const [view, setView] = useState<ClassView>("upcoming");
   const days = useMemo(() => {
-    const now = Date.now();
+    // A class stays under Upcoming until an hour after it ends; Past is everything else, most recent first.
+    const cutoff = Date.now() - 3600_000;
     const list = (term5.data?.classes ?? [])
-      .filter((c) => showPast || new Date(c.endsAt).getTime() >= now - 3600_000)
-      .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+      .filter((c) => (new Date(c.endsAt).getTime() >= cutoff) === (view === "upcoming"))
+      .sort((a, b) => (view === "upcoming" ? a.startsAt.localeCompare(b.startsAt) : b.startsAt.localeCompare(a.startsAt)));
     const map = new Map<string, ScheduleClass[]>();
     for (const c of list) {
       const k = dayKey(c.startsAt);
       map.set(k, [...(map.get(k) ?? []), c]);
     }
     return [...map.entries()];
-  }, [term5.data, showPast]);
+  }, [term5.data, view]);
 
   return (
     <div className="space-y-3">
-      <header className="flex flex-wrap items-end gap-3">
-        <div className="mr-auto">
-          <h1 className="text-3xl font-semibold">Classes &amp; Prereads</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and what to read before each class</p>
-        </div>
-        <Button variant="ghost" size="sm" onClick={() => setShowPast((v) => !v)}>
-          {showPast ? "Hide past classes" : "Show past classes"}
-        </Button>
+      <header>
+        <h1 className="text-3xl font-semibold">Classes &amp; Prereads</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and what to read before each class</p>
       </header>
       <SetupNudges />
       {term5.isLoading ? (
@@ -207,13 +227,23 @@ function SchedulePage() {
           <Skeleton className="h-24 w-full" />
         </div>
       ) : !days.length ? (
-        <div className="surface-card p-6 text-center text-sm text-muted-foreground">
-          No classes to show. Check your courses and sections in Menu → My courses.
+        <div className="space-y-2">
+          <div className="flex justify-end">
+            <ViewToggle view={view} onChange={setView} />
+          </div>
+          <div className="surface-card p-6 text-center text-sm text-muted-foreground">
+            {view === "upcoming"
+              ? "No upcoming classes to show. Check your courses and sections in Menu → My courses."
+              : "No past classes yet."}
+          </div>
         </div>
       ) : (
-        days.map(([key, classes]) => (
+        days.map(([key, classes], index) => (
           <section key={key} className="space-y-2">
-            <h2 className="py-1 text-sm font-semibold">{classes[0] ? dayLabel(classes[0].startsAt) : key}</h2>
+            <div className="flex min-h-10 items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold">{classes[0] ? dayLabel(classes[0].startsAt) : key}</h2>
+              {index === 0 && <ViewToggle view={view} onChange={setView} />}
+            </div>
             <ul className="space-y-3">
               {classes.map((c) => (
                 <li key={c.id}>
