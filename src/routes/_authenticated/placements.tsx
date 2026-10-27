@@ -10,6 +10,7 @@ import { getJobJdLink, listJobs, setJobReminders, type JobTile } from "@/lib/job
 import { jobsInView, type JobSort } from "@/lib/jobs/view";
 import { relativeTime } from "@/lib/format";
 import { currentSubscription, enableReminders, pushSupport } from "@/lib/pushClient";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Route = createFileRoute("/_authenticated/placements")({
   head: () => ({
@@ -141,6 +142,7 @@ const SORTS: { value: JobSort; label: string }[] = [
 function PlacementsPage() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<JobSort>("deadline");
+  const isMobile = useIsMobile();
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => listJobs() });
   const visible = useMemo(
     () => jobsInView(jobs.data?.jobs ?? [], { view: "upcoming", sort, filter: "all", search, now: Date.now() }),
@@ -157,28 +159,28 @@ function PlacementsPage() {
         <p className="text-xs text-muted-foreground">Please refer to the placement portal for more info.</p>
       </header>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search company or role" aria-label="Search jobs" className="h-10 border-border bg-card pl-9" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={isMobile ? "Search" : "Search company or role"} aria-label="Search jobs" className="h-10 border-border bg-card pl-9" />
+        </div>
+        <div className="flex h-10 shrink-0 items-center rounded-full bg-muted p-1" role="tablist" aria-label="Sort jobs by">
+          {SORTS.map((option) => (
+            <Button
+              key={option.value}
+              type="button"
+              role="tab"
+              aria-selected={sort === option.value}
+              variant={sort === option.value ? "default" : "ghost"}
+              size="sm"
+              className="h-8 rounded-full px-2.5 sm:px-3"
+              onClick={() => setSort(option.value)}
+            >
+              {option.label}
+            </Button>
+          ))}
         </div>
         <JobAlertsBell accountOn={jobs.data?.jobReminders} />
-      </div>
-
-      <div className="inline-flex rounded-full bg-muted p-1" role="tablist" aria-label="Sort jobs by">
-        {SORTS.map((option) => (
-          <Button
-            key={option.value}
-            type="button"
-            role="tab"
-            aria-selected={sort === option.value}
-            variant={sort === option.value ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setSort(option.value)}
-          >
-            {option.label}
-          </Button>
-        ))}
       </div>
 
       {jobs.isLoading ? (
