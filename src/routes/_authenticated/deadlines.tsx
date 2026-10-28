@@ -220,23 +220,23 @@ function DeadlinesPage() {
           <h1 className="title-gradient mr-auto w-fit min-w-0 text-3xl font-semibold">Hello{name ? ` ${name}` : ""}!</h1>
           <ShareButton message="All your ISB assignment deadlines in one place" />
         </div>
-          <p className="mt-1 text-sm font-medium text-muted-foreground">
-            {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : term5.data?.inRoster ? "Showing your Term 5 outlines and class updates" : "Connect eLearn to see your deadlines"}
+          <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
             {connected && (
-              <>
-                {" · "}
-                {/* Small inline refresh; the padding gives it a thumb-sized tap area without changing the line. */}
-                <button
-                  type="button"
-                  onClick={() => refresh.mutate()}
-                  disabled={refresh.isPending}
-                  className="-mx-1 -my-2 inline-flex items-center gap-1 rounded-full px-1 py-2 align-middle hover:underline disabled:opacity-80"
-                >
-                  <RefreshCcw className={`size-3.5 ${refresh.isPending ? "animate-spin" : ""}`} aria-hidden />
-                  {refresh.isPending ? "Refreshing…" : "Refresh now"}
-                </button>
-              </>
+              /* Refresh icon at the start of the line; padding gives it a thumb-sized tap area. */
+              <button
+                type="button"
+                onClick={() => refresh.mutate()}
+                disabled={refresh.isPending}
+                aria-label={refresh.isPending ? "Refreshing" : "Refresh now"}
+                title="Refresh now"
+                className="-m-2 inline-grid shrink-0 place-items-center rounded-full p-2 hover:text-foreground disabled:opacity-80"
+              >
+                <RefreshCcw className={`size-3.5 ${refresh.isPending ? "animate-spin" : ""}`} aria-hidden />
+              </button>
             )}
+            <span>
+              {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : term5.data?.inRoster ? "Showing your Term 5 outlines and class updates" : "Connect eLearn to see your deadlines"}
+            </span>
           </p>
       </header>
 
