@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { clearPersistedQueryCache } from "@/lib/queryPersist";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, LogOut, Share2, ShieldCheck } from "lucide-react";
@@ -162,6 +163,12 @@ function MenuPage() {
   async function signOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
+    clearPersistedQueryCache();
+    try {
+      window.localStorage.removeItem("account-access-ok-v1");
+    } catch {
+      /* nothing saved */
+    }
     await supabase.auth.signOut();
     void navigate({ to: "/", replace: true });
   }

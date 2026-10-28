@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,25 @@ import { AppShell } from "@/components/AppShell";
 import { useSession } from "@/lib/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { getAccountAccess } from "@/lib/elearn.functions";
+import { clearPersistedQueryCache, persistQueryCache, restoreQueryCache } from "@/lib/queryPersist";
+
+// Once a phone has passed the school-account check, later opens don't wait on it.
+const ACCESS_OK_KEY = "account-access-ok-v1";
+function accessRemembered(userId: string) {
+  try {
+    return window.localStorage.getItem(ACCESS_OK_KEY) === userId;
+  } catch {
+    return false;
+  }
+}
+function rememberAccess(userId: string | null) {
+  try {
+    if (userId) window.localStorage.setItem(ACCESS_OK_KEY, userId);
+    else window.localStorage.removeItem(ACCESS_OK_KEY);
+  } catch {
+    /* this visit only */
+  }
+}
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -26,8 +45,24 @@ function AuthenticatedLayout() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!loading && !session) void navigate({ to: "/", replace: true });
+    if (!loading && !session) {
+      clearPersistedQueryCache();
+      rememberAccess(null);
+      void navigate({ to: "/", replace: true });
+    }
   }, [loading, session, navigate]);
+
+  // Show last time's data straight away (restored before any screen asks for it), then keep it saved.
+  const userId = session?.user.id ?? null;
+  const restoredFor = useRef<string | null>(null);
+  if (userId && restoredFor.current !== userId) {
+    restoredFor.current = userId;
+    restoreQueryCache(queryClient, userId);
+  }
+  useEffect(() => {
+    if (!userId) return;
+    return persistQueryCache(queryClient, userId);
+  }, [userId, queryClient]);
 
   const access = useQuery({
     queryKey: ["account-access", session?.user.id],
@@ -35,7 +70,12 @@ function AuthenticatedLayout() {
     enabled: !!session,
   });
 
-  if (loading || !session || access.isLoading) {
+  useEffect(() => {
+    if (!userId || !access.data) return;
+    rememberAccess(access.data.allowed ? userId : null);
+  }, [userId, access.data]);
+
+  if (loading || !session || (access.isLoading && !accessRemembered(session.user.id))) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-sm text-muted-foreground">Loading…</p>
@@ -56,6 +96,8 @@ function AuthenticatedLayout() {
           onClick={async () => {
             await queryClient.cancelQueries();
             queryClient.clear();
+            clearPersistedQueryCache();
+            rememberAccess(null);
             await supabase.auth.signOut();
             void navigate({ to: "/", replace: true });
           }}

@@ -12,7 +12,7 @@
 <!-- LOVABLE:END -->
 
 - Derive deadline term/course filters at runtime from Moodle short names so existing rows need no migration.
-- Keep phone installability manifest-only; offline caching is intentionally excluded to protect fresh authenticated data.
+- Keep phone installability manifest-only; offline caching is intentionally excluded to protect fresh authenticated data. Instead, src/lib/queryPersist saves the signed-in user's screen data (allowlisted query keys) to localStorage, restores it on open for an instant first paint and refreshes in the background; per-user, max 24h, cleared on sign-out. Queries default to staleTime 2 min / gcTime 24h. A remembered school-account check (account-access-ok-v1) lets later opens skip the "Loading…" gate.
 - eLearn launch URLs are generated on interaction in a shared browser-safe helper so every attempt gets a fresh passport.
 - Detect phone browsers after hydration and keep Chrome-opening URL schemes in a shared browser-safe helper; browser handoffs are explicit and public setup URL copying has a manual fallback.
 - Clipboard connection goes through a browser-safe helper that validates before sending only the REST token; permission failures return a manual-paste outcome without attempting a connection.

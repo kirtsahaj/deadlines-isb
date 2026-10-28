@@ -17,7 +17,11 @@ function PageSkeleton() {
 }
 
 export const getRouter = () => {
-  const queryClient = new QueryClient();
+  // Data counts as fresh for 2 minutes, so switching tabs doesn't re-download everything;
+  // kept for a day so the saved copy (lib/queryPersist) covers every tab.
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { staleTime: 2 * 60_000, gcTime: 24 * 3600_000 } },
+  });
 
   const router = createRouter({
     routeTree,
