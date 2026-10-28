@@ -17,8 +17,8 @@ describe("deadline pill (Assignments and timed jobs)", () => {
     expect(deadlinePill("Due", "2026-10-29T17:30:00Z", now)).toEqual({ label: "Due tomorrow", tone: "soon" });
     // 22:00 IST Wednesday → Friday 09:00 IST is 35h away but not tomorrow: "soon", not "tomorrow"
     const lateWed = Date.parse("2026-10-28T16:30:00Z");
-    expect(deadlinePill("Due", "2026-10-30T03:30:00Z", lateWed)).toEqual({ label: "Due soon", tone: "soon" });
-    expect(deadlinePill("Closes", "2026-10-30T04:30:00Z", lateWed)).toEqual({ label: "Closes soon", tone: "soon" });
+    expect(deadlinePill("Due", "2026-10-30T03:30:00Z", lateWed)).toEqual({ label: "Due soon", tone: "later" });
+    expect(deadlinePill("Closes", "2026-10-30T04:30:00Z", lateWed)).toEqual({ label: "Closes soon", tone: "later" });
     // ...and nothing beyond 48h
     expect(deadlinePill("Due", "2026-10-30T17:30:00Z", lateWed)).toBeNull();
     // ...while Thursday 23:00 IST from late Wednesday is 25h away and is tomorrow

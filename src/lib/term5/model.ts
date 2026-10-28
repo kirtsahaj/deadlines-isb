@@ -452,7 +452,8 @@ export function isDone(item: Pick<UnifiedDeadline, "id" | "own" | "outline" | "n
 }
 
 /** Assignments pill: "Due in 5h" within 24h, "Due tomorrow" beyond that if dated tomorrow; urgent (red) in the last 12h. */
-export function dueSoon(dueAt: string | null, now: number): { label: string; urgent: boolean } | null {
+export function dueSoon(dueAt: string | null, now: number): { label: string; urgent: boolean; later?: true } | null {
   const pill = deadlinePill("Due", dueAt, now);
-  return pill ? { label: pill.label, urgent: pill.tone === "urgent" } : null;
+  if (!pill) return null;
+  return pill.tone === "later" ? { label: pill.label, urgent: false, later: true } : { label: pill.label, urgent: pill.tone === "urgent" };
 }

@@ -1,5 +1,6 @@
 /** Warm "soon" pills for Assignments (via dueSoon in term5/model), Placements and Classes. */
-export type SoonPill = { label: string; tone: "soon" | "urgent" | "now" };
+/** later = within 48h but not tomorrow ("Due/Closes soon"): a slightly yellower pill than "soon". */
+export type SoonPill = { label: string; tone: "later" | "soon" | "urgent" | "now" };
 
 const H = 3600_000;
 const M = 60_000;
@@ -26,7 +27,7 @@ export function deadlinePill(prefix: "Due" | "Closes", dueAt: string | null, now
   if (!(left > 0)) return null;
   if (left <= 24 * H) return { label: countdown(prefix, left), tone: left <= 12 * H ? "urgent" : "soon" };
   if (istDate(due) === tomorrowIst(now)) return { label: `${prefix} tomorrow`, tone: "soon" };
-  if (left <= 48 * H) return { label: `${prefix} soon`, tone: "soon" };
+  if (left <= 48 * H) return { label: `${prefix} soon`, tone: "later" };
   return null;
 }
 

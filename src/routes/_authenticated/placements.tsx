@@ -68,7 +68,7 @@ function JobCard({ job, isNew }: { job: JobTile; isNew: boolean }) {
         <dt className="text-muted-foreground">Apply by</dt>
         <dd className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
           {formatDate(job.deadlineDate, job.deadlineTime)}
-          {closing && <span className={`tile-soon ${closing.tone === "urgent" ? "tile-soon-urgent" : ""}`}>{closing.label}</span>}
+          {closing && <span className={`tile-soon ${closing.tone === "urgent" ? "tile-soon-urgent" : closing.tone === "later" ? "tile-soon-later" : ""}`}>{closing.label}</span>}
         </dd>
         <dt className="text-muted-foreground">Expected shortlist</dt>
         <dd>{formatDate(job.shortlistDate)}</dd>

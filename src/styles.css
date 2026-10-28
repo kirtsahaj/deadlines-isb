@@ -479,6 +479,15 @@
   color: var(--color-soon-foreground);
 }
 .dark .tile-soon { background-color: color-mix(in oklab, var(--color-soon) 26%, var(--color-card)); }
+/* "Due/Closes soon" (within 48h, not tomorrow): a slightly yellower golden-peach than "soon". */
+.tile-soon.tile-soon-later {
+  background-color: color-mix(in oklab, oklch(0.8 0.12 62) 26%, var(--color-card));
+  color: oklch(0.52 0.12 58);
+}
+.dark .tile-soon.tile-soon-later {
+  background-color: color-mix(in oklab, oklch(0.8 0.12 62) 26%, var(--color-card));
+  color: oklch(0.87 0.1 68);
+}
 .tile-soon.tile-soon-urgent {
   background-color: var(--color-urgent);
   color: var(--color-urgent-foreground);

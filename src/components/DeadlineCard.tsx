@@ -152,7 +152,7 @@ export function DeadlineCard({
           {item.provisional && item.dueAt ? item.kind === "preread" ? " · topic estimated" : " · estimated" : ""}
         </span>
         {soon ? (
-          <span className={`tile-soon ${soon.urgent ? "tile-soon-urgent" : ""}`}>{soon.label}</span>
+          <span className={`tile-soon ${soon.urgent ? "tile-soon-urgent" : soon.later ? "tile-soon-later" : ""}`}>{soon.label}</span>
         ) : (
           item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>
         )}
