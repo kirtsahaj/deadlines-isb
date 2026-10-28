@@ -136,14 +136,14 @@ function PlacementsPage() {
       <div className="flex items-center gap-2">
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={isMobile ? "Search" : "Search company or role"} aria-label="Search jobs" className="h-10 border-border bg-card pl-9" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={isMobile ? "Search" : "Search company or role"} aria-label="Search jobs" className="h-10 border-transparent bg-muted pl-9 shadow-none focus:border-border focus:bg-card focus-visible:ring-0" />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               type="button"
               variant="outline"
-              className="h-10 shrink-0 gap-1.5 rounded-full bg-card px-3"
+              className="h-10 shrink-0 gap-1.5 rounded-full border-transparent bg-muted px-3 shadow-none hover:bg-muted/70"
               aria-label={`Sort by ${SORTS.find((o) => o.value === sort)?.label}`}
             >
               <ArrowUpDown className="size-4 text-muted-foreground" aria-hidden />
