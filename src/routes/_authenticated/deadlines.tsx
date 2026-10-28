@@ -93,11 +93,8 @@ function DeadlinesPage() {
     mutationFn: () => syncNow(),
     onSuccess: async (result) => {
       if (result.ok) {
-        setSyncMessage(
-          result.outcome === "partial"
-            ? "Refresh complete. Some eLearn sections were unavailable; your existing dates remain here."
-            : `Updated — ${result.itemCount} eLearn deadline${result.itemCount === 1 ? "" : "s"} found.`,
-        );
+        // Full or partial, keep it short: the synced time on the line above says the rest.
+        setSyncMessage("Refresh complete");
       } else if (result.error === "sync_cooldown") {
         const seconds = result.retryAfterSeconds ?? 60;
         setSyncMessage(
