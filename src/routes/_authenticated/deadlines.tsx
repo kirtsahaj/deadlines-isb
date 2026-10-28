@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { setDone } from "@/lib/alerts.functions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReminderSetupDialog } from "@/components/ReminderSetup";
+import { ShareButton } from "@/components/ShareButton";
 import { SetupNudges } from "@/components/SetupNudges";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/useSession";
@@ -218,14 +219,24 @@ function DeadlinesPage() {
           <h1 className="title-gradient w-fit text-3xl font-semibold">Hello{name ? ` ${name}` : ""}!</h1>
           <p className="mt-1 text-sm font-medium text-muted-foreground">
             {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : term5.data?.inRoster ? "Showing your Term 5 outlines and class updates" : "Connect eLearn to see your deadlines"}
+            {connected && (
+              <>
+                {" · "}
+                {/* Small inline refresh; the padding gives it a thumb-sized tap area without changing the line. */}
+                <button
+                  type="button"
+                  onClick={() => refresh.mutate()}
+                  disabled={refresh.isPending}
+                  className="-mx-1 -my-2 inline-flex items-center gap-1 rounded-full px-1 py-2 align-middle text-primary hover:underline disabled:opacity-80"
+                >
+                  <RefreshCcw className={`size-3.5 ${refresh.isPending ? "animate-spin" : ""}`} aria-hidden />
+                  {refresh.isPending ? "Refreshing…" : "Refresh now"}
+                </button>
+              </>
+            )}
           </p>
         </div>
-        {connected && (
-          <Button variant="secondary" size="sm" className="tap-target" onClick={() => refresh.mutate()} disabled={refresh.isPending}>
-            <RefreshCcw className={`size-4 ${refresh.isPending ? "animate-spin" : ""}`} aria-hidden />
-            {refresh.isPending ? "Refreshing…" : "Refresh now"}
-          </Button>
-        )}
+        <ShareButton message="All your ISB assignment deadlines in one place" />
       </header>
 
       <SetupNudges />

@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SetupNudges } from "@/components/SetupNudges";
 import { AlertsBell } from "@/components/AlertsBell";
+import { ShareButton } from "@/components/ShareButton";
 import { useTerm5 } from "@/lib/useTerm5";
 import { getConnectionState } from "@/lib/elearn.functions";
 import { getCoursepacks, type ScheduleClass } from "@/lib/term5.functions";
@@ -224,9 +225,12 @@ function SchedulePage() {
   }, [term5.data, view]);
   return (
     <div className="space-y-3">
-      <header>
-        <h1 className="text-3xl font-semibold">Classes &amp; Prereads</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and prereads</p>
+      <header className="flex items-start gap-3">
+        <div className="mr-auto">
+          <h1 className="text-3xl font-semibold">Classes &amp; Prereads</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and prereads</p>
+        </div>
+        <ShareButton message="Your ISB timetable, rooms and prereads" />
       </header>
       <SetupNudges />
       {term5.isLoading ? (

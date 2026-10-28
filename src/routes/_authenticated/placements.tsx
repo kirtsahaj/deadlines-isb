@@ -15,6 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { getJobJdLink, listJobs, type JobTile } from "@/lib/jobs.functions";
 import { AlertsBell } from "@/components/AlertsBell";
+import { ShareButton } from "@/components/ShareButton";
 import { jobsInView, type JobSort } from "@/lib/jobs/view";
 import { isLive } from "@/lib/jobs/intake";
 import { jobClosing } from "@/lib/soon";
@@ -119,7 +120,8 @@ function PlacementsPage() {
 
   return (
     <div className="space-y-3">
-      <header>
+      <header className="flex items-start gap-3">
+        <div className="mr-auto">
         <h1 className="text-3xl font-semibold">Placements</h1>
         {jobs.data?.lastNewPostingAt && (
           <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
@@ -131,6 +133,8 @@ function PlacementsPage() {
             Last new posting {relativeTime(jobs.data.lastNewPostingAt)}
           </p>
         )}
+        </div>
+        <ShareButton message="Every CAS job posting with apply-by dates" />
       </header>
 
       <div className="flex items-center gap-2">
