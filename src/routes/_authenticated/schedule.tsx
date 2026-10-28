@@ -225,7 +225,7 @@ function SchedulePage() {
   return (
     <div className="space-y-3">
       <header>
-        <h1 className="title-gradient w-fit text-3xl font-semibold">Classes &amp; Prereads</h1>
+        <h1 className="text-3xl font-semibold">Classes &amp; Prereads</h1>
         <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and prereads</p>
       </header>
       <SetupNudges />

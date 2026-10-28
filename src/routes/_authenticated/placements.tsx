@@ -120,7 +120,7 @@ function PlacementsPage() {
   return (
     <div className="space-y-3">
       <header>
-        <h1 className="title-gradient w-fit text-3xl font-semibold">Placements</h1>
+        <h1 className="text-3xl font-semibold">Placements</h1>
         {jobs.data?.lastNewPostingAt && (
           <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
             {isLive(jobs.data.lastForwardedAt, Date.now()) && (

@@ -55,7 +55,7 @@ function Landing() {
   const domains = policy?.allowedDomains ?? [];
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col">
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 py-16">
         <div className="max-w-2xl">
           <CalendarClock className="mb-8 size-12 text-foreground" aria-hidden />

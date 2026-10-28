@@ -98,22 +98,22 @@
 :root {
   color-scheme: light;
   --preread: oklch(0.48 0.1 185);
-  --quiz: oklch(0.53 0.16 350);
+  --quiz: oklch(0.54 0.135 350);
   --activity: oklch(0.5 0.13 65);
   --radius: 1rem;
 
-  --background: oklch(0.982 0.002 260);
+  --background: oklch(0.97 0.018 320);
   --foreground: oklch(0.2 0.012 265);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.2 0.012 265);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0.012 265);
 
-  --primary: oklch(0.5 0.21 300);
+  --primary: oklch(0.51 0.175 300);
   --primary-foreground: oklch(0.99 0.005 300);
 
   --secondary: oklch(0.95 0.03 300);
-  --secondary-foreground: oklch(0.5 0.21 300);
+  --secondary-foreground: oklch(0.51 0.175 300);
 
   --muted: oklch(0.955 0.004 265);
   --muted-foreground: oklch(0.5 0.012 265);
@@ -124,10 +124,10 @@
   --destructive: oklch(0.6 0.19 18);
   --destructive-foreground: oklch(0.99 0.005 18);
 
-  --success: oklch(0.62 0.13 160);
-  --conf-own: oklch(0.33 0.11 268);
-  --conf-shared: oklch(0.66 0.15 38);
-  --conf-outline: oklch(0.58 0.21 8);
+  --success: oklch(0.61 0.11 160);
+  --conf-own: oklch(0.34 0.095 268);
+  --conf-shared: oklch(0.65 0.125 38);
+  --conf-outline: oklch(0.59 0.18 8);
   --conf-provisional: oklch(0.6 0.01 260);
   --success-foreground: oklch(0.99 0.005 160);
 
@@ -136,9 +136,9 @@
 
   --border: oklch(0.92 0.004 265);
   --input: oklch(0.92 0.004 265);
-  --ring: oklch(0.5 0.21 300);
+  --ring: oklch(0.51 0.175 300);
 
-  --chart-1: oklch(0.5 0.21 300);
+  --chart-1: oklch(0.51 0.175 300);
   --chart-2: oklch(0.86 0.1 350);
   --chart-3: oklch(0.8 0.13 80);
   --chart-4: oklch(0.62 0.13 160);
@@ -146,23 +146,28 @@
 
   --sidebar: oklch(0.97 0.004 265);
   --sidebar-foreground: oklch(0.2 0.012 265);
-  --sidebar-primary: oklch(0.5 0.21 300);
+  --sidebar-primary: oklch(0.51 0.175 300);
   --sidebar-primary-foreground: oklch(0.99 0.005 290);
   --sidebar-accent: oklch(0.95 0.03 300);
-  --sidebar-accent-foreground: oklch(0.5 0.21 300);
+  --sidebar-accent-foreground: oklch(0.51 0.175 300);
   --sidebar-border: oklch(0.92 0.004 265);
-  --sidebar-ring: oklch(0.5 0.21 300);
+  --sidebar-ring: oklch(0.51 0.175 300);
   /* Warm states and the brand gradient */
-  --soon: oklch(0.76 0.14 35);
-  --soon-foreground: oklch(0.53 0.15 38);
-  --urgent: oklch(0.58 0.21 8);
+  --soon: oklch(0.77 0.115 35);
+  --soon-foreground: oklch(0.53 0.13 38);
+  --urgent: oklch(0.59 0.18 8);
   --urgent-foreground: oklch(1 0 0);
   --brand-pink: oklch(0.68 0.19 355);
   --grad-1: oklch(0.68 0.19 355);
   --grad-2: oklch(0.58 0.23 330);
-  --grad-3: oklch(0.5 0.21 300);
-  --wash-pink: oklch(0.68 0.19 355 / 0.16);
-  --wash-violet: oklch(0.5 0.21 300 / 0.13);
+  --grad-3: oklch(0.51 0.175 300);
+  /* Page background: purple at the top → pink at the bottom, a purple glow, and a soft diagonal sheen */
+  --page-sheen: linear-gradient(118deg, transparent 16%, oklch(1 0 0 / 0.45) 33%, oklch(0.985 0.025 330 / 0.75) 44%, oklch(0.985 0.02 290 / 0.6) 52%, oklch(1 0 0 / 0.4) 61%, transparent 78%);
+  --page-glow: radial-gradient(42rem 22rem at 105% -12%, oklch(0.5 0.21 300 / 0.08), transparent 70%);
+  --page-gradient: linear-gradient(180deg, oklch(0.965 0.022 300) 0%, oklch(0.97 0.018 322) 50%, oklch(0.973 0.022 350) 100%);
+  /* Frosted bottom bar */
+  --nav-frost: color-mix(in oklab, oklch(0.975 0.025 318) 62%, transparent);
+  --nav-frost-edge: oklch(1 0 0 / 0.7);
 }
 
 .dark {
@@ -171,7 +176,7 @@
   --preread: oklch(0.78 0.11 180);
   --quiz: oklch(0.78 0.13 350);
   --activity: oklch(0.8 0.12 75);
-  --background: oklch(0.17 0.005 265);
+  --background: oklch(0.175 0.012 290);
   --foreground: oklch(0.95 0.004 265);
   --card: oklch(0.215 0.006 265);
   --card-foreground: oklch(0.95 0.004 265);
@@ -214,8 +219,11 @@
   --grad-1: oklch(0.8 0.14 355);
   --grad-2: oklch(0.76 0.16 320);
   --grad-3: oklch(0.74 0.13 285);
-  --wash-pink: oklch(0.72 0.17 355 / 0.16);
-  --wash-violet: oklch(0.58 0.19 300 / 0.16);
+  --page-sheen: linear-gradient(118deg, transparent 16%, oklch(1 0 0 / 0.06) 32%, oklch(0.88 0.1 330 / 0.15) 43%, oklch(0.9 0.08 290 / 0.12) 52%, oklch(1 0 0 / 0.05) 61%, transparent 78%);
+  --page-glow: radial-gradient(42rem 22rem at 105% -12%, oklch(0.62 0.18 300 / 0.14), transparent 70%);
+  --page-gradient: linear-gradient(180deg, oklch(0.19 0.032 300) 0%, oklch(0.185 0.03 322) 50%, oklch(0.19 0.036 345) 100%);
+  --nav-frost: color-mix(in oklab, oklch(0.22 0.035 315) 62%, transparent);
+  --nav-frost-edge: oklch(1 0 0 / 0.08);
 }
 
 @layer base {
@@ -230,14 +238,21 @@
   }
 
   body {
-    background-color: var(--color-background);
-    background-image:
-      radial-gradient(42rem 22rem at 105% -12%, var(--wash-pink), transparent 70%),
-      radial-gradient(38rem 22rem at -10% -14%, var(--wash-violet), transparent 70%);
-    background-attachment: fixed;
+    background-color: transparent;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* The page background sits on a fixed layer so the gradient and sheen stay put while
+     content scrolls (iPhone Safari ignores background-attachment: fixed). */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--page-sheen), var(--page-glow), var(--page-gradient), var(--color-background);
   }
 
   h1,
@@ -491,4 +506,12 @@
 .deadline-card .tile-badges [data-slot="badge"].tile-past-due {
   background-color: var(--color-urgent);
   color: var(--color-urgent-foreground);
+}
+
+/* Bottom bar: frosted glass, so content scrolling underneath shows through, blurred and tinted. */
+.nav-frost {
+  background-color: var(--nav-frost);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+  border-top: 1px solid var(--nav-frost-edge);
 }

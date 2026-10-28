@@ -55,7 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     }`;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col">
       <main
         className="mx-auto w-full max-w-3xl flex-1 pb-6"
         style={{
@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* A plain bar on the bottom edge in the card colour; its bottom padding keeps the tabs
           clear of the iPhone home bar and Android gesture pill. */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 backdrop-blur"
+        className="nav-frost fixed inset-x-0 bottom-0 z-20"
         style={{ paddingBottom: "max(0.75rem, calc(env(safe-area-inset-bottom) + 6px))" }}
         aria-label="Main"
       >
