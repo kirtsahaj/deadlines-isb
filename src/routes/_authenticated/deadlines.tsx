@@ -214,9 +214,12 @@ function DeadlinesPage() {
   return (
     <div className="space-y-3">
       {connected && <ReminderSetupDialog />}
-      <header className="flex flex-wrap items-start gap-2">
-        <div className="mr-auto">
-          <h1 className="title-gradient w-fit text-3xl font-semibold">Hello{name ? ` ${name}` : ""}!</h1>
+      {/* Title and share share the top row; the status line runs full width underneath. */}
+      <header>
+        <div className="flex items-start gap-2">
+          <h1 className="title-gradient mr-auto w-fit min-w-0 text-3xl font-semibold">Hello{name ? ` ${name}` : ""}!</h1>
+          <ShareButton message="All your ISB assignment deadlines in one place" />
+        </div>
           <p className="mt-1 text-sm font-medium text-muted-foreground">
             {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : term5.data?.inRoster ? "Showing your Term 5 outlines and class updates" : "Connect eLearn to see your deadlines"}
             {connected && (
@@ -235,8 +238,6 @@ function DeadlinesPage() {
               </>
             )}
           </p>
-        </div>
-        <ShareButton message="All your ISB assignment deadlines in one place" />
       </header>
 
       <SetupNudges />

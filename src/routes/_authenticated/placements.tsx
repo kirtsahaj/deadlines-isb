@@ -120,9 +120,11 @@ function PlacementsPage() {
 
   return (
     <div className="space-y-3">
-      <header className="flex items-start gap-2">
-        <div className="mr-auto">
-        <h1 className="text-3xl font-semibold">Placements</h1>
+      <header>
+        <div className="flex items-start gap-2">
+          <h1 className="mr-auto min-w-0 text-3xl font-semibold">Placements</h1>
+          <ShareButton message="Every CAS job posting with apply-by dates" />
+        </div>
         {jobs.data?.lastNewPostingAt && (
           <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
             {isLive(jobs.data.lastForwardedAt, Date.now()) && (
@@ -133,8 +135,6 @@ function PlacementsPage() {
             Last new posting {relativeTime(jobs.data.lastNewPostingAt)}
           </p>
         )}
-        </div>
-        <ShareButton message="Every CAS job posting with apply-by dates" />
       </header>
 
       <div className="flex items-center gap-2">
