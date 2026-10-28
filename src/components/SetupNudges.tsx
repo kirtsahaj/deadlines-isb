@@ -1,31 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Bell, ChevronRight, Link2, Smartphone } from "lucide-react";
+import { ChevronRight, Link2, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getConnectionState } from "@/lib/elearn.functions";
-import { currentSubscription, enableReminders, pushSupport } from "@/lib/pushClient";
 
-type Nudge = { id: string; icon: typeof Bell; text: string; action: React.ReactNode };
+type Nudge = { id: string; icon: typeof Link2; text: string; action: React.ReactNode };
 
-/** One small rotating banner for pending setup steps; each disappears once done. */
+/** One small rotating banner for pending setup steps (eLearn, home screen); each disappears once done. Notifications live on the bells and in Menu. */
 export function SetupNudges() {
   const connection = useQuery({ queryKey: ["connection-state"], queryFn: () => getConnectionState() });
   const [phone, setPhone] = useState(false);
   const [installed, setInstalled] = useState(true);
-  const [reminders, setReminders] = useState<"on" | "off" | "unavailable">("unavailable");
   const [index, setIndex] = useState(0);
-  const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
     setPhone(/iPhone|iPad|iPod|Android/.test(navigator.userAgent));
     setInstalled(
       window.matchMedia("(display-mode: standalone)").matches || (navigator as { standalone?: boolean }).standalone === true,
     );
-    const support = pushSupport();
-    if (support === "supported") {
-      void currentSubscription().then((s) => setReminders(s && Notification.permission === "granted" ? "on" : "off"));
-    }
   }, []);
 
   const nudges = useMemo(() => {
@@ -38,25 +31,6 @@ export function SetupNudges() {
         action: (
           <Button asChild size="sm">
             <Link to="/connect">Connect</Link>
-          </Button>
-        ),
-      });
-    }
-    if (reminders === "off") {
-      list.push({
-        id: "notify",
-        icon: Bell,
-        text: "Get a reminder 3 hours before each deadline",
-        action: (
-          <Button
-            size="sm"
-            onClick={async () => {
-              const r = await enableReminders().catch(() => "unsupported" as const);
-              if (r === "enabled") setReminders("on");
-              else setMsg(r === "denied" ? "Notifications are blocked in your settings." : "Add the app to your home screen first.");
-            }}
-          >
-            Turn on
           </Button>
         ),
       });
@@ -74,7 +48,7 @@ export function SetupNudges() {
       });
     }
     return list;
-  }, [connection.data, reminders, phone, installed]);
+  }, [connection.data, phone, installed]);
 
   useEffect(() => {
     if (nudges.length < 2) return;
@@ -92,7 +66,6 @@ export function SetupNudges() {
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium">{current.text}</p>
-        {msg && current.id === "notify" && <p className="text-xs text-muted-foreground">{msg}</p>}
         {nudges.length > 1 && (
           <div className="mt-1 flex gap-1" aria-hidden>
             {nudges.map((n, i) => (

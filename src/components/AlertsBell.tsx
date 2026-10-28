@@ -5,6 +5,16 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { canInstall, promptInstall } from "@/lib/installEvent";
+import { ConfirmTurnOff } from "@/components/ConfirmTurnOff";
+
+const TURN_OFF_TEXT: Record<AlertCategory, { title: string; description: string }> = {
+  deadlines: {
+    title: "Turn off assignment alerts?",
+    description: "You won't get reminders before assignment deadlines or alerts when new ones appear.",
+  },
+  classes: { title: "Turn off class alerts?", description: "You won't get reminders about prereads before your classes." },
+  jobs: { title: "Turn off job alerts?", description: "You won't get reminders before job application deadlines." },
+};
 import { getAlertSettings, setAlertSetting } from "@/lib/alerts.functions";
 import { ALERT_LABELS, type AlertCategory, type AlertSettings } from "@/lib/alerts";
 import { currentSubscription, enableReminders, pushSupport } from "@/lib/pushClient";
@@ -47,6 +57,7 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
   const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [homeScreenHelp, setHomeScreenHelp] = useState(false);
+  const [confirmOff, setConfirmOff] = useState(false);
   useEffect(() => {
     void currentSubscription()
       .catch(() => null)
@@ -66,14 +77,23 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
     queryClient.setQueryData(ALERT_SETTINGS_KEY, (old: AlertSettings | undefined) => (old ? { ...old, [category]: enabled } : old));
   }
 
-  async function toggle() {
+  async function turnOff() {
     setBusy(true);
     try {
-      if (on) {
-        await save(false);
-        toast(`${label} off`);
-        return;
-      }
+      await save(false);
+      toast(`${label} off`);
+    } catch {
+      toast(`Couldn't change ${label.toLowerCase()}. Please try again.`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function toggle() {
+    // Turning off always asks first; turning on never does.
+    if (on) return void setConfirmOff(true);
+    setBusy(true);
+    try {
       if (!deviceOn) {
         const support = pushSupport();
         if (support === "needs-home-screen") return void setHomeScreenHelp(true);
@@ -106,7 +126,11 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
         type="button"
         variant="outline"
         size="icon"
-        className={`size-10 shrink-0 rounded-full bg-card disabled:opacity-100 ${on || !known ? "text-muted-foreground" : "text-destructive"}`}
+        className={`size-10 shrink-0 rounded-full disabled:opacity-100 ${
+          on || !known
+            ? "bg-card text-muted-foreground"
+            : "border-destructive bg-destructive text-white hover:bg-destructive/90 hover:text-white"
+        }`}
         onClick={toggle}
         disabled={busy || !known || !checked}
         aria-pressed={on}
@@ -115,6 +139,13 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
       >
         <Icon className="size-4" aria-hidden />
       </Button>
+      <ConfirmTurnOff
+        open={confirmOff}
+        onOpenChange={setConfirmOff}
+        title={TURN_OFF_TEXT[category].title}
+        description={TURN_OFF_TEXT[category].description}
+        onConfirm={() => void turnOff()}
+      />
       <Dialog open={homeScreenHelp} onOpenChange={setHomeScreenHelp}>
         <DialogContent className="max-w-sm rounded-2xl">
           <DialogHeader>

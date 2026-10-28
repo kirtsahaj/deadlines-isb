@@ -3,6 +3,7 @@ import { Bell, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ConfirmTurnOff } from "@/components/ConfirmTurnOff";
 import { REMINDER_SETUP_KEY, currentSubscription, disableReminders, enableReminders, pushSupport, type PushSupport } from "@/lib/pushClient";
 
 function HomeScreenSteps() {
@@ -60,9 +61,19 @@ function useReminderState() {
 }
 
 function ReminderActions({ state }: { state: ReturnType<typeof useReminderState> }) {
+  const [confirmOff, setConfirmOff] = useState(false);
   if (state.support !== "supported") return null;
   return state.enabled ? (
-    <Button variant="outline" onClick={state.turnOff} disabled={state.busy}><BellOff className="size-4" />Turn off on this device</Button>
+    <>
+      <Button variant="outline" onClick={() => setConfirmOff(true)} disabled={state.busy}><BellOff className="size-4" />Turn off on this device</Button>
+      <ConfirmTurnOff
+        open={confirmOff}
+        onOpenChange={setConfirmOff}
+        title="Turn off notifications on this phone?"
+        description="All alerts on this device will stop: assignments, classes and jobs. You can turn them back on anytime."
+        onConfirm={() => void state.turnOff()}
+      />
+    </>
   ) : (
     <Button onClick={state.turnOn} disabled={state.busy}><Bell className="size-4" />{state.busy ? "Turning on…" : "Turn on notifications"}</Button>
   );
