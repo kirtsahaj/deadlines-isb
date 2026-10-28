@@ -168,13 +168,7 @@ export function DeadlineCard({
 
       <div className="mt-1.5 flex items-center gap-2">
         <div className="tile-badges tile-fade flex flex-1 flex-wrap items-center gap-1.5">
-        {submitted ? (
-          <span className="tile-chip tile-done">Submitted</span>
-        ) : item.done ? (
-          <span className="tile-chip tile-done">Done</span>
-        ) : (
-          <span className="tile-chip tile-kind">{KIND_LABELS[item.kind] ?? item.kind}</span>
-        )}
+        <span className="tile-chip tile-kind">{KIND_LABELS[item.kind] ?? item.kind}</span>
         {item.deadlineType === "cutoff" && <Badge variant="outline">Hard cut-off</Badge>}
         {overdue && <Badge variant="destructive">Past due</Badge>}
         {isText && <Badge variant="outline">Mentioned in course text</Badge>}
@@ -188,19 +182,34 @@ export function DeadlineCard({
           <a href={destination.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3" aria-hidden />{destination.activity ? "Open activity" : "Open course"}</a>
         </Button>}
         </div>
-        {onToggleDone && (
+        {/* Status on the right: empty tick → soft "Done" (yours, tap to undo) → solid "Submitted" (eLearn, locked). */}
+        {submitted ? (
+          <span className="tile-status tile-status-submitted" title="Submitted on eLearn">
+            <Check className="size-3.5" aria-hidden /> Submitted
+          </span>
+        ) : onToggleDone && item.done ? (
           <button
             type="button"
-            onClick={submitted ? undefined : onToggleDone}
-            disabled={submitted}
-            aria-pressed={finished}
-            aria-label={submitted ? "Submitted on eLearn" : item.done ? `Mark ${item.title} as not done` : `Mark ${item.title} as done`}
-            title={submitted ? "Submitted on eLearn" : item.done ? "Mark as not done" : "Mark as done"}
-            className={`tile-tick ${finished ? "tile-tick-on" : ""}`}
+            onClick={onToggleDone}
+            aria-pressed
+            aria-label={`Marked as done. Tap to mark ${item.title} as not done`}
+            title="Mark as not done"
+            className="tile-status tile-status-done"
+          >
+            <Check className="size-3.5" aria-hidden /> Done
+          </button>
+        ) : onToggleDone ? (
+          <button
+            type="button"
+            onClick={onToggleDone}
+            aria-pressed={false}
+            aria-label={`Mark ${item.title} as done`}
+            title="Mark as done"
+            className="tile-tick"
           >
             <Check className="size-4" aria-hidden />
           </button>
-        )}
+        ) : null}
       </div>
     </article>
     </Dialog>

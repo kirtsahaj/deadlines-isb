@@ -388,11 +388,7 @@
 }
 .deadline-card .tile-info:hover { background-color: var(--color-muted); }
 
-/* Done / submitted: a green status chip in place of the type label, and a faded tile. */
-.deadline-card .tile-done {
-  background-color: color-mix(in oklab, var(--color-success) 18%, var(--color-card));
-  color: color-mix(in oklab, var(--color-success) 80%, var(--color-foreground));
-}
+/* Finished tiles fade; the status control on the right stays at full strength. */
 .deadline-card[data-done="true"] .tile-fade { opacity: 0.55; }
 .deadline-card .tile-tick {
   display: grid; place-items: center; flex-shrink: 0;
@@ -400,12 +396,26 @@
   border: 1.5px solid var(--color-border); color: var(--color-muted-foreground);
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease;
 }
-.deadline-card .tile-tick:hover:not(:disabled) { color: var(--color-success); border-color: var(--color-success); }
-.deadline-card .tile-tick:active:not(:disabled) { transform: scale(0.9); }
-.deadline-card .tile-tick-on {
-  background-color: var(--color-success); border-color: var(--color-success); color: var(--color-success-foreground);
+.deadline-card .tile-tick:hover { color: var(--color-success); border-color: var(--color-success); }
+.deadline-card .tile-tick:active, .deadline-card .tile-status-done:active { transform: scale(0.94); }
+.deadline-card .tile-status {
+  display: inline-flex; align-items: center; gap: 0.25rem; flex-shrink: 0;
+  height: 2rem; padding: 0 0.75rem; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 700; border: 1.5px solid transparent;
+  transition: background-color 160ms ease, transform 120ms ease;
 }
-.deadline-card .tile-tick-on:hover:not(:disabled) { color: var(--color-success-foreground); }
+/* Ticked by the student: soft green, tappable to undo. */
+.deadline-card .tile-status-done {
+  background-color: color-mix(in oklab, var(--color-success) 16%, var(--color-card));
+  border-color: color-mix(in oklab, var(--color-success) 45%, var(--color-card));
+  color: color-mix(in oklab, var(--color-success) 80%, var(--color-foreground));
+}
+.deadline-card .tile-status-done:hover { background-color: color-mix(in oklab, var(--color-success) 24%, var(--color-card)); }
+/* Submitted on eLearn: solid green with white text, locked. */
+.deadline-card .tile-status-submitted {
+  background-color: var(--color-success); border-color: var(--color-success); color: #fff;
+}
+.dark .deadline-card .tile-status-submitted { color: var(--color-success-foreground); }
 /* Due within 24h: a warm pill in place of the grey "in 5 hours"; red in the last 3 hours. */
 .tile-soon {
   display: inline-flex; align-items: center; height: 1.375rem; padding: 0 0.5rem; border-radius: 999px;
