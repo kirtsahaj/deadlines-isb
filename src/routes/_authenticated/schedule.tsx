@@ -31,8 +31,8 @@ const TZ = "Asia/Kolkata";
 const dayKey = (iso: string) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date(iso));
 const dayLabel = (iso: string) =>
   new Intl.DateTimeFormat("en-IN", { timeZone: TZ, weekday: "long", day: "numeric", month: "short" }).format(new Date(iso));
-const dayLabelShort = (iso: string) =>
-  new Intl.DateTimeFormat("en-IN", { timeZone: TZ, weekday: "short", day: "numeric", month: "short" }).format(new Date(iso));
+const dayMonth = (iso: string) =>
+  new Intl.DateTimeFormat("en-IN", { timeZone: TZ, day: "numeric", month: "short" }).format(new Date(iso));
 const time = (iso: string) =>
   new Intl.DateTimeFormat("en-IN", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 
@@ -252,10 +252,10 @@ function SchedulePage() {
             <div className="flex min-h-10 items-center justify-between gap-3">
               <h2 className="text-sm font-semibold">
                 {key === dayKey(new Date().toISOString()) ? (
-                  // Short weekday keeps "Today · Wed, 28 Oct" on one line next to the toggle and bell on small phones.
+                  // "Today · 28 Oct": no weekday, so it stays on one line next to the toggle and bell on small phones.
                   <>
                     <span className="text-primary">Today · </span>
-                    {classes[0] ? dayLabelShort(classes[0].startsAt) : key}
+                    {classes[0] ? dayMonth(classes[0].startsAt) : key}
                   </>
                 ) : classes[0] ? (
                   dayLabel(classes[0].startsAt)
