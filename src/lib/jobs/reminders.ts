@@ -1,13 +1,19 @@
-/** Job application reminders: 3 hours before an explicit deadline time, like course deadlines. */
-export const JOB_REMINDER_OFFSETS_H = [3] as const;
+/** Job application reminders: 12 hours and 3 hours before an explicit deadline time. */
+export const JOB_REMINDER_OFFSETS_H = [12, 3] as const;
 const H = 60 * 60_000;
 
-/** Offsets due right now. Date-only deadlines (no instant) and passed deadlines never qualify. */
+/**
+ * The offset due right now: 3 inside the last 3 hours, 12 between 12 and 3 hours out.
+ * A job first seen inside 3 hours gets only the 3-hour notice (no late 12-hour one).
+ * Date-only deadlines (no instant) and passed deadlines never qualify.
+ */
 export function dueJobOffsets(deadlineAt: string | null, now: number): number[] {
   if (!deadlineAt) return [];
   const left = new Date(deadlineAt).getTime() - now;
   if (!Number.isFinite(left) || left <= 0) return [];
-  return left <= 3 * H ? [3] : [];
+  if (left <= 3 * H) return [3];
+  if (left <= 12 * H) return [12];
+  return [];
 }
 
 export const jobReminderKey = (userId: string, jobId: string, dueAt: string, offset: number) =>

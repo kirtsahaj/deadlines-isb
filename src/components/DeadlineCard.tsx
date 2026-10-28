@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Check, CircleCheck, Clock, ExternalLink, Info } from "lucide-react";
+import { AlertTriangle, Check, Clock, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { elearnDestination } from "@/lib/elearnDestination";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { dueSoon, showPastDue, type SourceRef, type UnifiedDeadline } from "@/lib/term5/model";
-import { CONFIDENCE_META, ConfidenceMark, ConnectCta } from "@/components/Confidence";
+import { CONFIDENCE_META, ConfidenceMark, ConnectCta, SourceIcon } from "@/components/Confidence";
 
 const KIND_LABELS: Record<string, string> = {
   assignment: "Assignment",
@@ -111,8 +111,8 @@ export function DeadlineCard({
               title="Source details"
               aria-label={`${meta.label}. Source details for ${item.title}`}
             >
-              {/* Confirmed from the student's own eLearn: a tick instead of (i). */}
-              {item.confidence === "own" ? <CircleCheck className="size-4" aria-hidden /> : <Info className="size-4" aria-hidden />}
+              {/* Source at a glance: person = your eLearn, two people = classmates, document = outline. */}
+              <SourceIcon value={item.confidence} />
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md rounded-2xl">

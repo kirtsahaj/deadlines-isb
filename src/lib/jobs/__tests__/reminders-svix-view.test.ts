@@ -8,14 +8,23 @@ const H = 3600_000;
 const now = Date.parse("2026-11-01T10:00:00Z");
 const at = (ms: number) => new Date(now + ms).toISOString();
 
-describe("job reminders: 3h only", () => {
-  it("never sends a 12-hour notice; only the 3-hour one", () => {
-    expect(dueJobOffsets(at(12 * H), now)).toEqual([]);
-    expect(dueJobOffsets(at(8 * H), now)).toEqual([]);
+describe("job reminders: 12h and 3h", () => {
+  it("sends the 12-hour notice between 12 and 3 hours out, nothing earlier", () => {
+    expect(dueJobOffsets(at(12 * H), now)).toEqual([12]);
+    expect(dueJobOffsets(at(8 * H), now)).toEqual([12]);
+    expect(dueJobOffsets(at(12 * H + 60_000), now)).toEqual([]);
+  });
+  it("sends both notices for one deadline, each once", () => {
+    const jobs = [{ id: "j1", deadlineAt: at(10 * H) }];
+    const first = planJobReminders(jobs, ["u1"], now);
+    expect(first).toEqual([{ userId: "u1", jobId: "j1", dueAt: at(10 * H), offset: 12 }]);
+    const claimed = new Set(first.map((r) => jobReminderKey(r.userId, r.jobId, r.dueAt, r.offset)));
+    expect(planJobReminders(jobs, ["u1"], now + 15 * 60_000, claimed)).toHaveLength(0);
+    expect(planJobReminders(jobs, ["u1"], now + 7 * H, claimed)).toEqual([{ userId: "u1", jobId: "j1", dueAt: at(10 * H), offset: 3 }]);
   });
   it("sends the 3-hour notice inside 3 hours, never after the deadline", () => {
     expect(dueJobOffsets(at(3 * H), now)).toEqual([3]);
-    expect(dueJobOffsets(at(3 * H + 60_000), now)).toEqual([]);
+    expect(dueJobOffsets(at(3 * H + 60_000), now)).toEqual([12]);
     expect(dueJobOffsets(at(-1), now)).toEqual([]);
   });
   it("never reminds for a date-only deadline", () => {

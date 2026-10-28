@@ -16,9 +16,9 @@ async function eligibleUsers(userIds: string[]): Promise<string[]> {
   return out;
 }
 
-/** 3-hour job application reminders for every school account with device notifications on. */
+/** 12-hour and 3-hour job application reminders for every school account with device notifications on. */
 export async function sendJobReminders(subs: (PushTarget & { user_id: string })[], now = Date.now()): Promise<number> {
-  const horizon = new Date(now + 3 * 60 * 60_000 + 60_000).toISOString();
+  const horizon = new Date(now + 12 * 60 * 60_000 + 60_000).toISOString();
   const { data: jobs } = await supabaseAdmin.from("jobs").select("id, company, role, deadline_at")
     .gt("deadline_at", new Date(now).toISOString()).lte("deadline_at", horizon);
   if (!jobs?.length) return 0;
@@ -34,7 +34,10 @@ export async function sendJobReminders(subs: (PushTarget & { user_id: string })[
     if (error) continue;
     const job = jobs.find((j) => j.id === r.jobId)!;
     const tz = settings?.find((s) => s.user_id === r.userId)?.timezone ?? "Asia/Kolkata";
-    const time = new Date(r.dueAt).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", timeZone: tz });
+    const dayOf = (ms: number) => new Date(ms).toLocaleDateString("en-CA", { timeZone: tz });
+    // The 12-hour notice can land the evening before: say "tomorrow" so the time isn't misread as today.
+    const day = dayOf(Date.parse(r.dueAt)) === dayOf(now) ? "" : "tomorrow ";
+    const time = day + new Date(r.dueAt).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", timeZone: tz });
     const message = { title: `Apply by ${time}: ${job.company}`, body: job.role ?? "Open Placements", url: "/placements", tag: `job-${r.jobId}-${r.offset}` };
     for (const sub of subs.filter((s) => s.user_id === r.userId)) {
       const res = await sendPush(sub, message);

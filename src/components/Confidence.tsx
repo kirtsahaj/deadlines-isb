@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { FileText, UserRound, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Confidence } from "@/lib/term5/model";
 
@@ -29,12 +30,25 @@ export const CONFIDENCE_META: Record<Confidence, { symbol: string; label: string
   },
 };
 
-/** Symbol + color, never color alone. */
+/**
+ * Where a deadline came from, as an icon in a thin circle (colour comes from the parent):
+ * your eLearn = person, course/section eLearn (classmates) = two people, outline or estimate = document.
+ */
+export function SourceIcon({ value }: { value: Confidence }) {
+  const Icon = value === "own" ? UserRound : value === "shared" ? UsersRound : FileText;
+  return (
+    <span aria-hidden className="grid size-[14px] place-items-center rounded-full border-[1.5px] border-current">
+      <Icon className="size-[9px]" strokeWidth={2.75} />
+    </span>
+  );
+}
+
+/** Icon + color, never color alone. */
 export function ConfidenceMark({ value, className = "" }: { value: Confidence; className?: string }) {
   const meta = CONFIDENCE_META[value];
   return (
-    <span aria-hidden className={`inline-grid size-5 place-items-center text-base font-bold leading-none ${meta.className} ${className}`}>
-      {meta.symbol}
+    <span aria-hidden className={`inline-grid size-5 place-items-center ${meta.className} ${className}`}>
+      <SourceIcon value={value} />
     </span>
   );
 }
