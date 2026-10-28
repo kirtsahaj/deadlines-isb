@@ -6,7 +6,8 @@ import { dehydrate, hydrate, type QueryClient } from "@tanstack/react-query";
  * straight away and refreshed in the background. Per-user, discarded after a day,
  * and cleared on sign-out. Only these screens' data is kept (never admin data or links).
  */
-const STORAGE_KEY = "query-cache-v1";
+const STORAGE_KEY = "query-cache-v2";
+const OLD_KEYS = ["query-cache-v1"];
 const MAX_AGE_MS = 24 * 3600_000;
 const KEEP = new Set([
   "term5",
@@ -21,11 +22,26 @@ const KEEP = new Set([
   "alert-settings",
 ]);
 
+/** Only plain JSON (objects, arrays, strings, numbers, booleans, null) survives saving; skip anything else. */
+export function isPlainJson(value: unknown, depth = 0): boolean {
+  if (depth > 40) return false;
+  if (value === null || typeof value === "string" || typeof value === "boolean") return true;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (Array.isArray(value)) return value.every((v) => isPlainJson(v, depth + 1));
+  if (typeof value === "object") {
+    const proto = Object.getPrototypeOf(value);
+    if (proto !== Object.prototype && proto !== null) return false;
+    return Object.values(value as Record<string, unknown>).every((v) => v === undefined || isPlainJson(v, depth + 1));
+  }
+  return false;
+}
+
 type Saved = { userId: string; savedAt: number; state: ReturnType<typeof dehydrate> };
 
 /** Restore this user's saved data into the cache. Call once, as soon as the signed-in user is known. */
 export function restoreQueryCache(queryClient: QueryClient, userId: string): boolean {
   try {
+    for (const key of OLD_KEYS) window.localStorage.removeItem(key);
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return false;
     const saved = JSON.parse(raw) as Saved;
@@ -47,7 +63,8 @@ export function persistQueryCache(queryClient: QueryClient, userId: string): () 
     timer = undefined;
     try {
       const state = dehydrate(queryClient, {
-        shouldDehydrateQuery: (q) => q.state.status === "success" && KEEP.has(String(q.queryKey[0])),
+        shouldDehydrateQuery: (q) =>
+          q.state.status === "success" && KEEP.has(String(q.queryKey[0])) && isPlainJson(q.state.data),
       });
       const saved: Saved = { userId, savedAt: Date.now(), state };
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));

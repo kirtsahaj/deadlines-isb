@@ -130,7 +130,8 @@ function DeadlinesPage() {
     queryKey: ["deadline-done", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from("deadline_done").select("item_key");
-      return new Set(error ? [] : (data ?? []).map((r) => r.item_key));
+      // A plain list (not a Set) so it can be saved on the phone for instant opens.
+      return error ? [] : (data ?? []).map((r) => r.item_key);
     },
     enabled: !!user,
   });
@@ -138,13 +139,13 @@ function DeadlinesPage() {
     mutationFn: (v: { keys: string[]; done: boolean }) => setDone({ data: v }),
     onMutate: (v) => {
       const key = ["deadline-done", user?.id];
-      const before = queryClient.getQueryData<Set<string>>(key);
+      const before = queryClient.getQueryData<string[]>(key);
       const next = new Set(before ?? []);
       for (const k of v.keys) {
         if (v.done) next.add(k);
         else next.delete(k);
       }
-      queryClient.setQueryData(key, next);
+      queryClient.setQueryData(key, [...next]);
       return { before };
     },
     onSuccess: (_r, v) => toast(v.done ? "Marked as done" : "Marked as not done"),
@@ -170,7 +171,7 @@ function DeadlinesPage() {
     }).map(i => ({ ...i, moodleCourseId: i.moodleCourseId ?? refs.find(c => c.short_name === `${i.courseCode}_PGP${term5.data.campus}_2026-27_T5`)?.moodle_course_id ?? null }))].filter((i) => i.moodleCourseId === null || !hidden.has(i.moodleCourseId));
   }, [term5.data, deadlines.data, courses.data, connection.data, hidden]);
   const withDone = useMemo(() => {
-    const done = doneRows.data ?? new Set<string>();
+    const done = new Set(Array.isArray(doneRows.data) ? doneRows.data : []);
     return merged.map((i): UnifiedDeadline => (isDone(i, done) ? { ...i, done: true } : i));
   }, [merged, doneRows.data]);
 

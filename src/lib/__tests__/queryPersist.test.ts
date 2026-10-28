@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QueryClient } from "@tanstack/react-query";
-import { clearPersistedQueryCache, persistQueryCache, restoreQueryCache } from "../queryPersist";
+import { clearPersistedQueryCache, isPlainJson, persistQueryCache, restoreQueryCache } from "../queryPersist";
 
 function fakeStorage() {
   const map = new Map<string, string>();
@@ -60,5 +60,26 @@ describe("saved screens", () => {
     stop2();
     clearPersistedQueryCache();
     expect(restoreQueryCache(new QueryClient(), "u1")).toBe(false);
+  });
+});
+
+describe("only plain data is saved", () => {
+  it("rejects Sets, Maps and Dates that would come back broken", () => {
+    expect(isPlainJson({ a: [1, "x", null, { b: true }] })).toBe(true);
+    expect(isPlainJson(new Set(["k"]))).toBe(false);
+    expect(isPlainJson({ m: new Map() })).toBe(false);
+    expect(isPlainJson({ d: new Date() })).toBe(false);
+  });
+  it("skips a query whose data isn't plain, keeping the rest", () => {
+    const qc = new QueryClient();
+    const stop = persistQueryCache(qc, "u1");
+    qc.setQueryData(["deadline-done", "u1"], new Set(["k"]));
+    qc.setQueryData(["deadlines", "u1"], [{ id: "a" }]);
+    vi.advanceTimersByTime(1100);
+    stop();
+    const next = new QueryClient();
+    restoreQueryCache(next, "u1");
+    expect(next.getQueryData(["deadline-done", "u1"])).toBeUndefined();
+    expect(next.getQueryData(["deadlines", "u1"])).toEqual([{ id: "a" }]);
   });
 });
