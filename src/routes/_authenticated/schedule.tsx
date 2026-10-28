@@ -192,7 +192,7 @@ function ViewToggle({ view, onChange }: { view: ClassView; onChange: (v: ClassVi
           aria-selected={view === value}
           variant={view === value ? "default" : "ghost"}
           size="sm"
-          className={`h-8 rounded-full px-2.5 sm:px-3 ${view === value ? "" : "text-primary hover:text-primary"}`}
+          className="h-8 rounded-full px-2.5 sm:px-3"
           onClick={() => onChange(value)}
         >
           {value === "upcoming" ? "Upcoming" : "Past"}
@@ -250,7 +250,7 @@ function SchedulePage() {
         days.map(([key, classes], index) => (
           <section key={key} className="space-y-2">
             <div className="flex min-h-10 items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold text-primary">
+              <h2 className="text-sm font-semibold">
                 {key === dayKey(new Date().toISOString()) ? (
                   // "Today · 28 Oct": no weekday, so it stays on one line next to the toggle and bell on small phones.
                   <>

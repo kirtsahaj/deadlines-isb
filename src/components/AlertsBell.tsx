@@ -106,7 +106,7 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
         type="button"
         variant="outline"
         size="icon"
-        className={`size-10 shrink-0 rounded-full bg-card disabled:opacity-100 ${!known ? "text-muted-foreground" : on ? "text-primary" : "text-destructive"}`}
+        className={`size-10 shrink-0 rounded-full bg-card disabled:opacity-100 ${on || !known ? "text-muted-foreground" : "text-destructive"}`}
         onClick={toggle}
         disabled={busy || !known || !checked}
         aria-pressed={on}
