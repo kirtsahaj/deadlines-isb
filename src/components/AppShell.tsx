@@ -59,7 +59,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main
         className="mx-auto w-full max-w-3xl flex-1 pb-6"
         style={{
-          paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)",
+          // 1.5rem (was 1.25rem): keeps headings clear of the soft blur iOS adds under the status bar.
+          paddingTop: "calc(env(safe-area-inset-top) + 1.5rem)",
           paddingLeft: "max(1rem, env(safe-area-inset-left))",
           paddingRight: "max(1rem, env(safe-area-inset-right))",
         }}
