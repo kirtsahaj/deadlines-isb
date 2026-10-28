@@ -53,6 +53,24 @@ export type Database = {
         }
         Relationships: []
       }
+      deadline_done: {
+        Row: {
+          done_at: string
+          item_key: string
+          user_id: string
+        }
+        Insert: {
+          done_at?: string
+          item_key: string
+          user_id: string
+        }
+        Update: {
+          done_at?: string
+          item_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       deadline_items: {
         Row: {
           active: boolean
@@ -637,7 +655,9 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          class_reminders: boolean
           created_at: string
+          deadline_reminders: boolean
           explicit_deadline_marker_only: boolean
           hidden_course_ids: number[]
           job_reminders: boolean
@@ -647,7 +667,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          class_reminders?: boolean
           created_at?: string
+          deadline_reminders?: boolean
           explicit_deadline_marker_only?: boolean
           hidden_course_ids?: number[]
           job_reminders?: boolean
@@ -657,7 +679,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          class_reminders?: boolean
           created_at?: string
+          deadline_reminders?: boolean
           explicit_deadline_marker_only?: boolean
           hidden_course_ids?: number[]
           job_reminders?: boolean
