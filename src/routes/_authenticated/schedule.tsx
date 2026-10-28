@@ -11,7 +11,7 @@ import { AlertsBell } from "@/components/AlertsBell";
 import { useTerm5 } from "@/lib/useTerm5";
 import { getConnectionState } from "@/lib/elearn.functions";
 import { getCoursepacks, type ScheduleClass } from "@/lib/term5.functions";
-import { classStarting, prereadKeys } from "@/lib/soon";
+import { classStarting } from "@/lib/soon";
 
 export const Route = createFileRoute("/_authenticated/schedule")({
   head: () => ({
@@ -129,9 +129,7 @@ function CoursepackButton({ courseCode }: { courseCode: string }) {
 }
 
 const prereadsOf = (c: ScheduleClass) => c.prep.filter((p) => p.timing === "before_class" && PREREAD_KINDS.has(p.kind));
-const SEEN_CLASSES_KEY = "classes-seen-v1";
-
-function ClassCard({ c, isNew }: { c: ScheduleClass; isNew: boolean }) {
+function ClassCard({ c }: { c: ScheduleClass }) {
   const prereads = prereadsOf(c);
   const rest = c.prep.filter((p) => !prereads.includes(p));
   const soon = classStarting(c, Date.now());
@@ -147,7 +145,6 @@ function ClassCard({ c, isNew }: { c: ScheduleClass; isNew: boolean }) {
         {soon && (
           <span className={`tile-soon ${soon.tone === "urgent" ? "tile-soon-urgent" : soon.tone === "now" ? "tile-soon-now" : ""}`}>{soon.label}</span>
         )}
-        {isNew && <span className="tile-new ml-auto" title="Preread added since your last visit">New</span>}
       </p>
       {c.sessionTitle && <h3 className="mt-1.5 text-base font-semibold leading-snug">{c.sessionTitle}</h3>}
       {prereads.length > 0 && (
@@ -223,28 +220,6 @@ function SchedulePage() {
     }
     return [...map.entries()];
   }, [term5.data, view]);
-
-  // "New" = a class with a preread that wasn't on this device's list at the previous visit. First visit shows nothing.
-  const [previouslySeen] = useState<Set<string> | null>(() => {
-    try {
-      const raw = window.localStorage.getItem(SEEN_CLASSES_KEY);
-      return raw ? new Set(JSON.parse(raw) as string[]) : null;
-    } catch {
-      return null;
-    }
-  });
-  useEffect(() => {
-    const all = term5.data?.classes;
-    if (!all?.length) return;
-    try {
-      window.localStorage.setItem(SEEN_CLASSES_KEY, JSON.stringify(all.flatMap((c) => prereadKeys({ id: c.id, prep: prereadsOf(c) }))));
-    } catch {
-      /* this visit only */
-    }
-  }, [term5.data]);
-  const isNew = (c: ScheduleClass) =>
-    view === "upcoming" && !!previouslySeen && prereadKeys({ id: c.id, prep: prereadsOf(c) }).some((k) => !previouslySeen.has(k));
-
   return (
     <div className="space-y-3">
       <header>
@@ -284,7 +259,7 @@ function SchedulePage() {
             <ul className="space-y-3">
               {classes.map((c) => (
                 <li key={c.id}>
-                  <ClassCard c={c} isNew={isNew(c)} />
+                  <ClassCard c={c} />
                 </li>
               ))}
             </ul>

@@ -30,6 +30,3 @@ export function classStarting(c: { startsAt: string; endsAt: string }, now: numb
   if (!(left > 0 && left <= 3 * H)) return null;
   return { label: countdown("Starts", left), tone: left <= 30 * M ? "urgent" : "soon" };
 }
-
-/** Stable keys for a class's prereads, used for the "New" tag on Classes. */
-export const prereadKeys = (c: { id: string; prep: { id: string }[] }) => c.prep.map((p) => `${c.id}:${p.id}`);

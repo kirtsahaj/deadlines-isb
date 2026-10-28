@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classStarting, jobClosing, prereadKeys } from "../soon";
+import { classStarting, jobClosing } from "../soon";
 
 // 28 Oct 2026, 16:00 IST
 const now = Date.parse("2026-10-28T10:30:00Z");
@@ -36,11 +36,5 @@ describe("class starting pill", () => {
     expect(classStarting(cls(-10 * 60_000), now)).toEqual({ label: "On now", tone: "now" });
     expect(classStarting(cls(-2 * H), now)).toBeNull();
     expect(classStarting(cls(4 * H), now)).toBeNull();
-  });
-});
-
-describe("class New tag keys", () => {
-  it("ties each preread to its class, so the same reading on another class counts separately", () => {
-    expect(prereadKeys({ id: "c1", prep: [{ id: "p1" }, { id: "p2" }] })).toEqual(["c1:p1", "c1:p2"]);
   });
 });
