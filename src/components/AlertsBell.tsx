@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, BellOff } from "lucide-react";
+import { Bell, BellOff, Share, SquarePlus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { canInstall, promptInstall } from "@/lib/installEvent";
 import { getAlertSettings, setAlertSetting } from "@/lib/alerts.functions";
 import { ALERT_LABELS, type AlertCategory, type AlertSettings } from "@/lib/alerts";
 import { currentSubscription, enableReminders, pushSupport } from "@/lib/pushClient";
@@ -44,6 +46,7 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
   };
   const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [homeScreenHelp, setHomeScreenHelp] = useState(false);
   useEffect(() => {
     void currentSubscription()
       .catch(() => null)
@@ -73,14 +76,18 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
       }
       if (!deviceOn) {
         const support = pushSupport();
-        if (support === "needs-home-screen") return void toast("Add the app to your home screen to get alerts");
+        if (support === "needs-home-screen") return void setHomeScreenHelp(true);
         if (support === "unsupported") return void toast("This browser can't show notifications");
         const result = await enableReminders();
         if (result === "denied") return void toast("Notifications are blocked. Allow them in your settings, then try again.");
         if (result !== "enabled") return void toast("Couldn't turn on notifications. Please try again.");
         setDeviceOn(true);
         await queryClient.invalidateQueries({ queryKey: ALERT_SETTINGS_KEY });
-        toast(`${label} on`);
+        // Android Chrome: offer the one-tap install while they're here.
+        toast(
+          `${label} on`,
+          canInstall() ? { duration: 10_000, action: { label: "Install app", onClick: () => void promptInstall() } } : undefined,
+        );
         return;
       }
       await save(true);
@@ -94,18 +101,51 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
 
   const Icon = on || !known ? Bell : BellOff;
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="icon"
-      className={`size-10 shrink-0 rounded-full bg-card disabled:opacity-100 ${!known ? "text-muted-foreground" : on ? "text-primary" : "text-destructive"}`}
-      onClick={toggle}
-      disabled={busy || !known || !checked}
-      aria-pressed={on}
-      aria-label={on ? `${label} on. Tap to turn off` : `${label} off. Tap to turn on`}
-      title={on ? `${label} on` : `${label} off`}
-    >
-      <Icon className="size-4" aria-hidden />
-    </Button>
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className={`size-10 shrink-0 rounded-full bg-card disabled:opacity-100 ${!known ? "text-muted-foreground" : on ? "text-primary" : "text-destructive"}`}
+        onClick={toggle}
+        disabled={busy || !known || !checked}
+        aria-pressed={on}
+        aria-label={on ? `${label} on. Tap to turn off` : `${label} off. Tap to turn on`}
+        title={on ? `${label} on` : `${label} off`}
+      >
+        <Icon className="size-4" aria-hidden />
+      </Button>
+      <Dialog open={homeScreenHelp} onOpenChange={setHomeScreenHelp}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Get alerts on your iPhone</DialogTitle>
+            <DialogDescription>iPhone only sends alerts from apps on your home screen. It takes a few seconds.</DialogDescription>
+          </DialogHeader>
+          <ol className="space-y-3 text-sm">
+            <li className="flex items-center gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+                <Share className="size-4" aria-hidden />
+              </span>
+              <span>In Safari, tap the <b>Share</b> button at the bottom of the screen.</span>
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+                <SquarePlus className="size-4" aria-hidden />
+              </span>
+              <span>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</span>
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+                <Bell className="size-4" aria-hidden />
+              </span>
+              <span>Open the app from your home screen and tap the bell again.</span>
+            </li>
+          </ol>
+          <Button type="button" className="w-full rounded-full" onClick={() => setHomeScreenHelp(false)}>
+            Got it
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
