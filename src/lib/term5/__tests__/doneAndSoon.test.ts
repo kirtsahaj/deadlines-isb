@@ -59,13 +59,17 @@ describe("done ticks", () => {
 });
 
 describe("due soon pill", () => {
-  it("shows hours inside 24h, minutes inside the last hour, urgent inside 3h", () => {
-    expect(dueSoon(iso(5 * H + 20 * 60_000), now)).toEqual({ label: "Due in 5h", urgent: false });
-    expect(dueSoon(iso(2 * H), now)).toEqual({ label: "Due in 2h", urgent: true });
+  // now = 1 Nov, 15:30 IST
+  it("shows hours inside 24h, minutes inside the last hour, red inside 12h", () => {
+    expect(dueSoon(iso(20 * H + 20 * 60_000), now)).toEqual({ label: "Due in 20h", urgent: false });
+    expect(dueSoon(iso(5 * H), now)).toEqual({ label: "Due in 5h", urgent: true });
     expect(dueSoon(iso(40 * 60_000), now)).toEqual({ label: "Due in 40m", urgent: true });
   });
-  it("stays hidden beyond 24h, after the deadline, or without a time", () => {
-    expect(dueSoon(iso(25 * H), now)).toBeNull();
+  it("says Due tomorrow (amber) beyond 24h when the date is tomorrow in India", () => {
+    expect(dueSoon(iso(25 * H), now)).toEqual({ label: "Due tomorrow", urgent: false });
+  });
+  it("stays hidden for the day after tomorrow, after the deadline, or without a time", () => {
+    expect(dueSoon(iso(34 * H), now)).toBeNull(); // 3 Nov, 01:30 IST
     expect(dueSoon(iso(-60_000), now)).toBeNull();
     expect(dueSoon(null, now)).toBeNull();
   });

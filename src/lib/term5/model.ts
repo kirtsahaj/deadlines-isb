@@ -3,6 +3,7 @@
  * shared section updates and outline deadlines into one card per assessment.
  * Pure functions only — covered by tests.
  */
+import { deadlinePill } from "../soon";
 
 export const TERM5 = { academicYear: "2026-27", campus: "Mohali", term: "T5", tz: "Asia/Kolkata" } as const;
 const OWN_FRESH_MS = 6 * 3600_000;
@@ -450,11 +451,8 @@ export function isDone(item: Pick<UnifiedDeadline, "id" | "own" | "outline" | "n
   return doneKeys(item).some((k) => done.has(k));
 }
 
-/** "Due in 5h" / "Due in 40m" inside the last 24 hours; urgent in the last 3. Null otherwise. */
+/** Assignments pill: "Due in 5h" within 24h, "Due tomorrow" beyond that if dated tomorrow; urgent (red) in the last 12h. */
 export function dueSoon(dueAt: string | null, now: number): { label: string; urgent: boolean } | null {
-  if (!dueAt) return null;
-  const left = Date.parse(dueAt) - now;
-  if (!(left > 0 && left <= 24 * 3600_000)) return null;
-  const label = left >= 3600_000 ? `Due in ${Math.floor(left / 3600_000)}h` : `Due in ${Math.max(1, Math.floor(left / 60_000))}m`;
-  return { label, urgent: left <= 3 * 3600_000 };
+  const pill = deadlinePill("Due", dueAt, now);
+  return pill ? { label: pill.label, urgent: pill.tone === "urgent" } : null;
 }
