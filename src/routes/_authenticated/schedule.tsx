@@ -248,7 +248,10 @@ function SchedulePage() {
         days.map(([key, classes], index) => (
           <section key={key} className="space-y-2">
             <div className="flex min-h-10 items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold">{classes[0] ? dayLabel(classes[0].startsAt) : key}</h2>
+              <h2 className="text-sm font-semibold">
+                {key === dayKey(new Date().toISOString()) && <span className="text-primary">Today · </span>}
+                {classes[0] ? dayLabel(classes[0].startsAt) : key}
+              </h2>
               {index === 0 && (
                 <div className="flex shrink-0 items-center gap-2">
                   <ViewToggle view={view} onChange={setView} />
