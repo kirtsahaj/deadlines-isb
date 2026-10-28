@@ -214,7 +214,7 @@ function DeadlinesPage() {
   return (
     <div className="space-y-3">
       {connected && <ReminderSetupDialog />}
-      <header className="flex flex-wrap items-start gap-3">
+      <header className="flex flex-wrap items-start gap-2">
         <div className="mr-auto">
           <h1 className="title-gradient w-fit text-3xl font-semibold">Hello{name ? ` ${name}` : ""}!</h1>
           <p className="mt-1 text-sm font-medium text-muted-foreground">

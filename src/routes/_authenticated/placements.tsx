@@ -120,7 +120,7 @@ function PlacementsPage() {
 
   return (
     <div className="space-y-3">
-      <header className="flex items-start gap-3">
+      <header className="flex items-start gap-2">
         <div className="mr-auto">
         <h1 className="text-3xl font-semibold">Placements</h1>
         {jobs.data?.lastNewPostingAt && (

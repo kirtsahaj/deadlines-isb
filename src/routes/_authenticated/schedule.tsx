@@ -225,7 +225,7 @@ function SchedulePage() {
   }, [term5.data, view]);
   return (
     <div className="space-y-3">
-      <header className="flex items-start gap-3">
+      <header className="flex items-start gap-2">
         <div className="mr-auto">
           <h1 className="text-3xl font-semibold">Classes &amp; Prereads</h1>
           <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and prereads</p>
