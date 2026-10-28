@@ -32,6 +32,6 @@ export function relativeTime(iso: string | null): string {
 }
 
 export function lastSyncedLabel(iso: string | null | undefined): string {
-  if (!iso) return "Not synced yet";
-  return `Last synced ${relativeTime(iso)}`;
+  if (!iso) return "Assignments not synced yet";
+  return `Assignments synced ${relativeTime(iso)}`;
 }

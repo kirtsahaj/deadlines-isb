@@ -227,7 +227,7 @@ function DeadlinesPage() {
                   type="button"
                   onClick={() => refresh.mutate()}
                   disabled={refresh.isPending}
-                  className="-mx-1 -my-2 inline-flex items-center gap-1 rounded-full px-1 py-2 align-middle text-primary hover:underline disabled:opacity-80"
+                  className="-mx-1 -my-2 inline-flex items-center gap-1 rounded-full px-1 py-2 align-middle hover:underline disabled:opacity-80"
                 >
                   <RefreshCcw className={`size-3.5 ${refresh.isPending ? "animate-spin" : ""}`} aria-hidden />
                   {refresh.isPending ? "Refreshing…" : "Refresh now"}
