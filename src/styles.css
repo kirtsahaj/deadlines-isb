@@ -164,9 +164,9 @@
   /* Page background: purple at the top → pink at the bottom, a purple glow, and a soft diagonal sheen */
   --page-sheen: linear-gradient(118deg, transparent 16%, oklch(1 0 0 / 0.35) 33%, oklch(0.985 0.02 330 / 0.55) 44%, oklch(0.985 0.016 290 / 0.45) 52%, oklch(1 0 0 / 0.3) 61%, transparent 78%);
   --page-glow: radial-gradient(40rem 24rem at 100% 40%, oklch(0.6 0.16 310 / 0.05), transparent 70%);
-  --page-gradient: linear-gradient(180deg, oklch(0.99 0.004 300) 0%, oklch(0.985 0.008 318) 55%, oklch(0.978 0.016 345) 100%);
+  --page-gradient: linear-gradient(180deg, oklch(0.99 0.004 300) 0%, oklch(0.987 0.005 318) 55%, oklch(0.984 0.008 340) 100%);
   /* Frosted bottom bar */
-  --nav-frost: color-mix(in oklab, oklch(0.978 0.016 345) 74%, transparent);
+  --nav-frost: color-mix(in oklab, oklch(0.984 0.008 340) 76%, transparent);
   --nav-frost-edge: oklch(1 0 0 / 0.7);
 }
 
@@ -221,8 +221,8 @@
   --grad-3: oklch(0.74 0.13 285);
   --page-sheen: linear-gradient(118deg, transparent 16%, oklch(1 0 0 / 0.04) 32%, oklch(0.88 0.1 330 / 0.1) 43%, oklch(0.9 0.08 290 / 0.08) 52%, oklch(1 0 0 / 0.035) 61%, transparent 78%);
   --page-glow: radial-gradient(40rem 24rem at 100% 40%, oklch(0.6 0.18 310 / 0.08), transparent 70%);
-  --page-gradient: linear-gradient(180deg, oklch(0.14 0.012 295) 0%, oklch(0.145 0.018 315) 50%, oklch(0.16 0.03 345) 100%);
-  --nav-frost: color-mix(in oklab, oklch(0.16 0.03 345) 74%, transparent);
+  --page-gradient: linear-gradient(180deg, oklch(0.14 0.012 295) 0%, oklch(0.142 0.013 312) 50%, oklch(0.148 0.016 330) 100%);
+  --nav-frost: color-mix(in oklab, oklch(0.148 0.016 330) 76%, transparent);
   --nav-frost-edge: oklch(1 0 0 / 0.08);
 }
 
