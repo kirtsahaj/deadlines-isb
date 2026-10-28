@@ -145,9 +145,9 @@ function DeadlinesPage() {
         else next.delete(k);
       }
       queryClient.setQueryData(key, next);
-      toast(v.done ? "Marked as done" : "Marked as not done");
       return { before };
     },
+    onSuccess: (_r, v) => toast(v.done ? "Marked as done" : "Marked as not done"),
     onError: (_e, _v, ctx) => {
       queryClient.setQueryData(["deadline-done", user?.id], ctx?.before);
       toast("Couldn't save that. Please try again.");
