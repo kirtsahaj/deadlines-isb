@@ -215,7 +215,7 @@ function DeadlinesPage() {
       {connected && <ReminderSetupDialog />}
       <header className="flex flex-wrap items-start gap-3">
         <div className="mr-auto">
-          <h1 className="text-3xl font-semibold">Hello{name ? ` ${name}` : ""}!</h1>
+          <h1 className="title-gradient w-fit text-3xl font-semibold">Hello{name ? ` ${name}` : ""}!</h1>
           <p className="mt-1 text-sm font-medium text-muted-foreground">
             {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : term5.data?.inRoster ? "Showing your Term 5 outlines and class updates" : "Connect eLearn to see your deadlines"}
           </p>
@@ -250,9 +250,9 @@ function DeadlinesPage() {
               type="button"
               role="tab"
               aria-selected={view === value}
-              variant={view === value ? "default" : "ghost"}
+              variant="ghost"
               size="sm"
-              className="h-8 rounded-full px-2.5 sm:px-3"
+              className={`h-8 rounded-full px-2.5 sm:px-3 ${view === value ? "bg-primary/14 text-primary hover:bg-primary/20 hover:text-primary dark:bg-primary/22" : ""}`}
               onClick={() => setView(value)}
             >
               {value === "upcoming" ? "Upcoming" : "Past"}

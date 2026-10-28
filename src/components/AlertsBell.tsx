@@ -129,7 +129,7 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
         className={`size-10 shrink-0 rounded-full disabled:opacity-100 ${
           on || !known
             ? "border-transparent bg-muted text-muted-foreground shadow-none hover:bg-muted/70"
-            : "border-destructive bg-destructive text-white hover:bg-destructive/90 hover:text-white"
+            : "border-urgent bg-urgent text-urgent-foreground hover:bg-urgent/90 hover:text-urgent-foreground"
         }`}
         onClick={toggle}
         disabled={busy || !known || !checked}

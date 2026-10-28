@@ -108,7 +108,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       {
         rel: "preload",
-        href: "/fonts/plus-jakarta-sans-latin-wght-normal.woff2",
+        href: "/fonts/geist-latin-wght-normal.woff2",
         as: "font",
         type: "font/woff2",
         crossOrigin: "anonymous",

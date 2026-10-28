@@ -190,9 +190,9 @@ function ViewToggle({ view, onChange }: { view: ClassView; onChange: (v: ClassVi
           type="button"
           role="tab"
           aria-selected={view === value}
-          variant={view === value ? "default" : "ghost"}
+          variant="ghost"
           size="sm"
-          className="h-8 rounded-full px-2.5 sm:px-3"
+          className={`h-8 rounded-full px-2.5 sm:px-3 ${view === value ? "bg-primary/14 text-primary hover:bg-primary/20 hover:text-primary dark:bg-primary/22" : ""}`}
           onClick={() => onChange(value)}
         >
           {value === "upcoming" ? "Upcoming" : "Past"}
@@ -225,7 +225,7 @@ function SchedulePage() {
   return (
     <div className="space-y-3">
       <header>
-        <h1 className="text-3xl font-semibold">Classes &amp; Prereads</h1>
+        <h1 className="title-gradient w-fit text-3xl font-semibold">Classes &amp; Prereads</h1>
         <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and prereads</p>
       </header>
       <SetupNudges />

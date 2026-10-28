@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Check, Clock, ExternalLink, Info } from "lucide-react";
+import { AlertTriangle, Check, CircleCheck, Clock, ExternalLink, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { elearnDestination } from "@/lib/elearnDestination";
 import { Badge } from "@/components/ui/badge";
@@ -111,7 +111,8 @@ export function DeadlineCard({
               title="Source details"
               aria-label={`${meta.label}. Source details for ${item.title}`}
             >
-              <Info className="size-4" aria-hidden />
+              {/* Confirmed from the student's own eLearn: a tick instead of (i). */}
+              {item.confidence === "own" ? <CircleCheck className="size-4" aria-hidden /> : <Info className="size-4" aria-hidden />}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md rounded-2xl">
@@ -170,7 +171,7 @@ export function DeadlineCard({
         <div className="tile-badges tile-fade flex flex-1 flex-wrap items-center gap-1.5">
         <span className="tile-chip tile-kind">{KIND_LABELS[item.kind] ?? item.kind}</span>
         {item.deadlineType === "cutoff" && <Badge variant="outline">Hard cut-off</Badge>}
-        {overdue && <Badge variant="destructive">Past due</Badge>}
+        {overdue && <Badge className="tile-past-due">Past due</Badge>}
         {isText && <Badge variant="outline">Mentioned in course text</Badge>}
         {item.conflict && (
           <Badge className="bg-warning text-warning-foreground">

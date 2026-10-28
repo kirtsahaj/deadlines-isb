@@ -6,31 +6,33 @@
 
 /* One self-hosted variable font (no Google Fonts request). OFL licence in public/fonts. */
 @font-face {
-  font-family: "Plus Jakarta Sans";
+  font-family: "Geist";
   font-style: normal;
   font-display: swap;
-  font-weight: 200 800;
-  src: url("/fonts/plus-jakarta-sans-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  src: url("/fonts/geist-latin-wght-normal.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: "Plus Jakarta Sans";
+  font-family: "Geist";
   font-style: normal;
   font-display: swap;
-  font-weight: 200 800;
-  src: url("/fonts/plus-jakarta-sans-latin-ext-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  src: url("/fonts/geist-latin-ext-wght-normal.woff2") format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 /*
  * ISB Deadline Tracker design system.
- * Calm academic palette: deep navy ink, warm paper, teal accent.
+ * Quiet neutral base (off-white, white cards, near-black ink) with one purple accent for
+ * what's selected, a pink → magenta → purple wash and title gradient, and warm states:
+ * coral = soon, raspberry = urgent / alerts off, navy = confirmed from your eLearn.
  * All colours are oklch semantic tokens. Never hardcode colours in components.
  */
 
 @theme inline {
-  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -56,6 +58,11 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
+  --color-soon: var(--soon);
+  --color-soon-foreground: var(--soon-foreground);
+  --color-urgent: var(--urgent);
+  --color-urgent-foreground: var(--urgent-foreground);
+  --color-brand-pink: var(--brand-pink);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-conf-own: var(--conf-own);
@@ -84,8 +91,8 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  --shadow-card: 0 1px 2px oklch(0.4 0.1 290 / 0.06), 0 1px 3px 1px oklch(0.4 0.1 290 / 0.04);
-  --shadow-raised: 0 2px 6px 2px oklch(0.4 0.12 290 / 0.08), 0 1px 2px oklch(0.4 0.12 290 / 0.1);
+  --shadow-card: 0 1px 2px oklch(0.3 0.02 265 / 0.06), 0 1px 3px 1px oklch(0.3 0.02 265 / 0.04);
+  --shadow-raised: 0 2px 6px 2px oklch(0.3 0.02 265 / 0.08), 0 1px 2px oklch(0.3 0.02 265 / 0.1);
 }
 
 :root {
@@ -95,56 +102,67 @@
   --activity: oklch(0.5 0.13 65);
   --radius: 1rem;
 
-  --background: oklch(0.985 0.008 300);
-  --foreground: oklch(0.24 0.03 290);
+  --background: oklch(0.982 0.002 260);
+  --foreground: oklch(0.2 0.012 265);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.03 290);
+  --card-foreground: oklch(0.2 0.012 265);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.03 290);
+  --popover-foreground: oklch(0.2 0.012 265);
 
-  --primary: oklch(0.55 0.17 290);
-  --primary-foreground: oklch(0.99 0.005 290);
+  --primary: oklch(0.5 0.21 300);
+  --primary-foreground: oklch(0.99 0.005 300);
 
-  --secondary: oklch(0.94 0.04 295);
-  --secondary-foreground: oklch(0.35 0.1 290);
+  --secondary: oklch(0.95 0.03 300);
+  --secondary-foreground: oklch(0.5 0.21 300);
 
-  --muted: oklch(0.96 0.012 295);
-  --muted-foreground: oklch(0.5 0.03 290);
+  --muted: oklch(0.955 0.004 265);
+  --muted-foreground: oklch(0.5 0.012 265);
 
-  --accent: oklch(0.86 0.1 350);
-  --accent-foreground: oklch(0.3 0.08 350);
+  --accent: oklch(0.95 0.025 330);
+  --accent-foreground: oklch(0.2 0.012 265);
 
   --destructive: oklch(0.6 0.19 18);
   --destructive-foreground: oklch(0.99 0.005 18);
 
   --success: oklch(0.62 0.13 160);
-  --conf-own: oklch(0.62 0.15 150);
-  --conf-shared: oklch(0.62 0.1 195);
-  --conf-outline: oklch(0.72 0.14 70);
+  --conf-own: oklch(0.33 0.11 268);
+  --conf-shared: oklch(0.66 0.15 38);
+  --conf-outline: oklch(0.58 0.21 8);
   --conf-provisional: oklch(0.6 0.01 260);
   --success-foreground: oklch(0.99 0.005 160);
 
   --warning: oklch(0.8 0.13 80);
   --warning-foreground: oklch(0.28 0.05 70);
 
-  --border: oklch(0.91 0.02 295);
-  --input: oklch(0.91 0.02 295);
-  --ring: oklch(0.55 0.17 290);
+  --border: oklch(0.92 0.004 265);
+  --input: oklch(0.92 0.004 265);
+  --ring: oklch(0.5 0.21 300);
 
-  --chart-1: oklch(0.55 0.17 290);
+  --chart-1: oklch(0.5 0.21 300);
   --chart-2: oklch(0.86 0.1 350);
   --chart-3: oklch(0.8 0.13 80);
   --chart-4: oklch(0.62 0.13 160);
   --chart-5: oklch(0.6 0.19 18);
 
-  --sidebar: oklch(0.97 0.015 295);
-  --sidebar-foreground: oklch(0.24 0.03 290);
-  --sidebar-primary: oklch(0.55 0.17 290);
+  --sidebar: oklch(0.97 0.004 265);
+  --sidebar-foreground: oklch(0.2 0.012 265);
+  --sidebar-primary: oklch(0.5 0.21 300);
   --sidebar-primary-foreground: oklch(0.99 0.005 290);
-  --sidebar-accent: oklch(0.94 0.04 295);
-  --sidebar-accent-foreground: oklch(0.35 0.1 290);
-  --sidebar-border: oklch(0.91 0.02 295);
-  --sidebar-ring: oklch(0.55 0.17 290);
+  --sidebar-accent: oklch(0.95 0.03 300);
+  --sidebar-accent-foreground: oklch(0.5 0.21 300);
+  --sidebar-border: oklch(0.92 0.004 265);
+  --sidebar-ring: oklch(0.5 0.21 300);
+  /* Warm states and the brand gradient */
+  --soon: oklch(0.76 0.14 35);
+  --soon-foreground: oklch(0.53 0.15 38);
+  --urgent: oklch(0.58 0.21 8);
+  --urgent-foreground: oklch(1 0 0);
+  --brand-pink: oklch(0.68 0.19 355);
+  --grad-1: oklch(0.68 0.19 355);
+  --grad-2: oklch(0.58 0.23 330);
+  --grad-3: oklch(0.5 0.21 300);
+  --wash-pink: oklch(0.68 0.19 355 / 0.16);
+  --wash-violet: oklch(0.5 0.21 300 / 0.13);
 }
 
 .dark {
@@ -153,41 +171,51 @@
   --preread: oklch(0.78 0.11 180);
   --quiz: oklch(0.78 0.13 350);
   --activity: oklch(0.8 0.12 75);
-  --background: oklch(0.19 0.008 280);
-  --foreground: oklch(0.96 0.008 240);
-  --card: oklch(0.235 0.012 280);
-  --card-foreground: oklch(0.96 0.008 240);
-  --popover: oklch(0.235 0.012 280);
-  --popover-foreground: oklch(0.96 0.008 240);
-  --primary: oklch(0.78 0.12 295);
-  --primary-foreground: oklch(0.22 0.04 255);
-  --secondary: oklch(0.29 0.025 290);
-  --secondary-foreground: oklch(0.96 0.008 240);
-  --muted: oklch(0.29 0.012 280);
-  --muted-foreground: oklch(0.72 0.02 245);
-  --accent: oklch(0.7 0.1 195);
-  --accent-foreground: oklch(0.19 0.032 255);
+  --background: oklch(0.17 0.005 265);
+  --foreground: oklch(0.95 0.004 265);
+  --card: oklch(0.215 0.006 265);
+  --card-foreground: oklch(0.95 0.004 265);
+  --popover: oklch(0.215 0.006 265);
+  --popover-foreground: oklch(0.95 0.004 265);
+  --primary: oklch(0.8 0.12 300);
+  --primary-foreground: oklch(0.2 0.04 300);
+  --secondary: oklch(0.3 0.05 300);
+  --secondary-foreground: oklch(0.84 0.1 300);
+  --muted: oklch(0.27 0.006 265);
+  --muted-foreground: oklch(0.7 0.01 265);
+  --accent: oklch(0.3 0.04 330);
+  --accent-foreground: oklch(0.95 0.004 265);
   --destructive: oklch(0.68 0.17 25);
   --destructive-foreground: oklch(0.15 0.03 25);
   --success: oklch(0.7 0.11 160);
-  --conf-own: oklch(0.74 0.15 150);
-  --conf-shared: oklch(0.74 0.1 195);
-  --conf-outline: oklch(0.8 0.14 75);
+  --conf-own: oklch(0.78 0.08 265);
+  --conf-shared: oklch(0.8 0.12 40);
+  --conf-outline: oklch(0.7 0.18 10);
   --conf-provisional: oklch(0.7 0.01 260);
   --success-foreground: oklch(0.18 0.03 160);
   --warning: oklch(0.78 0.13 72);
   --warning-foreground: oklch(0.2 0.03 72);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.7 0.1 195);
-  --sidebar: oklch(0.22 0.034 255);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.8 0.12 300);
+  --sidebar: oklch(0.2 0.006 265);
   --sidebar-foreground: oklch(0.96 0.008 240);
-  --sidebar-primary: oklch(0.7 0.1 195);
-  --sidebar-primary-foreground: oklch(0.19 0.032 255);
-  --sidebar-accent: oklch(0.29 0.036 255);
-  --sidebar-accent-foreground: oklch(0.96 0.008 240);
+  --sidebar-primary: oklch(0.8 0.12 300);
+  --sidebar-primary-foreground: oklch(0.2 0.04 300);
+  --sidebar-accent: oklch(0.3 0.05 300);
+  --sidebar-accent-foreground: oklch(0.84 0.1 300);
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.7 0.1 195);
+  --sidebar-ring: oklch(0.8 0.12 300);
+  --soon: oklch(0.76 0.14 35);
+  --soon-foreground: oklch(0.85 0.1 40);
+  --urgent: oklch(0.62 0.2 10);
+  --urgent-foreground: oklch(1 0 0);
+  --brand-pink: oklch(0.72 0.17 355);
+  --grad-1: oklch(0.8 0.14 355);
+  --grad-2: oklch(0.76 0.16 320);
+  --grad-3: oklch(0.74 0.13 285);
+  --wash-pink: oklch(0.72 0.17 355 / 0.16);
+  --wash-violet: oklch(0.58 0.19 300 / 0.16);
 }
 
 @layer base {
@@ -204,8 +232,8 @@
   body {
     background-color: var(--color-background);
     background-image:
-      radial-gradient(60rem 30rem at 100% -10%, color-mix(in oklch, var(--color-accent) 22%, transparent), transparent 70%),
-      radial-gradient(50rem 30rem at -10% 0%, color-mix(in oklch, var(--color-primary) 12%, transparent), transparent 70%);
+      radial-gradient(42rem 22rem at 105% -12%, var(--wash-pink), transparent 70%),
+      radial-gradient(38rem 22rem at -10% -14%, var(--wash-violet), transparent 70%);
     background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -375,11 +403,11 @@
   border: 1px solid var(--color-border); font-weight: 600;
 }
 .deadline-card .tile-link:hover { background-color: var(--color-muted); }
-/* Only the info glyph is coloured, by confidence: own = green, classmate = amber,
-   outline/estimate = red. Prereads are never sourced from eLearn, so they stay grey. */
-.deadline-card .tile-info { --conf: var(--color-destructive); }
-.deadline-card[data-confidence="own"] .tile-info { --conf: var(--color-success); }
-.deadline-card[data-confidence="shared"] .tile-info { --conf: var(--color-warning); }
+/* Only the source glyph is coloured: own eLearn = navy tick, classmate = coral (i),
+   outline/estimate = raspberry (i). Prereads are never sourced from eLearn, so they stay grey. */
+.deadline-card .tile-info { --conf: var(--color-conf-outline); }
+.deadline-card[data-confidence="own"] .tile-info { --conf: var(--color-conf-own); }
+.deadline-card[data-confidence="shared"] .tile-info { --conf: var(--color-conf-shared); }
 .deadline-card[data-tile-type="preread"] .tile-info { --conf: var(--color-muted-foreground); }
 .deadline-card .tile-info {
   color: var(--conf);
@@ -416,20 +444,20 @@
   background-color: var(--color-success); border-color: var(--color-success); color: #fff;
 }
 .dark .deadline-card .tile-status-submitted { color: var(--color-success-foreground); }
-/* Due within 24h: a warm pill in place of the grey "in 5 hours"; red in the last 3 hours. */
+/* Soon: a coral pill in place of the grey "in 2 days"; urgent (last 12h, or a class in its last 30 min): solid raspberry. */
 .tile-soon {
   display: inline-flex; align-items: center; height: 1.375rem; padding: 0 0.5rem; border-radius: 999px;
   font-size: 0.75rem; font-weight: 600;
-  background-color: color-mix(in oklab, var(--color-warning) 30%, var(--color-card));
-  color: color-mix(in oklab, var(--color-warning-foreground) 85%, var(--color-warning));
+  background-color: color-mix(in oklab, var(--color-soon) 22%, var(--color-card));
+  color: var(--color-soon-foreground);
 }
-.tile-soon-urgent {
-  background-color: color-mix(in oklab, var(--color-destructive) 16%, var(--color-card));
-  color: var(--color-destructive);
+.dark .tile-soon { background-color: color-mix(in oklab, var(--color-soon) 26%, var(--color-card)); }
+.tile-soon.tile-soon-urgent {
+  background-color: var(--color-urgent);
+  color: var(--color-urgent-foreground);
 }
-.dark .tile-soon:not(.tile-soon-urgent):not(.tile-soon-now) { color: var(--color-warning); }
 /* Class in progress (Classes). */
-.tile-soon-now {
+.tile-soon.tile-soon-now {
   background-color: color-mix(in oklab, var(--color-primary) 14%, var(--color-card));
   color: var(--color-primary);
 }
@@ -449,4 +477,18 @@
 .deadline-card[data-tile-type="preread"] .tile-kind {
   background-color: var(--color-muted);
   color: var(--color-muted-foreground);
+}
+
+/* Page titles on the three main tabs: the brand gradient as text colour. */
+.title-gradient {
+  background-image: linear-gradient(100deg, var(--grad-1), var(--grad-2) 45%, var(--grad-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* "Past due" on an unsubmitted eLearn assignment: solid raspberry, same chip shape as the other labels. */
+.deadline-card .tile-badges [data-slot="badge"].tile-past-due {
+  background-color: var(--color-urgent);
+  color: var(--color-urgent-foreground);
 }
