@@ -228,7 +228,7 @@ function SchedulePage() {
       <header>
         <div className="flex items-start gap-2">
           <h1 className="mr-auto min-w-0 text-3xl font-semibold">Classes &amp; Prereads</h1>
-          <ShareButton message="Your ISB timetable, rooms and prereads" />
+          <ShareButton />
         </div>
         <p className="mt-1 text-sm text-muted-foreground">Your timetable, rooms and prereads</p>
       </header>

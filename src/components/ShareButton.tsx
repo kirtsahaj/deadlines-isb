@@ -3,13 +3,16 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export const APP_URL = "https://deadlines-isb.lovable.app";
+/** The one share message, used by the tab share buttons and the Menu tile. */
+export const SHARE_MESSAGE =
+  "ISB Deadline Tracker: assignments, classes & prereads and CAS job postings, all in one place. Sign in with your ISB account:";
 
 /**
  * Top-right share button on each main tab. Phones open their own share sheet with the
- * app link and a message that fits the tab; without a share sheet (most laptops) the
- * link is copied instead.
+ * app link and the share message; without a share sheet (most laptops) the link is copied instead.
  */
-export function ShareButton({ message }: { message: string }) {
+export function ShareButton() {
+  const message = SHARE_MESSAGE;
   async function share() {
     if (typeof navigator !== "undefined" && "share" in navigator) {
       try {

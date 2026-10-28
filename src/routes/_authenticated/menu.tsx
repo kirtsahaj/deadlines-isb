@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { APP_URL, SHARE_MESSAGE } from "@/components/ShareButton";
 import { clearPersistedQueryCache } from "@/lib/queryPersist";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy, LogOut, Share2, ShieldCheck } from "lucide-react";
+import { Check, ChevronRight, Copy, LogOut, Share2, ShieldCheck } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   AlertDialog,
@@ -181,6 +182,8 @@ function MenuPage() {
     <div className="space-y-3">
       <SetupNudges />
 
+      <ShareApp />
+
       <div className="divide-y divide-border">
         {state && !state.connected && (
           <section className="scroll-mt-24 py-5 first:pt-0">
@@ -289,7 +292,6 @@ function MenuPage() {
           <LogOut className="size-4" aria-hidden /> Sign out
           <span className="ml-auto text-xs font-normal text-muted-foreground">Keeps your eLearn connection</span>
         </Button>
-        <ShareApp />
         <div className="p-4">
           <a
             href={WHATSAPP_URL}
@@ -311,9 +313,8 @@ function MenuPage() {
   );
 }
 
-const SHARE_URL = "https://deadlines-isb.lovable.app";
-const SHARE_TEXT =
-  "ISB Deadline Tracker: assignments, classes & prereads and CAS job postings, all in one place. Sign in with your ISB account:";
+const SHARE_URL = APP_URL;
+const SHARE_TEXT = SHARE_MESSAGE;
 
 /** Phones open the native share sheet; elsewhere, copy the link or share on WhatsApp. */
 function ShareApp() {
@@ -341,12 +342,23 @@ function ShareApp() {
   }
   return (
     <div>
-      <Button variant="ghost" type="button" onClick={share} className="tap-target flex h-auto w-full flex-wrap justify-start gap-3 rounded-none p-4 text-left text-sm font-medium">
-        <Share2 className="size-4" aria-hidden /> Share the app
-        <span className="ml-auto text-xs font-normal text-muted-foreground">Send it to your classmates</span>
-      </Button>
+      {/* A full tile so sharing is easy to spot and tap. */}
+      <button
+        type="button"
+        onClick={share}
+        className="surface-card flex w-full items-center gap-3 p-4 text-left transition-shadow hover:shadow-[var(--shadow-raised)] active:scale-[0.99]"
+      >
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/14 text-primary" aria-hidden>
+          <Share2 className="size-4" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-semibold">Share the app</span>
+          <span className="block text-sm text-muted-foreground">Send it to your classmates</span>
+        </span>
+        <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+      </button>
       {fallback && (
-        <div className="flex flex-wrap gap-2 px-4 pb-4">
+        <div className="flex flex-wrap gap-2 pt-2">
           <Button variant="outline" size="sm" className="rounded-full" onClick={copy}>
             {copied ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />}
             {copied ? "Copied" : "Copy link"}

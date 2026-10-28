@@ -218,7 +218,7 @@ function DeadlinesPage() {
       <header>
         <div className="flex items-start gap-2">
           <h1 className="title-gradient mr-auto w-fit min-w-0 text-3xl font-semibold">Hello{name ? ` ${name}` : ""}!</h1>
-          <ShareButton message="All your ISB assignment deadlines in one place" />
+          <ShareButton />
         </div>
           <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
             {connected && (

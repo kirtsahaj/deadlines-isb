@@ -123,7 +123,7 @@ function PlacementsPage() {
       <header>
         <div className="flex items-start gap-2">
           <h1 className="mr-auto min-w-0 text-3xl font-semibold">Placements</h1>
-          <ShareButton message="Every CAS job posting with apply-by dates" />
+          <ShareButton />
         </div>
         {jobs.data?.lastNewPostingAt && (
           <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
