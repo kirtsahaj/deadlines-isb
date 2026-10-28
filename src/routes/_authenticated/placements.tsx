@@ -17,6 +17,7 @@ import { getJobJdLink, listJobs, type JobTile } from "@/lib/jobs.functions";
 import { AlertsBell } from "@/components/AlertsBell";
 import { jobsInView, type JobSort } from "@/lib/jobs/view";
 import { isLive } from "@/lib/jobs/intake";
+import { jobClosing } from "@/lib/soon";
 import { relativeTime } from "@/lib/format";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -51,6 +52,7 @@ function JobCard({ job, isNew }: { job: JobTile; isNew: boolean }) {
     mutationFn: () => getJobJdLink({ data: { jobId: job.id } }),
     onSuccess: ({ url }) => window.open(url, "_blank", "noopener,noreferrer"),
   });
+  const closing = jobClosing(job, Date.now());
 
   return (
     <article className="surface-card relative space-y-1 p-3">
@@ -64,7 +66,10 @@ function JobCard({ job, isNew }: { job: JobTile; isNew: boolean }) {
       <h2 className="text-base font-semibold leading-snug">{job.role}</h2>
       <dl className="grid gap-x-3 text-sm sm:grid-cols-[auto_1fr]">
         <dt className="text-muted-foreground">Apply by</dt>
-        <dd>{formatDate(job.deadlineDate, job.deadlineTime)}</dd>
+        <dd className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+          {formatDate(job.deadlineDate, job.deadlineTime)}
+          {closing && <span className={`tile-soon ${closing.tone === "urgent" ? "tile-soon-urgent" : ""}`}>{closing.label}</span>}
+        </dd>
         <dt className="text-muted-foreground">Expected shortlist</dt>
         <dd>{formatDate(job.shortlistDate)}</dd>
       </dl>

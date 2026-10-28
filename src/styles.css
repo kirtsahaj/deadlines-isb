@@ -427,7 +427,12 @@
   background-color: color-mix(in oklab, var(--color-destructive) 16%, var(--color-card));
   color: var(--color-destructive);
 }
-.dark .tile-soon { color: var(--color-warning); }
+.dark .tile-soon:not(.tile-soon-urgent):not(.tile-soon-now) { color: var(--color-warning); }
+/* Class in progress (Classes). */
+.tile-soon-now {
+  background-color: color-mix(in oklab, var(--color-primary) 14%, var(--color-card));
+  color: var(--color-primary);
+}
 /* Appeared since the last visit. */
 .tile-new {
   display: inline-flex; align-items: center; height: 1.125rem; padding: 0 0.4rem; border-radius: 999px;

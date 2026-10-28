@@ -9,6 +9,27 @@ import { currentSubscription, enableReminders, pushSupport } from "@/lib/pushCli
 
 export const ALERT_SETTINGS_KEY = ["alert-settings"] as const;
 
+// Last known "this device gets notifications", so switching tabs doesn't flash the off state while it re-checks.
+const DEVICE_KEY = "alerts-device-on-v1";
+let deviceCache: boolean | null = null;
+function lastKnownDevice(): boolean | null {
+  if (deviceCache !== null) return deviceCache;
+  try {
+    const raw = window.localStorage.getItem(DEVICE_KEY);
+    return raw === "1" ? true : raw === "0" ? false : null;
+  } catch {
+    return null;
+  }
+}
+function rememberDevice(on: boolean) {
+  deviceCache = on;
+  try {
+    window.localStorage.setItem(DEVICE_KEY, on ? "1" : "0");
+  } catch {
+    /* this session only */
+  }
+}
+
 /**
  * One bell per section. On only when this device can receive notifications and the section is on.
  * Turning it on from a device without notifications asks permission once and switches every section on.
@@ -16,14 +37,24 @@ export const ALERT_SETTINGS_KEY = ["alert-settings"] as const;
 export function AlertsBell({ category }: { category: AlertCategory }) {
   const queryClient = useQueryClient();
   const settings = useQuery({ queryKey: ALERT_SETTINGS_KEY, queryFn: () => getAlertSettings() });
-  const [deviceOn, setDeviceOn] = useState<boolean | null>(null);
+  const [deviceOn, setDeviceOnState] = useState<boolean | null>(lastKnownDevice);
+  const setDeviceOn = (value: boolean) => {
+    rememberDevice(value);
+    setDeviceOnState(value);
+  };
+  const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     void currentSubscription()
       .catch(() => null)
-      .then((sub) => setDeviceOn(!!sub && "Notification" in window && Notification.permission === "granted"));
+      .then((sub) => {
+        setDeviceOn(!!sub && "Notification" in window && Notification.permission === "granted");
+        setChecked(true);
+      });
   }, []);
   const sectionOn = settings.data?.[category];
+  // Until both are known, show a plain grey bell rather than a red "off".
+  const known = sectionOn !== undefined && deviceOn !== null;
   const on = !!sectionOn && !!deviceOn;
   const label = ALERT_LABELS[category];
 
@@ -61,15 +92,15 @@ export function AlertsBell({ category }: { category: AlertCategory }) {
     }
   }
 
-  const Icon = on ? Bell : BellOff;
+  const Icon = on || !known ? Bell : BellOff;
   return (
     <Button
       type="button"
       variant="outline"
       size="icon"
-      className={`size-10 shrink-0 rounded-full bg-card ${on ? "text-muted-foreground" : "text-destructive"}`}
+      className={`size-10 shrink-0 rounded-full bg-card disabled:opacity-100 ${on || !known ? "text-muted-foreground" : "text-destructive"}`}
       onClick={toggle}
-      disabled={busy || sectionOn === undefined || deviceOn === null}
+      disabled={busy || !known || !checked}
       aria-pressed={on}
       aria-label={on ? `${label} on. Tap to turn off` : `${label} off. Tap to turn on`}
       title={on ? `${label} on` : `${label} off`}
