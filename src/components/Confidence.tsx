@@ -38,8 +38,8 @@ export function SourceIcon({ value }: { value: Confidence }) {
   const Icon = value === "own" ? UserRound : value === "shared" ? UsersRound : FileText;
   return (
     <span aria-hidden className="grid size-[14px] place-items-center rounded-full border-[1.5px] border-current">
-      {/* "!" beats the Button's [&_svg]:size-4 so the icon fits inside the circle. */}
-      <Icon className="size-[9px]!" strokeWidth={2.75} />
+      {/* Inline size beats the Button's [&_svg]:size-4 so the icon fits inside the circle. */}
+      <Icon style={{ width: 9, height: 9 }} strokeWidth={2.75} />
     </span>
   );
 }
