@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Clock, ExternalLink, Info } from "lucide-react";
+import { AlertTriangle, Check, Clock, ExternalLink, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { elearnDestination } from "@/lib/elearnDestination";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatDateTime, relativeTime } from "@/lib/format";
-import { showPastDue, type SourceRef, type UnifiedDeadline } from "@/lib/term5/model";
+import { dueSoon, showPastDue, type SourceRef, type UnifiedDeadline } from "@/lib/term5/model";
 import { CONFIDENCE_META, ConfidenceMark, ConnectCta } from "@/components/Confidence";
 
 const KIND_LABELS: Record<string, string> = {
@@ -68,13 +68,23 @@ export function DeadlineCard({
   timezone,
   connected,
   outlineKind,
+  isNew = false,
+  onToggleDone,
 }: {
   item: UnifiedDeadline;
   timezone: string;
   connected: boolean;
   outlineKind: string | null;
+  /** Appeared since the student's previous visit on this device. */
+  isNew?: boolean;
+  /** Tick button (Assignments). Submitted items show a locked filled tick. */
+  onToggleDone?: () => void;
 }) {
-  const overdue = showPastDue(item, Date.now());
+  const now = Date.now();
+  const overdue = showPastDue(item, now);
+  const submitted = item.submissionStatus === "submitted";
+  const finished = submitted || !!item.done;
+  const soon = finished ? null : dueSoon(item.dueAt, now);
   const meta = CONFIDENCE_META[item.confidence];
   const isText = item.kind === "text";
   const destination = elearnDestination(item);
@@ -84,8 +94,8 @@ export function DeadlineCard({
 
   return (
     <Dialog open={sourceOpen} onOpenChange={setSourceOpen}>
-    <article data-tile-type={tileType} data-confidence={item.confidence} className="deadline-card relative px-3 py-2.5 sm:px-4">
-      <div className="flex items-start gap-2">
+    <article data-tile-type={tileType} data-confidence={item.confidence} data-done={finished ? "true" : undefined} className="deadline-card relative px-3 py-2.5 sm:px-4">
+      <div className="tile-fade flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="tile-chip">{item.courseCode}</span>
@@ -93,6 +103,7 @@ export function DeadlineCard({
           </div>
           <h3 className="mt-0.5 text-base font-semibold leading-snug">{item.title}</h3>
         </div>
+          {isNew && <span className="tile-new mt-1.5 shrink-0">New</span>}
           <DialogTrigger asChild>
             <Button variant="ghost" size="icon"
               type="button"
@@ -133,13 +144,17 @@ export function DeadlineCard({
           </DialogContent>
       </div>
 
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+      <div className="tile-fade mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         <span className="inline-flex items-center gap-1.5 font-medium">
           <Clock className="size-4 text-muted-foreground" aria-hidden />
           {item.kind === "preread" ? "Class starts " : ""}{whenLabel(item, timezone)}
           {item.provisional && item.dueAt ? item.kind === "preread" ? " · topic estimated" : " · estimated" : ""}
         </span>
-        {item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>}
+        {soon ? (
+          <span className={`tile-soon ${soon.urgent ? "tile-soon-urgent" : ""}`}>{soon.label}</span>
+        ) : (
+          item.dueAt && <span className="text-muted-foreground">{relativeTime(item.dueAt)}</span>
+        )}
       </div>
       {item.otherSection && (
         <p className="mt-1 text-xs text-muted-foreground">
@@ -151,13 +166,16 @@ export function DeadlineCard({
         {item.preparation.map(p => <li key={p.id}>{p.title} <span className="text-xs text-muted-foreground">· {p.requirement === "assigned" ? "Required" : p.requirement}</span></li>)}
       </ul>}
 
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-        <div className="tile-badges flex flex-1 flex-wrap items-center gap-1.5">
-        <span className="tile-chip tile-kind">{KIND_LABELS[item.kind] ?? item.kind}</span>
-        {item.deadlineType === "cutoff" && <Badge variant="outline">Hard cut-off</Badge>}
-        {item.submissionStatus === "submitted" && (
-          <Badge className="bg-success text-success-foreground">Submitted</Badge>
+      <div className="mt-1.5 flex items-center gap-2">
+        <div className="tile-badges tile-fade flex flex-1 flex-wrap items-center gap-1.5">
+        {submitted ? (
+          <span className="tile-chip tile-done">Submitted</span>
+        ) : item.done ? (
+          <span className="tile-chip tile-done">Done</span>
+        ) : (
+          <span className="tile-chip tile-kind">{KIND_LABELS[item.kind] ?? item.kind}</span>
         )}
+        {item.deadlineType === "cutoff" && <Badge variant="outline">Hard cut-off</Badge>}
         {overdue && <Badge variant="destructive">Past due</Badge>}
         {isText && <Badge variant="outline">Mentioned in course text</Badge>}
         {item.conflict && (
@@ -166,10 +184,23 @@ export function DeadlineCard({
             Dates differ
           </Badge>
         )}
+        {destination && <Button asChild variant="secondary" size="sm" className="tile-link h-6 gap-1 rounded-full px-2.5 text-xs" title={destination.activity ? "Open assignment / activity in eLearn" : "Open course in eLearn"}>
+          <a href={destination.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3" aria-hidden />{destination.activity ? "Open activity" : "Open course"}</a>
+        </Button>}
         </div>
-      {destination && <Button asChild variant="secondary" size="sm" className="tile-link ml-auto h-6 gap-1 rounded-full px-2.5 text-xs" title={destination.activity ? "Open assignment / activity in eLearn" : "Open course in eLearn"}>
-        <a href={destination.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3" aria-hidden />{destination.activity ? "Open activity" : "Open course"}</a>
-      </Button>}
+        {onToggleDone && (
+          <button
+            type="button"
+            onClick={submitted ? undefined : onToggleDone}
+            disabled={submitted}
+            aria-pressed={finished}
+            aria-label={submitted ? "Submitted on eLearn" : item.done ? `Mark ${item.title} as not done` : `Mark ${item.title} as done`}
+            title={submitted ? "Submitted on eLearn" : item.done ? "Mark as not done" : "Mark as done"}
+            className={`tile-tick ${finished ? "tile-tick-on" : ""}`}
+          >
+            <Check className="size-4" aria-hidden />
+          </button>
+        )}
       </div>
     </article>
     </Dialog>

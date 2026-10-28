@@ -388,6 +388,43 @@
 }
 .deadline-card .tile-info:hover { background-color: var(--color-muted); }
 
+/* Done / submitted: a green status chip in place of the type label, and a faded tile. */
+.deadline-card .tile-done {
+  background-color: color-mix(in oklab, var(--color-success) 18%, var(--color-card));
+  color: color-mix(in oklab, var(--color-success) 80%, var(--color-foreground));
+}
+.deadline-card[data-done="true"] .tile-fade { opacity: 0.55; }
+.deadline-card .tile-tick {
+  display: grid; place-items: center; flex-shrink: 0;
+  width: 2rem; height: 2rem; border-radius: 999px;
+  border: 1.5px solid var(--color-border); color: var(--color-muted-foreground);
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease;
+}
+.deadline-card .tile-tick:hover:not(:disabled) { color: var(--color-success); border-color: var(--color-success); }
+.deadline-card .tile-tick:active:not(:disabled) { transform: scale(0.9); }
+.deadline-card .tile-tick-on {
+  background-color: var(--color-success); border-color: var(--color-success); color: var(--color-success-foreground);
+}
+.deadline-card .tile-tick-on:hover:not(:disabled) { color: var(--color-success-foreground); }
+/* Due within 24h: a warm pill in place of the grey "in 5 hours"; red in the last 3 hours. */
+.tile-soon {
+  display: inline-flex; align-items: center; height: 1.375rem; padding: 0 0.5rem; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600;
+  background-color: color-mix(in oklab, var(--color-warning) 30%, var(--color-card));
+  color: color-mix(in oklab, var(--color-warning-foreground) 85%, var(--color-warning));
+}
+.tile-soon-urgent {
+  background-color: color-mix(in oklab, var(--color-destructive) 16%, var(--color-card));
+  color: var(--color-destructive);
+}
+.dark .tile-soon { color: var(--color-warning); }
+/* Appeared since the last visit. */
+.tile-new {
+  display: inline-flex; align-items: center; height: 1.125rem; padding: 0 0.4rem; border-radius: 999px;
+  font-size: 0.625rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  background-color: color-mix(in oklab, var(--color-primary) 14%, var(--color-card)); color: var(--color-primary);
+}
+
 /* The type label (Deadline/Assignment/Quiz) carries a tint of the tile accent to
    emphasise real deadlines; preread tiles are neutral, so their label stays grey. */
 .deadline-card .tile-kind {

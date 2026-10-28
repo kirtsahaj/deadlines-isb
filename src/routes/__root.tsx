@@ -85,20 +85,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "theme-color", content: "#fbf9ff" },
       { title: "ISB Deadline Tracker" },
-      {
-        name: "description",
-        content:
-          "A read-only student tool that brings every eLearn coursework deadline into one calm list.",
-      },
+      { name: "description", content: "Assignments, classes & prereads and CAS job postings, all in one place. For ISB students." },
       { property: "og:title", content: "ISB Deadline Tracker" },
-      {
-        property: "og:description",
-        content:
-          "A read-only student tool that brings every eLearn coursework deadline into one calm list.",
-      },
+      { property: "og:description", content: "Assignments, classes & prereads and CAS job postings, all in one place. For ISB students." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://deadlines-isb.lovable.app" },
+      { property: "og:image", content: "https://deadlines-isb.lovable.app/og-image.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "ISB Deadline Tracker: assignments, classes and job postings in one place" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:image", content: "https://deadlines-isb.lovable.app/og-image.png" },
     ],
     links: [
       {

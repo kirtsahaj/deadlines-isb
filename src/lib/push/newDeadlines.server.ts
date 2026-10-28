@@ -6,6 +6,7 @@ import { claimReminder } from "./reminderClaims.server";
 import { enrollmentsFor } from "@/lib/term5/userDeadlines.server";
 import { campusFor } from "@/lib/term5/catalog.server";
 import { sectionLetter, term5CodeFromShortName } from "@/lib/term5/model";
+import { readAlertSettings } from "@/lib/alerts";
 
 type NewItem = { external_key: string; title: string; due_at: string | null; moodle_course_id: number };
 
@@ -22,8 +23,10 @@ export async function notifyNewDeadlines(userId: string, items: NewItem[]) {
   if (!subs?.length) return;
   const [{ data: account }, { data: settings }] = await Promise.all([
     supabaseAdmin.auth.admin.getUserById(userId),
-    supabaseAdmin.from("user_settings").select("timezone").eq("user_id", userId).maybeSingle(),
+    supabaseAdmin.from("user_settings").select("*").eq("user_id", userId).maybeSingle(),
   ]);
+  // The Assignments bell covers "New deadline" alerts and the 3-hour reminder.
+  if (!readAlertSettings(settings as Record<string, unknown> | null).deadlines) return;
   const tz = settings?.timezone ?? "Asia/Kolkata";
   const merged = await mergedForUser(userId, account.user?.email ?? "");
   const seen = new Set<string>();
@@ -97,7 +100,8 @@ export async function notifySectionmates(
         sectionLetter(e.sectionId) === mySection.get(e.courseCode) ? (byCourse.get(e.courseCode) ?? []).map((i) => ({ i, code: e.courseCode })) : [],
       );
       if (!matched.length) continue;
-      const { data: settings } = await supabaseAdmin.from("user_settings").select("timezone").eq("user_id", otherId).maybeSingle();
+      const { data: settings } = await supabaseAdmin.from("user_settings").select("*").eq("user_id", otherId).maybeSingle();
+      if (!readAlertSettings(settings as Record<string, unknown> | null).deadlines) continue;
       const tz = settings?.timezone ?? "Asia/Kolkata";
       for (const { i, code } of matched) {
         if (!(await claimReminder(otherId, [`new:${i.external_key}`], i.due_at!))) continue;

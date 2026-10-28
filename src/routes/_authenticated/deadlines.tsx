@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeadlineCard } from "@/components/DeadlineCard";
+import { AlertsBell } from "@/components/AlertsBell";
+import { toast } from "sonner";
+import { setDone } from "@/lib/alerts.functions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReminderSetupDialog } from "@/components/ReminderSetup";
 import { SetupNudges } from "@/components/SetupNudges";
@@ -15,7 +18,9 @@ import { useTerm5 } from "@/lib/useTerm5";
 import { getConnectionState, syncNow } from "@/lib/elearn.functions";
 import { DEFAULT_TIMEZONE, lastSyncedLabel } from "@/lib/format";
 import { firstPreferredName } from "@/lib/preferredName";
-import { inView, mergeDeadlines, sortView, type DeadlineView, type OutlineOccurrence, type OwnRow } from "@/lib/term5/model";
+import { doneKeys, inView, isDone, mergeDeadlines, sortView, type DeadlineView, type OutlineOccurrence, type OwnRow, type UnifiedDeadline } from "@/lib/term5/model";
+
+const SEEN_DEADLINES_KEY = "deadlines-seen-v1";
 
 export const Route = createFileRoute("/_authenticated/deadlines")({
   head: () => ({
@@ -120,6 +125,35 @@ function DeadlinesPage() {
   const timezone = settings.data?.timezone ?? DEFAULT_TIMEZONE;
   const hidden = useMemo(() => new Set(settings.data?.hidden_course_ids ?? []), [settings.data?.hidden_course_ids]);
 
+  // Ticks are account-wide; before the deadline_done table exists this simply returns nothing.
+  const doneRows = useQuery({
+    queryKey: ["deadline-done", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("deadline_done").select("item_key");
+      return new Set(error ? [] : (data ?? []).map((r) => r.item_key));
+    },
+    enabled: !!user,
+  });
+  const toggleDone = useMutation({
+    mutationFn: (v: { keys: string[]; done: boolean }) => setDone({ data: v }),
+    onMutate: (v) => {
+      const key = ["deadline-done", user?.id];
+      const before = queryClient.getQueryData<Set<string>>(key);
+      const next = new Set(before ?? []);
+      for (const k of v.keys) {
+        if (v.done) next.add(k);
+        else next.delete(k);
+      }
+      queryClient.setQueryData(key, next);
+      toast(v.done ? "Marked as done" : "Marked as not done");
+      return { before };
+    },
+    onError: (_e, _v, ctx) => {
+      queryClient.setQueryData(["deadline-done", user?.id], ctx?.before);
+      toast("Couldn't save that. Please try again.");
+    },
+  });
+
   const merged = useMemo(() => {
     if (!term5.data) return [];
     const refs = [...(courses.data ?? []), ...term5.data.courseRefs];
@@ -135,8 +169,31 @@ function DeadlinesPage() {
       campus: term5.data.campus,
     }).map(i => ({ ...i, moodleCourseId: i.moodleCourseId ?? refs.find(c => c.short_name === `${i.courseCode}_PGP${term5.data.campus}_2026-27_T5`)?.moodle_course_id ?? null }))].filter((i) => i.moodleCourseId === null || !hidden.has(i.moodleCourseId));
   }, [term5.data, deadlines.data, courses.data, connection.data, hidden]);
+  const withDone = useMemo(() => {
+    const done = doneRows.data ?? new Set<string>();
+    return merged.map((i): UnifiedDeadline => (isDone(i, done) ? { ...i, done: true } : i));
+  }, [merged, doneRows.data]);
+
+  // "New" = not on this device's list at the previous visit. First visit shows nothing as new.
+  const [previouslySeen] = useState<Set<string> | null>(() => {
+    try {
+      const raw = window.localStorage.getItem(SEEN_DEADLINES_KEY);
+      return raw ? new Set(JSON.parse(raw) as string[]) : null;
+    } catch {
+      return null;
+    }
+  });
+  useEffect(() => {
+    if (!merged.length) return;
+    try {
+      window.localStorage.setItem(SEEN_DEADLINES_KEY, JSON.stringify(merged.map((i) => i.id)));
+    } catch {
+      /* this visit only */
+    }
+  }, [merged]);
 
   const visible = useMemo(() => {
+    const merged = withDone;
     const q = search.trim().toLowerCase();
     const now = Date.now();
     return sortView(
@@ -147,7 +204,7 @@ function DeadlinesPage() {
       }),
       view,
     );
-  }, [merged, search, view]);
+  }, [withDone, search, view]);
 
   const name = firstPreferredName(user?.user_metadata, profile.data?.display_name);
   const loading = connection.isLoading || term5.isLoading || (connected && deadlines.isLoading);
@@ -201,6 +258,7 @@ function DeadlinesPage() {
             </Button>
           ))}
         </div>
+        <AlertsBell category="deadlines" />
       </div>
 
       {loading ? (
@@ -224,6 +282,8 @@ function DeadlinesPage() {
                 timezone={timezone}
                 connected={connected}
                 outlineKind={term5.data?.outlineSourceKinds[item.courseCode] ?? null}
+                isNew={!!previouslySeen && !previouslySeen.has(item.id)}
+                onToggleDone={() => toggleDone.mutate({ keys: doneKeys(item), done: !item.done })}
               />
             </li>
           ))}

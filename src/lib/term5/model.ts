@@ -101,6 +101,8 @@ export type UnifiedDeadline = {
   conflict: boolean;
   provisional: boolean;
   remindable: boolean;
+  /** Ticked as done by the student (Assignments only); set on the client/reminder job from deadline_done. */
+  done?: boolean;
   otherSection: boolean;
   /** Section the item was seen for when it is not the student's own (e.g. "H"). */
   otherSectionLabel?: string | null;
@@ -381,9 +383,9 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
 export type DeadlineView = "upcoming" | "past";
 
 /** Submitted undated → Past; unknown undated → Upcoming; submitted future-dated stays Upcoming. */
-export function inView(item: Pick<UnifiedDeadline, "dueAt" | "dateOnly" | "submissionStatus">, view: DeadlineView, now: number) {
+export function inView(item: Pick<UnifiedDeadline, "dueAt" | "dateOnly" | "submissionStatus" | "done">, view: DeadlineView, now: number) {
   const at = sortInstant(item);
-  if (at === null) return view === (item.submissionStatus === "submitted" ? "past" : "upcoming");
+  if (at === null) return view === (item.submissionStatus === "submitted" || item.done ? "past" : "upcoming");
   return view === "upcoming" ? at >= now : at < now;
 }
 
@@ -392,9 +394,10 @@ export function inView(item: Pick<UnifiedDeadline, "dueAt" | "dateOnly" | "submi
  * with a reported, non-submitted status. Quizzes, forums, outline and classmate items never know.
  */
 export function showPastDue(
-  item: Pick<UnifiedDeadline, "dueAt" | "dateOnly" | "kind" | "submissionStatus" | "own">,
+  item: Pick<UnifiedDeadline, "dueAt" | "dateOnly" | "kind" | "submissionStatus" | "own" | "done">,
   now: number,
 ): boolean {
+  if (item.done) return false;
   const at = sortInstant(item);
   if (at === null || at >= now) return false;
   if (!item.own || item.kind !== "assignment") return false;
@@ -425,4 +428,33 @@ export function withinReminderWindow(dueAt: string | null, now: number) {
   if (!dueAt) return false;
   const t = new Date(dueAt).getTime();
   return t > now && t <= now + REMINDER_LEAD_MS;
+}
+
+/**
+ * Stable identities for a "done" tick. eLearn activity keys are the same for every student in a course,
+ * so a tick on a classmate-sourced item still matches once the student connects their own eLearn.
+ */
+export function doneKeys(item: Pick<UnifiedDeadline, "id" | "own" | "outline" | "notifyKeys">): string[] {
+  const keys = new Set<string>();
+  if (item.own?.external_key) keys.add(`elearn:${item.own.external_key}`);
+  // Classmate-sourced items carry "shared:<course>:<eLearn activity key>" as their first notify key.
+  const shared = item.notifyKeys.find((k) => k.startsWith("shared:"));
+  const m = shared ? /^shared:[^:]+:(.+)$/.exec(shared) : null;
+  if (m?.[1]) keys.add(`elearn:${m[1]}`);
+  if (item.outline) keys.add(`outline:${item.outline.occurrence_id}`);
+  if (!keys.size) keys.add(`item:${item.id}`);
+  return [...keys];
+}
+
+export function isDone(item: Pick<UnifiedDeadline, "id" | "own" | "outline" | "notifyKeys">, done: Set<string>): boolean {
+  return doneKeys(item).some((k) => done.has(k));
+}
+
+/** "Due in 5h" / "Due in 40m" inside the last 24 hours; urgent in the last 3. Null otherwise. */
+export function dueSoon(dueAt: string | null, now: number): { label: string; urgent: boolean } | null {
+  if (!dueAt) return null;
+  const left = Date.parse(dueAt) - now;
+  if (!(left > 0 && left <= 24 * 3600_000)) return null;
+  const label = left >= 3600_000 ? `Due in ${Math.floor(left / 3600_000)}h` : `Due in ${Math.max(1, Math.floor(left / 60_000))}m`;
+  return { label, urgent: left <= 3 * 3600_000 };
 }

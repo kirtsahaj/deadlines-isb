@@ -16,12 +16,15 @@ export const Route = createFileRoute("/api/public/deadline-reminders")({
         const { sendPush } = await import("@/lib/push/webpush.server");
         const { mergedForUser } = await import("@/lib/term5/userDeadlines.server");
         const { claimReminder } = await import("@/lib/push/reminderClaims.server");
-        const { dueForReminder } = await import("@/lib/term5/model");
+        const { dueForReminder, isDone } = await import("@/lib/term5/model");
+        const { categoryForItem, readAlertSettings } = await import("@/lib/alerts");
 
         const { data: subs } = await supabaseAdmin.from("push_subscriptions").select("user_id, endpoint, p256dh, auth");
         if (!subs?.length) return Response.json({ sent: 0 });
         const userIds = [...new Set(subs.map((s) => s.user_id))];
-        const { data: settings } = await supabaseAdmin.from("user_settings").select("user_id, timezone").in("user_id", userIds);
+        const { data: settings } = await supabaseAdmin.from("user_settings").select("*").in("user_id", userIds);
+        // Ticks; empty if the deadline_done table doesn't exist yet.
+        const { data: doneRows } = await supabaseAdmin.from("deadline_done").select("user_id, item_key").in("user_id", userIds);
 
         let sent = 0;
         const now = Date.now();
@@ -29,9 +32,15 @@ export const Route = createFileRoute("/api/public/deadline-reminders")({
           try {
             const { data: u } = await supabaseAdmin.auth.admin.getUserById(userId);
             const email = u.user?.email ?? "";
-            const due = dueForReminder(await mergedForUser(userId, email), now);
+            const mine = settings?.find((s) => s.user_id === userId);
+            const wants = readAlertSettings(mine as Record<string, unknown> | undefined);
+            const done = new Set((doneRows ?? []).filter((r) => r.user_id === userId).map((r) => r.item_key));
+            // Respect each section's bell, and never remind about something ticked as done.
+            const due = dueForReminder(await mergedForUser(userId, email), now).filter(
+              (item) => wants[categoryForItem(item)] && !isDone(item, done),
+            );
             if (!due.length) continue;
-            const tz = settings?.find((s) => s.user_id === userId)?.timezone ?? "Asia/Kolkata";
+            const tz = mine?.timezone ?? "Asia/Kolkata";
             for (const item of due) {
               const dueAt = item.dueAt;
               if (!dueAt) continue;

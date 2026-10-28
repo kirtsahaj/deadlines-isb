@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SetupNudges } from "@/components/SetupNudges";
+import { AlertsBell } from "@/components/AlertsBell";
 import { useTerm5 } from "@/lib/useTerm5";
 import { getConnectionState } from "@/lib/elearn.functions";
 import { getCoursepacks, type ScheduleClass } from "@/lib/term5.functions";
@@ -228,8 +229,9 @@ function SchedulePage() {
         </div>
       ) : !days.length ? (
         <div className="space-y-2">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
             <ViewToggle view={view} onChange={setView} />
+            <AlertsBell category="classes" />
           </div>
           <div className="surface-card p-6 text-center text-sm text-muted-foreground">
             {view === "upcoming"
@@ -242,7 +244,12 @@ function SchedulePage() {
           <section key={key} className="space-y-2">
             <div className="flex min-h-10 items-center justify-between gap-3">
               <h2 className="text-sm font-semibold">{classes[0] ? dayLabel(classes[0].startsAt) : key}</h2>
-              {index === 0 && <ViewToggle view={view} onChange={setView} />}
+              {index === 0 && (
+                <div className="flex shrink-0 items-center gap-2">
+                  <ViewToggle view={view} onChange={setView} />
+                  <AlertsBell category="classes" />
+                </div>
+              )}
             </div>
             <ul className="space-y-3">
               {classes.map((c) => (

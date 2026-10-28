@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { Check, Copy, LogOut, Share2, ShieldCheck } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   AlertDialog,
@@ -282,6 +282,7 @@ function MenuPage() {
           <LogOut className="size-4" aria-hidden /> Sign out
           <span className="ml-auto text-xs font-normal text-muted-foreground">Keeps your eLearn connection</span>
         </Button>
+        <ShareApp />
         <div className="p-4">
           <a
             href={WHATSAPP_URL}
@@ -299,6 +300,57 @@ function MenuPage() {
           </a>
         </div>
       </div>
+    </div>
+  );
+}
+
+const SHARE_URL = "https://deadlines-isb.lovable.app";
+const SHARE_TEXT =
+  "ISB Deadline Tracker: assignments, classes & prereads and CAS job postings, all in one place. Sign in with your ISB account:";
+
+/** Phones open the native share sheet; elsewhere, copy the link or share on WhatsApp. */
+function ShareApp() {
+  const [fallback, setFallback] = useState(false);
+  const [copied, setCopied] = useState(false);
+  async function share() {
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await navigator.share({ title: "ISB Deadline Tracker", text: SHARE_TEXT, url: SHARE_URL });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+    setFallback(true);
+  }
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(`${SHARE_TEXT} ${SHARE_URL}`);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setCopied(false);
+    }
+  }
+  return (
+    <div>
+      <Button variant="ghost" type="button" onClick={share} className="tap-target flex h-auto w-full flex-wrap justify-start gap-3 rounded-none p-4 text-left text-sm font-medium">
+        <Share2 className="size-4" aria-hidden /> Share the app
+        <span className="ml-auto text-xs font-normal text-muted-foreground">Send it to your classmates</span>
+      </Button>
+      {fallback && (
+        <div className="flex flex-wrap gap-2 px-4 pb-4">
+          <Button variant="outline" size="sm" className="rounded-full" onClick={copy}>
+            {copied ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />}
+            {copied ? "Copied" : "Copy link"}
+          </Button>
+          <Button asChild variant="outline" size="sm" className="rounded-full">
+            <a href={`https://wa.me/?text=${encodeURIComponent(`${SHARE_TEXT} ${SHARE_URL}`)}`} target="_blank" rel="noopener noreferrer">
+              Share on WhatsApp
+            </a>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

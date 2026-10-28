@@ -1,5 +1,6 @@
 import { VAPID_PUBLIC_KEY, b64urlToBytes } from "./push/vapid";
 import { removePushSubscription, savePushSubscription, sendTestPush } from "./push.functions";
+import { enableAllAlerts } from "./alerts.functions";
 
 export const REMINDER_SETUP_KEY = "isb-deadline-tracker-show-reminder-setup";
 
@@ -33,6 +34,8 @@ export async function enableReminders(): Promise<"enabled" | "denied" | "unsuppo
   }));
   const json = sub.toJSON();
   await savePushSubscription({ data: { endpoint: sub.endpoint, p256dh: json.keys?.["p256dh"] ?? "", auth: json.keys?.["auth"] ?? "" } });
+  // Turning notifications on for a device always switches Assignments, Classes and Placements alerts on.
+  await enableAllAlerts().catch(() => undefined);
   void sendTestPush().catch(() => undefined);
   return "enabled";
 }

@@ -12,16 +12,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "ISB Deadline Tracker — every coursework deadline in one place" },
-      {
-        name: "description",
-        content:
-          "A read-only student tool that gathers assignment, quiz, forum and calendar deadlines from eLearn into one calm list.",
-      },
+      { name: "description", content: "Assignments, classes & prereads and CAS job postings, all in one place. For ISB students." },
       { property: "og:title", content: "ISB Deadline Tracker" },
-      {
-        property: "og:description",
-        content: "See every eLearn coursework deadline in one calm, read-only list.",
-      },
+      { property: "og:description", content: "Assignments, classes & prereads and CAS job postings, all in one place. For ISB students." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

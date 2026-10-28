@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpDown, Bell, BellOff, ExternalLink, Search } from "lucide-react";
-import { toast } from "sonner";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { ArrowUpDown, ExternalLink, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,11 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getJobJdLink, listJobs, setJobReminders, type JobTile } from "@/lib/jobs.functions";
+import { getJobJdLink, listJobs, type JobTile } from "@/lib/jobs.functions";
+import { AlertsBell } from "@/components/AlertsBell";
 import { jobsInView, type JobSort } from "@/lib/jobs/view";
 import { isLive } from "@/lib/jobs/intake";
 import { relativeTime } from "@/lib/format";
-import { currentSubscription, enableReminders, pushSupport } from "@/lib/pushClient";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Route = createFileRoute("/_authenticated/placements")({
@@ -47,7 +46,7 @@ function formatDate(date: string | null, time?: string | null): string {
 const addedLabel = (iso: string) =>
   new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" }).format(new Date(iso));
 
-function JobCard({ job }: { job: JobTile }) {
+function JobCard({ job, isNew }: { job: JobTile; isNew: boolean }) {
   const jd = useMutation({
     mutationFn: () => getJobJdLink({ data: { jobId: job.id } }),
     onSuccess: ({ url }) => window.open(url, "_blank", "noopener,noreferrer"),
@@ -57,7 +56,10 @@ function JobCard({ job }: { job: JobTile }) {
     <article className="surface-card relative space-y-1 p-3">
       <div className="flex items-baseline justify-between gap-3">
         <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-muted-foreground">{job.company}</p>
-        <p className="shrink-0 text-xs text-muted-foreground">Added {addedLabel(job.addedAt)}</p>
+        <p className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+          {isNew && <span className="tile-new">New</span>}
+          Added {addedLabel(job.addedAt)}
+        </p>
       </div>
       <h2 className="text-base font-semibold leading-snug">{job.role}</h2>
       <dl className="grid gap-x-3 text-sm sm:grid-cols-[auto_1fr]">
@@ -85,73 +87,6 @@ function JobCard({ job }: { job: JobTile }) {
   );
 }
 
-/**
- * One tap toggles new-job alerts and "apply by" reminders for the account (all devices).
- * It counts as on only when this device can actually receive them; turning it on asks for
- * notification permission first when needed. Assignment and class reminders are unaffected.
- */
-function JobAlertsBell({ accountOn }: { accountOn: boolean | undefined }) {
-  const queryClient = useQueryClient();
-  const [deviceOn, setDeviceOn] = useState<boolean | null>(null);
-  const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    void currentSubscription()
-      .catch(() => null)
-      .then((sub) => setDeviceOn(!!sub && "Notification" in window && Notification.permission === "granted"));
-  }, []);
-  const on = !!accountOn && !!deviceOn;
-
-  async function save(enabled: boolean) {
-    await setJobReminders({ data: { enabled } });
-    queryClient.setQueryData(["jobs"], (old: Awaited<ReturnType<typeof listJobs>> | undefined) =>
-      old ? { ...old, jobReminders: enabled } : old,
-    );
-  }
-
-  async function toggle() {
-    setBusy(true);
-    try {
-      if (on) {
-        await save(false);
-        toast("Job alerts off");
-        return;
-      }
-      if (!deviceOn) {
-        const support = pushSupport();
-        if (support === "needs-home-screen") return void toast("Add the app to your home screen to get job alerts");
-        if (support === "unsupported") return void toast("This browser can't show notifications");
-        const result = await enableReminders();
-        if (result === "denied") return void toast("Notifications are blocked. Allow them in your settings, then try again.");
-        if (result !== "enabled") return void toast("Couldn't turn on notifications. Please try again.");
-        setDeviceOn(true);
-      }
-      if (!accountOn) await save(true);
-      toast("Job alerts on");
-    } catch {
-      toast("Couldn't change job alerts. Please try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const Icon = on ? Bell : BellOff;
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      size="icon"
-      className="size-10 shrink-0 rounded-full bg-card text-muted-foreground"
-      onClick={toggle}
-      disabled={busy || accountOn === undefined || deviceOn === null}
-      aria-pressed={on}
-      aria-label={on ? "Job alerts on. Tap to turn off" : "Job alerts off. Tap to turn on"}
-      title={on ? "Job alerts on" : "Job alerts off"}
-    >
-      <Icon className="size-4" aria-hidden />
-    </Button>
-  );
-}
-
 const SORTS: { value: JobSort; label: string }[] = [
   { value: "deadline", label: "Deadline" },
   { value: "added", label: "Added on" },
@@ -160,6 +95,15 @@ const SORTS: { value: JobSort; label: string }[] = [
 function PlacementsPage() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<JobSort>("deadline");
+  // Jobs seen at the previous visit (the bottom bar updates this list once Placements opens).
+  const [previouslySeen] = useState<Set<string> | null>(() => {
+    try {
+      const raw = window.localStorage.getItem("placements-seen-v1");
+      return raw ? new Set(JSON.parse(raw) as string[]) : null;
+    } catch {
+      return null;
+    }
+  });
   const isMobile = useIsMobile();
   // Refresh every minute while the tab is open, so new postings appear without leaving the page.
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => listJobs(), refetchInterval: 60_000 });
@@ -215,7 +159,7 @@ function PlacementsPage() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <JobAlertsBell accountOn={jobs.data?.jobReminders} />
+        <AlertsBell category="jobs" />
       </div>
 
       {jobs.isLoading ? (
@@ -234,7 +178,7 @@ function PlacementsPage() {
         <ul className="space-y-2">
           {visible.map((job) => (
             <li key={job.id}>
-              <JobCard job={job} />
+              <JobCard job={job} isNew={!!previouslySeen && !previouslySeen.has(job.id)} />
             </li>
           ))}
         </ul>
