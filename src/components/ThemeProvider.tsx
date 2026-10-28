@@ -6,7 +6,7 @@ const ThemeContext = createContext<Ctx>({ theme: "light", preference: "system", 
 const STORAGE_KEY = "deadline-tracker-theme-v2";
 const LEGACY_KEY = "deadline-tracker-theme";
 /** Browser chrome (status bar / address bar) colours matching the page background. */
-const CHROME: Record<AppTheme, string> = { light: "#fbf9ff", dark: "#131317" };
+const CHROME: Record<AppTheme, string> = { light: "#fcfbfe", dark: "#09080e" }; // = top of --page-gradient
 
 function applyTheme(next: AppTheme) {
   const root = document.documentElement;

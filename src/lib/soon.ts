@@ -16,6 +16,7 @@ const tomorrowIst = (now: number) => istDate(Date.parse(`${istDate(now)}T12:00:0
  * Deadlines with an exact time:
  * - within 24h: "Due in 5h" (minutes in the last hour)
  * - more than 24h away but dated tomorrow (India time): "Due tomorrow"
+ * - otherwise within 48h (e.g. the day after tomorrow, seen late in the evening): "Due soon"
  * Red in the last 12h, amber before that. Anything further out shows nothing.
  */
 export function deadlinePill(prefix: "Due" | "Closes", dueAt: string | null, now: number): SoonPill | null {
@@ -25,6 +26,7 @@ export function deadlinePill(prefix: "Due" | "Closes", dueAt: string | null, now
   if (!(left > 0)) return null;
   if (left <= 24 * H) return { label: countdown(prefix, left), tone: left <= 12 * H ? "urgent" : "soon" };
   if (istDate(due) === tomorrowIst(now)) return { label: `${prefix} tomorrow`, tone: "soon" };
+  if (left <= 48 * H) return { label: `${prefix} soon`, tone: "soon" };
   return null;
 }
 

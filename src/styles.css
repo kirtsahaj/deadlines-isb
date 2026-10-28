@@ -102,7 +102,7 @@
   --activity: oklch(0.5 0.13 65);
   --radius: 1rem;
 
-  --background: oklch(0.97 0.018 320);
+  --background: oklch(0.99 0.004 300);
   --foreground: oklch(0.2 0.012 265);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.2 0.012 265);
@@ -162,11 +162,11 @@
   --grad-2: oklch(0.58 0.23 330);
   --grad-3: oklch(0.51 0.175 300);
   /* Page background: purple at the top → pink at the bottom, a purple glow, and a soft diagonal sheen */
-  --page-sheen: linear-gradient(118deg, transparent 16%, oklch(1 0 0 / 0.45) 33%, oklch(0.985 0.025 330 / 0.75) 44%, oklch(0.985 0.02 290 / 0.6) 52%, oklch(1 0 0 / 0.4) 61%, transparent 78%);
-  --page-glow: radial-gradient(42rem 22rem at 105% -12%, oklch(0.5 0.21 300 / 0.08), transparent 70%);
-  --page-gradient: linear-gradient(180deg, oklch(0.965 0.022 300) 0%, oklch(0.97 0.018 322) 50%, oklch(0.973 0.022 350) 100%);
+  --page-sheen: linear-gradient(118deg, transparent 16%, oklch(1 0 0 / 0.35) 33%, oklch(0.985 0.02 330 / 0.55) 44%, oklch(0.985 0.016 290 / 0.45) 52%, oklch(1 0 0 / 0.3) 61%, transparent 78%);
+  --page-glow: radial-gradient(40rem 24rem at 100% 40%, oklch(0.6 0.16 310 / 0.05), transparent 70%);
+  --page-gradient: linear-gradient(180deg, oklch(0.99 0.004 300) 0%, oklch(0.985 0.008 318) 55%, oklch(0.978 0.016 345) 100%);
   /* Frosted bottom bar */
-  --nav-frost: color-mix(in oklab, oklch(0.975 0.025 318) 62%, transparent);
+  --nav-frost: color-mix(in oklab, oklch(0.978 0.016 345) 74%, transparent);
   --nav-frost-edge: oklch(1 0 0 / 0.7);
 }
 
@@ -176,7 +176,7 @@
   --preread: oklch(0.78 0.11 180);
   --quiz: oklch(0.78 0.13 350);
   --activity: oklch(0.8 0.12 75);
-  --background: oklch(0.175 0.012 290);
+  --background: oklch(0.14 0.012 295);
   --foreground: oklch(0.95 0.004 265);
   --card: oklch(0.215 0.006 265);
   --card-foreground: oklch(0.95 0.004 265);
@@ -219,10 +219,10 @@
   --grad-1: oklch(0.8 0.14 355);
   --grad-2: oklch(0.76 0.16 320);
   --grad-3: oklch(0.74 0.13 285);
-  --page-sheen: linear-gradient(118deg, transparent 16%, oklch(1 0 0 / 0.06) 32%, oklch(0.88 0.1 330 / 0.15) 43%, oklch(0.9 0.08 290 / 0.12) 52%, oklch(1 0 0 / 0.05) 61%, transparent 78%);
-  --page-glow: radial-gradient(42rem 22rem at 105% -12%, oklch(0.62 0.18 300 / 0.14), transparent 70%);
-  --page-gradient: linear-gradient(180deg, oklch(0.19 0.032 300) 0%, oklch(0.185 0.03 322) 50%, oklch(0.19 0.036 345) 100%);
-  --nav-frost: color-mix(in oklab, oklch(0.22 0.035 315) 62%, transparent);
+  --page-sheen: linear-gradient(118deg, transparent 16%, oklch(1 0 0 / 0.04) 32%, oklch(0.88 0.1 330 / 0.1) 43%, oklch(0.9 0.08 290 / 0.08) 52%, oklch(1 0 0 / 0.035) 61%, transparent 78%);
+  --page-glow: radial-gradient(40rem 24rem at 100% 40%, oklch(0.6 0.18 310 / 0.08), transparent 70%);
+  --page-gradient: linear-gradient(180deg, oklch(0.14 0.012 295) 0%, oklch(0.145 0.018 315) 50%, oklch(0.16 0.03 345) 100%);
+  --nav-frost: color-mix(in oklab, oklch(0.16 0.03 345) 74%, transparent);
   --nav-frost-edge: oklch(1 0 0 / 0.08);
 }
 
@@ -252,7 +252,19 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: var(--page-sheen), var(--page-glow), var(--page-gradient), var(--color-background);
+    background: var(--page-glow), var(--page-gradient), var(--color-background);
+  }
+  /* The sheen fades in below the status bar, so the very top stays one flat colour that
+     matches the phone's status bar / browser bar (theme-color). */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--page-sheen);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 160px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 160px);
   }
 
   h1,

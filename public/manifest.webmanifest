@@ -6,8 +6,8 @@
   "start_url": "/deadlines",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#fbf9ff",
-  "theme_color": "#fbf9ff",
+  "background_color": "#fcfbfe",
+  "theme_color": "#fcfbfe",
   "icons": [
     {
       "src": "/pwa-192.png",

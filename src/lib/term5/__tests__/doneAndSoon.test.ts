@@ -68,8 +68,9 @@ describe("due soon pill", () => {
   it("says Due tomorrow (amber) beyond 24h when the date is tomorrow in India", () => {
     expect(dueSoon(iso(25 * H), now)).toEqual({ label: "Due tomorrow", urgent: false });
   });
-  it("stays hidden for the day after tomorrow, after the deadline, or without a time", () => {
-    expect(dueSoon(iso(34 * H), now)).toBeNull(); // 3 Nov, 01:30 IST
+  it("says Due soon within 48h when not tomorrow, and stays hidden beyond that, after the deadline, or without a time", () => {
+    expect(dueSoon(iso(34 * H), now)).toEqual({ label: "Due soon", urgent: false }); // 3 Nov, 01:30 IST: within 48h, not tomorrow
+    expect(dueSoon(iso(49 * H), now)).toBeNull();
     expect(dueSoon(iso(-60_000), now)).toBeNull();
     expect(dueSoon(null, now)).toBeNull();
   });
