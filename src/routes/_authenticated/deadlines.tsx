@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/deadlines")({
   head: () => ({
     meta: [
       { title: "Your deadlines — ISB Deadline Tracker" },
-      { name: "description", content: "Every upcoming Term 5 and eLearn deadline in one list, with how confident each date is." },
+      { name: "description", content: "Every upcoming Term 5 and eLearn deadline in one list, with where each date comes from." },
       { property: "og:title", content: "Your deadlines — ISB Deadline Tracker" },
       { property: "og:description", content: "Every upcoming Term 5 and eLearn deadline in one list." },
       { property: "og:type", content: "website" },
@@ -290,7 +290,7 @@ function DeadlinesPage() {
               <DeadlineCard
                 item={item}
                 timezone={timezone}
-                connected={connected}
+                connected={connection.data ? connected : undefined}
                 outlineKind={term5.data?.outlineSourceKinds[item.courseCode] ?? null}
                 isNew={!!previouslySeen && !previouslySeen.has(item.id)}
                 onToggleDone={() => toggleDone.mutate({ keys: doneKeys(item), done: !item.done })}

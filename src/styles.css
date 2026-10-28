@@ -430,12 +430,10 @@
   border: 1px solid var(--color-border); font-weight: 600;
 }
 .deadline-card .tile-link:hover { background-color: var(--color-muted); }
-/* Only the source glyph is coloured: own eLearn = navy tick, classmate = coral (i),
-   outline/estimate = raspberry (i). Prereads are never sourced from eLearn, so they stay grey. */
-.deadline-card .tile-info { --conf: var(--color-conf-outline); }
-.deadline-card[data-confidence="own"] .tile-info { --conf: var(--color-conf-own); }
-.deadline-card[data-confidence="shared"] .tile-info { --conf: var(--color-conf-shared); }
-.deadline-card[data-tile-type="preread"] .tile-info { --conf: var(--color-muted-foreground); }
+/* The source icon's shape tells the source; its colour is one quiet grey for everyone,
+   and raspberry (outline only, no fill) while eLearn isn't connected, to nudge connecting. */
+.deadline-card .tile-info { --conf: var(--color-muted-foreground); }
+.deadline-card[data-unlinked="true"] .tile-info { --conf: var(--color-urgent); }
 .deadline-card .tile-info {
   color: var(--conf);
   background-color: transparent;

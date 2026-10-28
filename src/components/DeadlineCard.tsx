@@ -73,7 +73,8 @@ export function DeadlineCard({
 }: {
   item: UnifiedDeadline;
   timezone: string;
-  connected: boolean;
+  /** undefined while the eLearn connection is still loading. */
+  connected: boolean | undefined;
   outlineKind: string | null;
   /** Appeared since the student's previous visit on this device. */
   isNew?: boolean;
@@ -86,6 +87,8 @@ export function DeadlineCard({
   const finished = submitted || !!item.done;
   const soon = finished ? null : dueSoon(item.dueAt, now);
   const meta = CONFIDENCE_META[item.confidence];
+  /** Only once we know eLearn isn't connected (never red while the connection is still loading). */
+  const unlinked = connected === false;
   const isText = item.kind === "text";
   const destination = elearnDestination(item);
   const [sourceOpen, setSourceOpen] = useState(false);
@@ -94,7 +97,7 @@ export function DeadlineCard({
 
   return (
     <Dialog open={sourceOpen} onOpenChange={setSourceOpen}>
-    <article data-tile-type={tileType} data-confidence={item.confidence} data-done={finished ? "true" : undefined} className="deadline-card relative px-3 py-2.5 sm:px-4">
+    <article data-tile-type={tileType} data-confidence={item.confidence} data-unlinked={unlinked ? "true" : undefined} data-done={finished ? "true" : undefined} className="deadline-card relative px-3 py-2.5 sm:px-4">
       <div className="tile-fade flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -118,7 +121,7 @@ export function DeadlineCard({
           <DialogContent className="max-w-md rounded-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <ConfidenceMark value={item.confidence} /> {meta.label}
+                <ConfidenceMark value={item.confidence} className={unlinked ? "text-urgent" : "text-muted-foreground"} /> {meta.label}
               </DialogTitle>
               <DialogDescription>{item.title}</DialogDescription>
             </DialogHeader>
@@ -140,7 +143,7 @@ export function DeadlineCard({
               {item.outline && item.outline.deadline_rule !== "explicit" && !item.dateOnly && !item.dueAt && (
                 <p className="text-muted-foreground">No date in the outline yet.</p>
               )}
-              <ConnectCta connected={connected} />
+              <ConnectCta connected={connected !== false} />
             </div>
           </DialogContent>
       </div>
@@ -159,7 +162,7 @@ export function DeadlineCard({
       </div>
       {item.otherSection && (
         <p className="mt-1 text-xs text-muted-foreground">
-          Section {item.otherSectionLabel ?? "other"} date{!connected && " · connect eLearn for your section"}
+          Section {item.otherSectionLabel ?? "other"} date{unlinked && " · connect eLearn for your section"}
         </p>
       )}
 

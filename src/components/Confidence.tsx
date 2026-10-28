@@ -3,29 +3,22 @@ import { FileText, UserRound, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Confidence } from "@/lib/term5/model";
 
-export const CONFIDENCE_META: Record<Confidence, { symbol: string; label: string; className: string; explain: string }> = {
+/** Where a date came from, in plain words (we talk about the source, not confidence). */
+export const CONFIDENCE_META: Record<Confidence, { label: string; explain: string }> = {
   own: {
-    symbol: "●",
-    label: "Your eLearn, recently refreshed",
-    className: "text-conf-own",
-    explain: "Comes from your own eLearn and was refreshed recently.",
+    label: "From your eLearn",
+    explain: "Comes from your own eLearn.",
   },
   shared: {
-    symbol: "◐",
-    label: "Course and section eLearn",
-    className: "text-conf-shared",
-    explain: "Seen recently on eLearn for your course and section.",
+    label: "From your section's eLearn",
+    explain: "Seen on eLearn by classmates in your course and section.",
   },
   outline: {
-    symbol: "○",
-    label: "Outline or older update",
-    className: "text-conf-outline",
-    explain: "From the course outline or an update that hasn't been confirmed recently.",
+    label: "From the course outline",
+    explain: "Taken from the course outline.",
   },
   provisional: {
-    symbol: "?",
-    label: "Estimated or not announced yet",
-    className: "text-conf-provisional",
+    label: "Estimated from the course outline",
     explain: "Estimated from the outline and class schedule, or not announced yet.",
   },
 };
@@ -44,11 +37,10 @@ export function SourceIcon({ value }: { value: Confidence }) {
   );
 }
 
-/** Icon + color, never color alone. */
-export function ConfidenceMark({ value, className = "" }: { value: Confidence; className?: string }) {
-  const meta = CONFIDENCE_META[value];
+/** The source icon at text size; colour comes from className (grey, or red while eLearn isn't connected). */
+export function ConfidenceMark({ value, className = "text-muted-foreground" }: { value: Confidence; className?: string }) {
   return (
-    <span aria-hidden className={`inline-grid size-5 place-items-center ${meta.className} ${className}`}>
+    <span aria-hidden className={`inline-grid size-5 place-items-center ${className}`}>
       <SourceIcon value={value} />
     </span>
   );
@@ -73,8 +65,9 @@ export function ConfidenceLegend() {
 export function ConnectCta({ connected }: { connected: boolean }) {
   if (connected) return null;
   return (
-    <div className="rounded-xl bg-primary/10 p-3 text-sm">
-      <p>Connect your eLearn to get personal updates for your courses, including your own submissions.</p>
+    <div className="rounded-xl border border-urgent/40 bg-urgent/8 p-3 text-sm">
+      <p className="font-semibold text-urgent">eLearn not connected</p>
+      <p className="mt-0.5">Connect your eLearn for more accurate, real-time dates, including your own submissions.</p>
       <Button asChild size="sm" className="mt-2">
         <Link to="/connect">Connect eLearn</Link>
       </Button>
