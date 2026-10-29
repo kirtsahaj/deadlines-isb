@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getAdminMetrics, getIntakeHealth, type AdminUserRow } from "@/lib/admin.functions";
+import { getAdminMetrics, getIntakeHealth, getJobDigestFeedUrl, type AdminUserRow } from "@/lib/admin.functions";
 import { relativeTime } from "@/lib/format";
 import { useSession } from "@/lib/useSession";
 import { isAdminEmail } from "@/lib/admin";
@@ -55,6 +55,8 @@ function AdminPage() {
   const metrics = useQuery({ queryKey: ["admin-metrics"], queryFn: () => fetchMetrics(), enabled: allowed });
   const fetchIntake = useServerFn(getIntakeHealth);
   const intake = useQuery({ queryKey: ["admin-intake"], queryFn: () => fetchIntake(), enabled: allowed });
+  const fetchDigestFeed = useServerFn(getJobDigestFeedUrl);
+  const digestFeed = useQuery({ queryKey: ["admin-digest-feed"], queryFn: () => fetchDigestFeed(), enabled: allowed, staleTime: Infinity });
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "connected" | "not" | "notify">("all");
 
@@ -102,6 +104,14 @@ function AdminPage() {
       </div>
 
       <IntakeCard data={intake.data} failed={intake.isError} />
+
+      <section className="surface-card space-y-2 p-4" aria-label="Job digest feed">
+        <h2 className="text-base font-semibold">Job digest feed</h2>
+        <p className="text-sm text-muted-foreground">
+          Private RSS link for the 10 PM Outlook automation (job applications closing in the next 24 hours). Keep it private.
+        </p>
+        <Input readOnly value={digestFeed.data?.url ?? "Loading…"} onFocus={(e) => e.currentTarget.select()} aria-label="Job digest feed URL" />
+      </section>
 
       <div className="flex flex-wrap gap-2">
         <Input

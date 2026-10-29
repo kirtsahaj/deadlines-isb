@@ -19,6 +19,7 @@ import { Route as AuthenticatedPlacementsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as ApiPublicCoursepackRouteImport } from './routes/api/public/coursepack'
 import { Route as ApiPublicDeadlineRemindersRouteImport } from './routes/api/public/deadline-reminders'
+import { Route as ApiPublicJobDigestRouteImport } from './routes/api/public/job-digest'
 import { Route as ApiPublicPlacementRemindersRouteImport } from './routes/api/public/placement-reminders'
 import { Route as ApiPublicResendInboundRouteImport } from './routes/api/public/resend-inbound'
 import { Route as ApiPublicScheduledAccountRouteImport } from './routes/api/public/scheduled-account'
@@ -74,6 +75,11 @@ const ApiPublicDeadlineRemindersRoute =
     path: '/api/public/deadline-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobDigestRoute = ApiPublicJobDigestRouteImport.update({
+  id: '/api/public/job-digest',
+  path: '/api/public/job-digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPlacementRemindersRoute =
   ApiPublicPlacementRemindersRouteImport.update({
     id: '/api/public/placement-reminders',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/schedule': typeof AuthenticatedScheduleRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
+  '/api/public/job-digest': typeof ApiPublicJobDigestRoute
   '/api/public/placement-reminders': typeof ApiPublicPlacementRemindersRoute
   '/api/public/resend-inbound': typeof ApiPublicResendInboundRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/schedule': typeof AuthenticatedScheduleRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
+  '/api/public/job-digest': typeof ApiPublicJobDigestRoute
   '/api/public/placement-reminders': typeof ApiPublicPlacementRemindersRoute
   '/api/public/resend-inbound': typeof ApiPublicResendInboundRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
+  '/api/public/job-digest': typeof ApiPublicJobDigestRoute
   '/api/public/placement-reminders': typeof ApiPublicPlacementRemindersRoute
   '/api/public/resend-inbound': typeof ApiPublicResendInboundRoute
   '/api/public/scheduled-account': typeof ApiPublicScheduledAccountRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
+    | '/api/public/job-digest'
     | '/api/public/placement-reminders'
     | '/api/public/resend-inbound'
     | '/api/public/scheduled-account'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
+    | '/api/public/job-digest'
     | '/api/public/placement-reminders'
     | '/api/public/resend-inbound'
     | '/api/public/scheduled-account'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/_authenticated/schedule'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
+    | '/api/public/job-digest'
     | '/api/public/placement-reminders'
     | '/api/public/resend-inbound'
     | '/api/public/scheduled-account'
@@ -198,6 +210,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ApiPublicCoursepackRoute: typeof ApiPublicCoursepackRoute
   ApiPublicDeadlineRemindersRoute: typeof ApiPublicDeadlineRemindersRoute
+  ApiPublicJobDigestRoute: typeof ApiPublicJobDigestRoute
   ApiPublicPlacementRemindersRoute: typeof ApiPublicPlacementRemindersRoute
   ApiPublicResendInboundRoute: typeof ApiPublicResendInboundRoute
   ApiPublicScheduledAccountRoute: typeof ApiPublicScheduledAccountRoute
@@ -276,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDeadlineRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/job-digest': {
+      id: '/api/public/job-digest'
+      path: '/api/public/job-digest'
+      fullPath: '/api/public/job-digest'
+      preLoaderRoute: typeof ApiPublicJobDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/placement-reminders': {
       id: '/api/public/placement-reminders'
       path: '/api/public/placement-reminders'
@@ -333,6 +353,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ApiPublicCoursepackRoute: ApiPublicCoursepackRoute,
   ApiPublicDeadlineRemindersRoute: ApiPublicDeadlineRemindersRoute,
+  ApiPublicJobDigestRoute: ApiPublicJobDigestRoute,
   ApiPublicPlacementRemindersRoute: ApiPublicPlacementRemindersRoute,
   ApiPublicResendInboundRoute: ApiPublicResendInboundRoute,
   ApiPublicScheduledAccountRoute: ApiPublicScheduledAccountRoute,

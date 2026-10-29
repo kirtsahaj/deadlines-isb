@@ -136,3 +136,13 @@ export const getIntakeHealth = createServerFn({ method: "GET" })
       problems: problems.slice(0, 10).map((p) => ({ id: p.id, receivedAt: p.received_at, subject: p.subject, label: problemLabel(p) })),
     };
   });
+
+/** Owner only: the private feed URL for the 10 PM Outlook job-digest automation. */
+export const getJobDigestFeedUrl = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const email = (context.claims as { email?: unknown })?.email;
+    if (!isAdminEmail(typeof email === "string" ? email : "")) throw new Error("forbidden");
+    const { jobDigestKey } = await import("@/lib/jobs/digest.server");
+    return { url: `https://deadlines-isb.lovable.app/api/public/job-digest?key=${await jobDigestKey()}` };
+  });
