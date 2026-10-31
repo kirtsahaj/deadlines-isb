@@ -167,6 +167,24 @@ export type Database = {
         }
         Relationships: []
       }
+      email_unsubscribes: {
+        Row: {
+          created_at: string
+          email: string
+          mail: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          mail: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          mail?: string
+        }
+        Relationships: []
+      }
       elearn_connections: {
         Row: {
           base_url: string

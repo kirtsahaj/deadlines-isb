@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as EmailSettingsRouteImport } from './routes/email-settings'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated/connect'
 import { Route as AuthenticatedDeadlinesRouteImport } from './routes/_authenticated/deadlines'
@@ -32,6 +33,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailSettingsRoute = EmailSettingsRouteImport.update({
+  id: '/email-settings',
+  path: '/email-settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -105,6 +111,7 @@ const ApiPublicScheduledSyncRoute = ApiPublicScheduledSyncRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/email-settings': typeof EmailSettingsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/email-settings': typeof EmailSettingsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/email-settings': typeof EmailSettingsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/deadlines': typeof AuthenticatedDeadlinesRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/email-settings'
     | '/admin'
     | '/connect'
     | '/deadlines'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/email-settings'
     | '/admin'
     | '/connect'
     | '/deadlines'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/email-settings'
     | '/_authenticated/admin'
     | '/_authenticated/connect'
     | '/_authenticated/deadlines'
@@ -208,6 +220,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  EmailSettingsRoute: typeof EmailSettingsRoute
   ApiPublicCoursepackRoute: typeof ApiPublicCoursepackRoute
   ApiPublicDeadlineRemindersRoute: typeof ApiPublicDeadlineRemindersRoute
   ApiPublicJobDigestRoute: typeof ApiPublicJobDigestRoute
@@ -231,6 +244,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email-settings': {
+      id: '/email-settings'
+      path: '/email-settings'
+      fullPath: '/email-settings'
+      preLoaderRoute: typeof EmailSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -351,6 +371,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  EmailSettingsRoute: EmailSettingsRoute,
   ApiPublicCoursepackRoute: ApiPublicCoursepackRoute,
   ApiPublicDeadlineRemindersRoute: ApiPublicDeadlineRemindersRoute,
   ApiPublicJobDigestRoute: ApiPublicJobDigestRoute,
