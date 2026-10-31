@@ -20,6 +20,11 @@ export function catalogFor(campus: Campus): Catalog {
   return CATALOGS[campus];
 }
 
+/** Every address on a campus class list (lower-case), in list order. */
+export function rosterEmails(campus: Campus): string[] {
+  return Object.keys(ROSTERS[campus]).map((e) => e.toLowerCase().trim());
+}
+
 /** Campus comes from the private class lists, never from the email domain. */
 export function campusFor(email: string): Campus | null {
   const key = email.toLowerCase().trim();

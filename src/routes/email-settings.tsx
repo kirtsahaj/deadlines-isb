@@ -115,7 +115,7 @@ function EmailSettings() {
         <MailCheck className="mb-5 size-9 text-primary" aria-hidden />
         <h1 className="text-3xl font-semibold">Email preferences</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          For the daily mails from Kirt: the Job deadlines digest and the Birthday reminder mail.
+          For the daily mails from Kirt
         </p>
 
         <section className="surface-card mt-6 space-y-4 p-4">
@@ -125,7 +125,7 @@ function EmailSettings() {
             <>
               <p className="text-sm">
                 To make sure only you can change these, please confirm your ISB email with Microsoft. This only confirms
-                your address. It doesn't sign you up for anything.
+                your address.
               </p>
               <Button className="tap-target w-full" onClick={() => void confirmEmail()} disabled={busy}>
                 {busy ? "Opening Microsoft…" : "Confirm my ISB email"}
