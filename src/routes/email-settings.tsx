@@ -21,7 +21,7 @@ type MailKey = "jobs" | "birthday" | "hide_birthday";
 const MAILS: { key: MailKey; name: string; detail: string; kind: "mail" | "hide" }[] = [
   { key: "jobs", name: "Job deadlines digest", detail: "10 PM, only when an application closes in the next 24 hours", kind: "mail" },
   { key: "birthday", name: "Birthday reminder mail", detail: "Daily list of upcoming birthdays", kind: "mail" },
-  { key: "hide_birthday", name: "Hide my birthday", detail: "Leave me out of the Birthday reminder mail", kind: "hide" },
+  { key: "hide_birthday", name: "Hide my birthday", detail: "Don't list my birthday in the mail. I'll still get the mail.", kind: "hide" },
 ];
 const isMail = (k: MailKey) => MAILS.find((m) => m.key === k)!.kind === "mail";
 
