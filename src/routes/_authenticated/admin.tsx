@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Input } from "@/components/ui/input";
@@ -112,6 +112,10 @@ function AdminPage() {
         </p>
         <Input readOnly value={digestFeed.data?.url ?? "Loading…"} onFocus={(e) => e.currentTarget.select()} aria-label="Job digest feed URL" />
       </section>
+
+      <Link to="/admin/mail" className="surface-card flex items-center justify-between p-4 text-sm font-semibold">
+        Mail opt-outs <span aria-hidden>→</span>
+      </Link>
 
       <div className="flex flex-wrap gap-2">
         <Input

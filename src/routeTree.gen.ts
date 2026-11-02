@@ -18,6 +18,7 @@ import { Route as AuthenticatedDeadlinesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedMenuRouteImport } from './routes/_authenticated/menu'
 import { Route as AuthenticatedPlacementsRouteImport } from './routes/_authenticated/placements'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
+import { Route as AuthenticatedAdminMailRouteImport } from './routes/_authenticated/admin_.mail'
 import { Route as ApiPublicBirthdayDigestRouteImport } from './routes/api/public/birthday-digest'
 import { Route as ApiPublicCoursepackRouteImport } from './routes/api/public/coursepack'
 import { Route as ApiPublicDeadlineRemindersRouteImport } from './routes/api/public/deadline-reminders'
@@ -70,6 +71,11 @@ const AuthenticatedPlacementsRoute = AuthenticatedPlacementsRouteImport.update({
 const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminMailRoute = AuthenticatedAdminMailRouteImport.update({
+  id: '/admin_/mail',
+  path: '/admin/mail',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiPublicBirthdayDigestRoute = ApiPublicBirthdayDigestRouteImport.update({
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/menu': typeof AuthenticatedMenuRoute
   '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/admin/mail': typeof AuthenticatedAdminMailRoute
   '/api/public/birthday-digest': typeof ApiPublicBirthdayDigestRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/menu': typeof AuthenticatedMenuRoute
   '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/admin/mail': typeof AuthenticatedAdminMailRoute
   '/api/public/birthday-digest': typeof ApiPublicBirthdayDigestRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/_authenticated/menu': typeof AuthenticatedMenuRoute
   '/_authenticated/placements': typeof AuthenticatedPlacementsRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
+  '/_authenticated/admin_/mail': typeof AuthenticatedAdminMailRoute
   '/api/public/birthday-digest': typeof ApiPublicBirthdayDigestRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/menu'
     | '/placements'
     | '/schedule'
+    | '/admin/mail'
     | '/api/public/birthday-digest'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/menu'
     | '/placements'
     | '/schedule'
+    | '/admin/mail'
     | '/api/public/birthday-digest'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/_authenticated/menu'
     | '/_authenticated/placements'
     | '/_authenticated/schedule'
+    | '/_authenticated/admin_/mail'
     | '/api/public/birthday-digest'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
@@ -321,6 +333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedScheduleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin_/mail': {
+      id: '/_authenticated/admin_/mail'
+      path: '/admin/mail'
+      fullPath: '/admin/mail'
+      preLoaderRoute: typeof AuthenticatedAdminMailRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/birthday-digest': {
       id: '/api/public/birthday-digest'
       path: '/api/public/birthday-digest'
@@ -394,6 +413,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMenuRoute: typeof AuthenticatedMenuRoute
   AuthenticatedPlacementsRoute: typeof AuthenticatedPlacementsRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
+  AuthenticatedAdminMailRoute: typeof AuthenticatedAdminMailRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -403,6 +423,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMenuRoute: AuthenticatedMenuRoute,
   AuthenticatedPlacementsRoute: AuthenticatedPlacementsRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
+  AuthenticatedAdminMailRoute: AuthenticatedAdminMailRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

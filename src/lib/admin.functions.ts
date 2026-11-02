@@ -146,3 +146,66 @@ export const getJobDigestFeedUrl = createServerFn({ method: "GET" })
     const { jobDigestKey } = await import("@/lib/jobs/digest.server");
     return { url: `https://deadlines-isb.lovable.app/api/public/job-digest?key=${await jobDigestKey()}` };
   });
+
+export type MailOptOutRow = {
+  email: string;
+  name: string;
+  campus: "Mohali" | "Hyderabad" | null;
+  jobs: string | null;
+  birthday: string | null;
+  hideBirthday: string | null;
+  latest: string;
+};
+
+/** "vinay_rane_pgp2027@isb.edu" → "Vinay Rane" when the class list has no name. */
+function nameFromEmail(email: string) {
+  return email
+    .split("@")[0]!
+    .replace(/_pgp\d+$/i, "")
+    .split(/[_.]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/** Owner only: who left the daily mails or hid their birthday (email_unsubscribes). */
+export const getMailOptOuts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const email = (context.claims as { email?: unknown })?.email;
+    if (!isAdminEmail(typeof email === "string" ? email : "")) throw new Error("forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { campusFor } = await import("@/lib/term5/catalog.server");
+    const { data: opts, error } = await supabaseAdmin.from("email_unsubscribes").select("email, mail, created_at");
+    if (error) throw new Error("optouts_unavailable");
+    const emails = [...new Set((opts ?? []).map((o) => o.email.toLowerCase()))];
+    const { data: people } = emails.length
+      ? await supabaseAdmin.from("birthdays").select("email, name, campus").in("email", emails)
+      : { data: [] as { email: string; name: string; campus: string }[] };
+    const known = new Map((people ?? []).map((p) => [p.email.toLowerCase(), p]));
+
+    const byEmail = new Map<string, MailOptOutRow>();
+    for (const o of opts ?? []) {
+      const key = o.email.toLowerCase();
+      let row = byEmail.get(key);
+      if (!row) {
+        const p = known.get(key);
+        const c = campusFor(key);
+        row = {
+          email: key,
+          name: p?.name ?? nameFromEmail(key),
+          campus: (p?.campus as MailOptOutRow["campus"]) ?? (c === "MOH" ? "Mohali" : c === "HYD" ? "Hyderabad" : null),
+          jobs: null,
+          birthday: null,
+          hideBirthday: null,
+          latest: o.created_at,
+        };
+        byEmail.set(key, row);
+      }
+      if (o.mail === "jobs") row.jobs = o.created_at;
+      else if (o.mail === "birthday") row.birthday = o.created_at;
+      else if (o.mail === "hide_birthday") row.hideBirthday = o.created_at;
+      if (o.created_at > row.latest) row.latest = o.created_at;
+    }
+    return { rows: [...byEmail.values()].sort((a, b) => b.latest.localeCompare(a.latest)) };
+  });
