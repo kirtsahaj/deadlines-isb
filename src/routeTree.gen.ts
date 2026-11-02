@@ -18,6 +18,7 @@ import { Route as AuthenticatedDeadlinesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedMenuRouteImport } from './routes/_authenticated/menu'
 import { Route as AuthenticatedPlacementsRouteImport } from './routes/_authenticated/placements'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
+import { Route as ApiPublicBirthdayDigestRouteImport } from './routes/api/public/birthday-digest'
 import { Route as ApiPublicCoursepackRouteImport } from './routes/api/public/coursepack'
 import { Route as ApiPublicDeadlineRemindersRouteImport } from './routes/api/public/deadline-reminders'
 import { Route as ApiPublicJobDigestRouteImport } from './routes/api/public/job-digest'
@@ -70,6 +71,11 @@ const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiPublicBirthdayDigestRoute = ApiPublicBirthdayDigestRouteImport.update({
+  id: '/api/public/birthday-digest',
+  path: '/api/public/birthday-digest',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicCoursepackRoute = ApiPublicCoursepackRouteImport.update({
   id: '/api/public/coursepack',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/menu': typeof AuthenticatedMenuRoute
   '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/api/public/birthday-digest': typeof ApiPublicBirthdayDigestRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
   '/api/public/job-digest': typeof ApiPublicJobDigestRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/menu': typeof AuthenticatedMenuRoute
   '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/api/public/birthday-digest': typeof ApiPublicBirthdayDigestRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
   '/api/public/job-digest': typeof ApiPublicJobDigestRoute
@@ -162,6 +170,7 @@ export interface FileRoutesById {
   '/_authenticated/menu': typeof AuthenticatedMenuRoute
   '/_authenticated/placements': typeof AuthenticatedPlacementsRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
+  '/api/public/birthday-digest': typeof ApiPublicBirthdayDigestRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
   '/api/public/job-digest': typeof ApiPublicJobDigestRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
     | '/menu'
     | '/placements'
     | '/schedule'
+    | '/api/public/birthday-digest'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
     | '/api/public/job-digest'
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
     | '/menu'
     | '/placements'
     | '/schedule'
+    | '/api/public/birthday-digest'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
     | '/api/public/job-digest'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/_authenticated/menu'
     | '/_authenticated/placements'
     | '/_authenticated/schedule'
+    | '/api/public/birthday-digest'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
     | '/api/public/job-digest'
@@ -233,6 +245,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   EmailSettingsRoute: typeof EmailSettingsRoute
+  ApiPublicBirthdayDigestRoute: typeof ApiPublicBirthdayDigestRoute
   ApiPublicCoursepackRoute: typeof ApiPublicCoursepackRoute
   ApiPublicDeadlineRemindersRoute: typeof ApiPublicDeadlineRemindersRoute
   ApiPublicJobDigestRoute: typeof ApiPublicJobDigestRoute
@@ -307,6 +320,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/schedule'
       preLoaderRoute: typeof AuthenticatedScheduleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/birthday-digest': {
+      id: '/api/public/birthday-digest'
+      path: '/api/public/birthday-digest'
+      fullPath: '/api/public/birthday-digest'
+      preLoaderRoute: typeof ApiPublicBirthdayDigestRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/coursepack': {
       id: '/api/public/coursepack'
@@ -392,6 +412,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   EmailSettingsRoute: EmailSettingsRoute,
+  ApiPublicBirthdayDigestRoute: ApiPublicBirthdayDigestRoute,
   ApiPublicCoursepackRoute: ApiPublicCoursepackRoute,
   ApiPublicDeadlineRemindersRoute: ApiPublicDeadlineRemindersRoute,
   ApiPublicJobDigestRoute: ApiPublicJobDigestRoute,

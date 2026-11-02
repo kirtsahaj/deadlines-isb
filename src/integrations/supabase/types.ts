@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      birthdays: {
+        Row: {
+          campus: string
+          day: number
+          email: string
+          month: number
+          name: string
+        }
+        Insert: {
+          campus: string
+          day: number
+          email: string
+          month: number
+          name: string
+        }
+        Update: {
+          campus?: string
+          day?: number
+          email?: string
+          month?: number
+          name?: string
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           created_at: string

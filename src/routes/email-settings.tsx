@@ -12,20 +12,23 @@ import { APP_URL } from "@/components/ShareButton";
 /**
  * Email preferences for Kirt's daily batch mails (job deadlines digest, birthday reminder).
  * Standalone page, not part of the app shell: people confirm their ISB email with Microsoft
- * (only to prove the address is theirs), then unsubscribe from one or both mails.
+ * (only to prove the address is theirs), then unsubscribe from one or both mails and/or hide their
+ * own birthday from the birthday mail ("hide_birthday" row, same table).
  * Opt-outs live in public.email_unsubscribes (email + mail), readable/writable only by that email.
  */
-type MailKey = "jobs" | "birthday";
+type MailKey = "jobs" | "birthday" | "hide_birthday";
 
-const MAILS: { key: MailKey; name: string; detail: string }[] = [
-  { key: "jobs", name: "Job deadlines digest", detail: "10 PM, only when an application closes in the next 24 hours" },
-  { key: "birthday", name: "Birthday reminder mail", detail: "Daily list of upcoming birthdays" },
+const MAILS: { key: MailKey; name: string; detail: string; kind: "mail" | "hide" }[] = [
+  { key: "jobs", name: "Job deadlines digest", detail: "10 PM, only when an application closes in the next 24 hours", kind: "mail" },
+  { key: "birthday", name: "Birthday reminder mail", detail: "Daily list of upcoming birthdays", kind: "mail" },
+  { key: "hide_birthday", name: "Hide my birthday", detail: "Leave me out of the Birthday reminder mail", kind: "hide" },
 ];
+const isMail = (k: MailKey) => MAILS.find((m) => m.key === k)!.kind === "mail";
 
 export const Route = createFileRoute("/email-settings")({
   validateSearch: (search: Record<string, unknown>): { mail?: MailKey } => {
     const mail = search["mail"];
-    return mail === "jobs" || mail === "birthday" ? { mail } : {};
+    return mail === "jobs" || mail === "birthday" || mail === "hide_birthday" ? { mail } : {};
   },
   head: () => ({
     meta: [
@@ -104,7 +107,43 @@ function EmailSettings() {
 
   const left = unsubscribed.data ?? new Set<MailKey>();
   const names = (keys: MailKey[]) => keys.map((k) => MAILS.find((m) => m.key === k)!.name).join(" and ");
-  const stillGetting = useMemo(() => MAILS.filter((m) => !left.has(m.key)), [left]);
+  const stillGetting = useMemo(() => MAILS.filter((m) => m.kind === "mail" && !left.has(m.key)), [left]);
+  const doneMails = (done ?? []).filter(isMail);
+  const doneHidden = (done ?? []).includes("hide_birthday");
+
+  const renderItem = (m: (typeof MAILS)[number]) =>
+    left.has(m.key) ? (
+      <li key={m.key} className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold">{m.name}</p>
+          <p className="text-xs text-muted-foreground">{m.kind === "mail" ? "Unsubscribed" : "Your birthday is hidden"}</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => void resubscribe(m.key)} disabled={busy}>
+          {m.kind === "mail" ? "Resubscribe" : "Show it again"}
+        </Button>
+      </li>
+    ) : (
+      <li key={m.key}>
+        <label className="flex cursor-pointer items-start gap-3">
+          <Checkbox
+            className="mt-0.5"
+            checked={chosen.has(m.key)}
+            onCheckedChange={(v) =>
+              setChosen((prev) => {
+                const next = new Set(prev);
+                if (v) next.add(m.key);
+                else next.delete(m.key);
+                return next;
+              })
+            }
+          />
+          <span>
+            <span className="block text-sm font-semibold">{m.name}</span>
+            <span className="block text-xs text-muted-foreground">{m.detail}</span>
+          </span>
+        </label>
+      </li>
+    );
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -153,16 +192,18 @@ function EmailSettings() {
               {done ? (
                 <div className="space-y-3">
                   <p className="text-base font-semibold">
-                    {done.length ? `You're unsubscribed from the ${names(done)}.` : "No changes made."}
+                    {doneMails.length > 0 && `You're unsubscribed from the ${names(doneMails)}. `}
+                    {doneHidden && "Your birthday won't appear in the Birthday reminder mail."}
+                    {!doneMails.length && !doneHidden && "No changes made."}
                   </p>
                   {stillGetting.length > 0 && (
                     <p className="text-sm text-muted-foreground">You'll still get the {names(stillGetting.map((m) => m.key))}.</p>
                   )}
-                  {done.length > 0 && (
+                  {done && done.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {done.map((k) => (
                         <Button key={k} variant="outline" size="sm" onClick={() => void resubscribe(k)} disabled={busy}>
-                          Resubscribe{done.length > 1 ? ` to ${names([k])}` : ""}
+                          {isMail(k) ? `Resubscribe${doneMails.length > 1 ? ` to ${names([k])}` : ""}` : "Show my birthday again"}
                         </Button>
                       ))}
                     </div>
@@ -173,46 +214,12 @@ function EmailSettings() {
               ) : (
                 <>
                   <p className="text-sm font-medium">Unsubscribe me from:</p>
-                  <ul className="space-y-3">
-                    {MAILS.map((m) =>
-                      left.has(m.key) ? (
-                        <li key={m.key} className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-semibold">{m.name}</p>
-                            <p className="text-xs text-muted-foreground">Unsubscribed</p>
-                          </div>
-                          <Button variant="outline" size="sm" onClick={() => void resubscribe(m.key)} disabled={busy}>
-                            Resubscribe
-                          </Button>
-                        </li>
-                      ) : (
-                        <li key={m.key}>
-                          <label className="flex cursor-pointer items-start gap-3">
-                            <Checkbox
-                              className="mt-0.5"
-                              checked={chosen.has(m.key)}
-                              onCheckedChange={(v) =>
-                                setChosen((prev) => {
-                                  const next = new Set(prev);
-                                  if (v) next.add(m.key);
-                                  else next.delete(m.key);
-                                  return next;
-                                })
-                              }
-                            />
-                            <span>
-                              <span className="block text-sm font-semibold">{m.name}</span>
-                              <span className="block text-xs text-muted-foreground">{m.detail}</span>
-                            </span>
-                          </label>
-                        </li>
-                      ),
-                    )}
-                  </ul>
-                  {stillGetting.length > 0 && (
+                  <ul className="space-y-3">{MAILS.filter((m) => m.kind === "mail").map(renderItem)}</ul>
+                  <ul className="space-y-3 border-t border-border pt-4">{MAILS.filter((m) => m.kind === "hide").map(renderItem)}</ul>
+                  {MAILS.some((m) => !left.has(m.key)) && (
                     <div className="flex items-center gap-3 pt-1">
                       <Button className="tap-target" onClick={() => void unsubscribe()} disabled={busy || chosen.size === 0}>
-                        {busy ? "Saving…" : "Unsubscribe"}
+                        {busy ? "Saving…" : [...chosen].some(isMail) ? "Unsubscribe" : "Save"}
                       </Button>
                       <button type="button" className="text-sm text-muted-foreground underline" onClick={() => setDone([])}>
                         Keep everything
