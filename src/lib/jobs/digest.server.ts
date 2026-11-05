@@ -22,7 +22,7 @@ export async function jobDigestKeyMatches(candidate: string): Promise<boolean> {
 
 export async function readDigestJobs(now: number) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  // Wide window; jobsForDigest picks the exact set (next 24h, or date-only today/tomorrow IST).
+  // Wide window; jobsForDigest picks the exact set (next 24h, or date-only closing tomorrow IST).
   const from = new Date(now - 24 * 3600_000).toISOString();
   const to = new Date(now + 3 * 24 * 3600_000).toISOString();
   const { data, error } = await supabaseAdmin
