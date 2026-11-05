@@ -3,7 +3,8 @@
  * (Power Automate, 10 PM IST) as an RSS feed. Pure and browser-safe so it can be tested.
  *
  * Included: jobs with an exact deadline in the next 24 hours, plus date-only jobs closing
- * today or tomorrow (India time), shown as "no time given". Sorted by closing time.
+ * tomorrow (India time), shown with just the date: they go in the mail the night before,
+ * not on the closing day itself. Sorted by closing time.
  */
 export type DigestJob = {
   id: string;
@@ -32,7 +33,7 @@ export function jobsForDigest(jobs: DigestJob[], now: number): DigestJob[] {
         const left = Date.parse(j.deadlineAt) - now;
         return left > 0 && left <= 24 * H;
       }
-      return j.deadlineDate === today || j.deadlineDate === tomorrow;
+      return j.deadlineDate === tomorrow;
     })
     .sort((a, b) => closesAt(a) - closesAt(b) || a.company.localeCompare(b.company));
 }
@@ -50,7 +51,7 @@ export function closingLabel(job: DigestJob): string {
     const time = new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", timeZone: TZ }).format(ms);
     return `${dayLabel(ms)}, ${time}`;
   }
-  return `${dayLabel(Date.parse(`${job.deadlineDate}T12:00:00+05:30`))} (no time given)`;
+  return dayLabel(Date.parse(`${job.deadlineDate}T12:00:00+05:30`));
 }
 
 /** A simple numbered list for the mail body: company in bold, role, closing time. */

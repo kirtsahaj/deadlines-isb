@@ -8,7 +8,7 @@ const at = (ms: number) => new Date(now + ms).toISOString();
 const job = (o: Partial<DigestJob>): DigestJob => ({ id: o.company ?? "x", company: "Co", role: "Analyst", deadlineAt: null, deadlineDate: null, ...o });
 
 describe("job digest", () => {
-  it("keeps exact deadlines in the next 24h and date-only ones closing today or tomorrow (IST), soonest first", () => {
+  it("keeps exact deadlines in the next 24h and date-only ones closing tomorrow (IST, not today), soonest first", () => {
     const jobs = [
       job({ company: "Later", deadlineAt: at(25 * H) }),
       job({ company: "Passed", deadlineAt: at(-60_000) }),
@@ -18,7 +18,7 @@ describe("job digest", () => {
       job({ company: "Today", deadlineDate: "2026-10-29" }),
       job({ company: "Saturday", deadlineDate: "2026-10-31" }),
     ];
-    expect(jobsForDigest(jobs, now).map((j) => j.company)).toEqual(["Today", "Bain", "UBS", "YCP"]);
+    expect(jobsForDigest(jobs, now).map((j) => j.company)).toEqual(["Bain", "UBS", "YCP"]);
   });
 
   it("lists company, role and closing time, escaping text", () => {
@@ -28,7 +28,7 @@ describe("job digest", () => {
     ]);
     expect(html).toBe(
       "<ol><li><b>Bain &amp; Company</b> &ndash; Associate &lt;Consultant&gt; &middot; closes Fri, 30 Oct, 10:00 am</li>" +
-        "<li><b>YCP</b> &middot; closes Fri, 30 Oct (no time given)</li></ol>",
+        "<li><b>YCP</b> &middot; closes Fri, 30 Oct</li></ol>",
     );
   });
 
