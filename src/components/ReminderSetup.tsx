@@ -128,7 +128,7 @@ export function ReminderSettings() {
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        A notification 3 hours before each course deadline, 12 and 3 hours before each job application deadline, plus alerts for new deadlines and job postings.{" "}
+        A notification 3 hours before each course deadline, a summary of job applications closing at 10 PM and 8 AM, plus alerts for new deadlines and job postings.{" "}
         {state.support === "supported" ? (state.enabled ? "On for this device." : "Off for this device.") : "Add the app to your home screen to turn these on."}
       </p>
       <ReminderActions state={state} />

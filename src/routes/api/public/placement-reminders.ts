@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { authenticateCronRequest } from "@/integrations/supabase/cron-auth";
 
-/** Scheduler entry for Placements only: 12h and 3h application-deadline reminders (src/lib/jobs/reminders). Separate from academic reminders. */
+/** Scheduler entry for Placements only: daily job summaries at 10 PM and 8 AM IST (src/lib/jobs/reminders). Separate from academic reminders. */
 export const Route = createFileRoute("/api/public/placement-reminders")({
   server: {
     handlers: {

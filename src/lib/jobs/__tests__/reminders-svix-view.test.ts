@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dueJobOffsets, jobAlertsOn, jobReminderKey, newJobWorthAnnouncing, planJobReminders } from "../reminders";
+import { dueJobSummary, jobAlertsOn, jobSummaryClaim, jobSummaryMessage, newJobWorthAnnouncing } from "../reminders";
 import { signSvix, verifySvix } from "../svix";
 import { jobsInView } from "../view";
 import type { JobTile } from "@/lib/jobs.functions";
@@ -8,36 +8,64 @@ const H = 3600_000;
 const now = Date.parse("2026-11-01T10:00:00Z");
 const at = (ms: number) => new Date(now + ms).toISOString();
 
-describe("job reminders: 12h and 3h", () => {
-  it("sends the 12-hour notice between 12 and 3 hours out, nothing earlier", () => {
-    expect(dueJobOffsets(at(12 * H), now)).toEqual([12]);
-    expect(dueJobOffsets(at(8 * H), now)).toEqual([12]);
-    expect(dueJobOffsets(at(12 * H + 60_000), now)).toEqual([]);
+describe("job reminders: daily summaries", () => {
+  // Mon 9 Nov 2026, IST times
+  const ist = (hhmm: string, day = "2026-11-09") => Date.parse(`${day}T${hhmm}:00+05:30`);
+  const job = (company: string, o: { at?: string; date?: string }) => ({
+    id: company, company, role: "Analyst",
+    deadlineAt: o.at ? new Date(o.at).toISOString() : null, deadlineDate: o.date ?? null,
   });
-  it("sends both notices for one deadline, each once", () => {
-    const jobs = [{ id: "j1", deadlineAt: at(10 * H) }];
-    const first = planJobReminders(jobs, ["u1"], now);
-    expect(first).toEqual([{ userId: "u1", jobId: "j1", dueAt: at(10 * H), offset: 12 }]);
-    const claimed = new Set(first.map((r) => jobReminderKey(r.userId, r.jobId, r.dueAt, r.offset)));
-    expect(planJobReminders(jobs, ["u1"], now + 15 * 60_000, claimed)).toHaveLength(0);
-    expect(planJobReminders(jobs, ["u1"], now + 7 * H, claimed)).toEqual([{ userId: "u1", jobId: "j1", dueAt: at(10 * H), offset: 3 }]);
+
+  it("is due from 10 PM to midnight and from 8 to 10 AM IST only", () => {
+    expect(dueJobSummary(ist("21:59"))).toBeNull();
+    expect(dueJobSummary(ist("22:00"))).toBe("night");
+    expect(dueJobSummary(ist("23:45"))).toBe("night");
+    expect(dueJobSummary(ist("07:59"))).toBeNull();
+    expect(dueJobSummary(ist("08:10"))).toBe("morning");
+    expect(dueJobSummary(ist("10:00"))).toBeNull();
   });
-  it("sends the 3-hour notice inside 3 hours, never after the deadline", () => {
-    expect(dueJobOffsets(at(3 * H), now)).toEqual([3]);
-    expect(dueJobOffsets(at(3 * H + 60_000), now)).toEqual([12]);
-    expect(dueJobOffsets(at(-1), now)).toEqual([]);
+  it("claims once per kind and IST day", () => {
+    expect(jobSummaryClaim("night", ist("22:15"))).toEqual(jobSummaryClaim("night", ist("23:50")));
+    expect(jobSummaryClaim("night", ist("22:15")).dueAt).not.toBe(jobSummaryClaim("night", ist("22:15", "2026-11-10")).dueAt);
+    expect(jobSummaryClaim("morning", ist("08:00")).key).not.toBe(jobSummaryClaim("night", ist("22:00")).key);
   });
-  it("never reminds for a date-only deadline", () => {
-    expect(dueJobOffsets(null, now)).toEqual([]);
+  it("night: same jobs as the 10 PM mail, date-only only the night before", () => {
+    const jobs = [
+      job("Amazon", { at: "2026-11-10T10:00:00+05:30" }),
+      job("Virtusa", { at: "2026-11-10T11:00:00+05:30" }),
+      job("Later", { at: "2026-11-11T09:00:00+05:30" }),
+      job("YCP", { date: "2026-11-10" }),
+      job("TodayDateOnly", { date: "2026-11-09" }),
+    ];
+    expect(jobSummaryMessage("night", jobs, ist("22:00"))).toEqual({
+      title: "3 job applications closing in the next 24 hours",
+      body: "Amazon, Virtusa, YCP",
+    });
+    // Next night: YCP (closing 10 Nov) does not repeat.
+    expect(jobSummaryMessage("night", jobs, ist("22:00", "2026-11-10"))).toEqual({
+      title: "1 job application closing in the next 24 hours",
+      body: "Later",
+    });
   });
-  it("dedupes per user/job/due time/offset and re-arms when the deadline changes", () => {
-    const jobs = [{ id: "j1", deadlineAt: at(3 * H) }];
-    const first = planJobReminders(jobs, ["u1", "u2"], now);
-    expect(first).toHaveLength(2);
-    const claimed = new Set(first.map((r) => jobReminderKey(r.userId, r.jobId, r.dueAt, r.offset)));
-    expect(planJobReminders(jobs, ["u1", "u2"], now + 15 * 60_000, claimed)).toHaveLength(0);
-    const moved = [{ id: "j1", deadlineAt: at(2 * H) }];
-    expect(planJobReminders(moved, ["u1"], now, claimed)).toEqual([{ userId: "u1", jobId: "j1", dueAt: at(2 * H), offset: 3 }]);
+  it("morning: exact deadlines later today with times; date-only left out", () => {
+    const jobs = [
+      job("Virtusa", { at: "2026-11-10T11:00:00+05:30" }),
+      job("Amazon", { at: "2026-11-10T10:00:00+05:30" }),
+      job("Gone", { at: "2026-11-10T07:00:00+05:30" }),
+      job("Tomorrow", { at: "2026-11-11T09:00:00+05:30" }),
+      job("YCP", { date: "2026-11-10" }),
+    ];
+    expect(jobSummaryMessage("morning", jobs, ist("08:00", "2026-11-10"))).toEqual({
+      title: "2 applications close today",
+      body: "Amazon 10:00 am, Virtusa 11:00 am",
+    });
+    expect(jobSummaryMessage("morning", [jobs[0]!], ist("08:00", "2026-11-10"))?.title).toBe("1 application closes today");
+  });
+  it("sends nothing when nothing closes, and caps long lists", () => {
+    expect(jobSummaryMessage("night", [], ist("22:00"))).toBeNull();
+    expect(jobSummaryMessage("morning", [], ist("08:00"))).toBeNull();
+    const many = ["A", "B", "C", "D", "E", "F", "G"].map((c) => job(c, { at: "2026-11-10T10:00:00+05:30" }));
+    expect(jobSummaryMessage("night", many, ist("22:00"))?.body).toBe("A, B, C, D, E +2 more");
   });
   it("announces new postings only while the deadline can still be met", () => {
     expect(newJobWorthAnnouncing(undefined, now)).toBe(true);

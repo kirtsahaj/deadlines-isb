@@ -1,44 +1,57 @@
-/** Job application reminders: 12 hours and 3 hours before an explicit deadline time. */
-export const JOB_REMINDER_OFFSETS_H = [12, 3] as const;
-const H = 60 * 60_000;
+import { jobsForDigest, type DigestJob } from "./digest";
 
 /**
- * The offset due right now: 3 inside the last 3 hours, 12 between 12 and 3 hours out.
- * A job first seen inside 3 hours gets only the 3-hour notice (no late 12-hour one).
- * Date-only deadlines (no instant) and passed deadlines never qualify.
+ * Job application reminders are two daily summaries, not one notice per job:
+ * - night (10 PM IST, with the mail): the same jobs as the 10 PM digest mail
+ *   (exact deadlines in the next 24h + date-only jobs closing tomorrow);
+ * - morning (8 AM IST): jobs with an exact deadline later today. Date-only jobs are
+ *   left out, as in the mail: they are covered only the night before.
+ * Each summary is sent once per user per day; the scheduler runs every 15 minutes,
+ * so a window (not an exact minute) decides when it is due.
  */
-export function dueJobOffsets(deadlineAt: string | null, now: number): number[] {
-  if (!deadlineAt) return [];
-  const left = new Date(deadlineAt).getTime() - now;
-  if (!Number.isFinite(left) || left <= 0) return [];
-  if (left <= 3 * H) return [3];
-  if (left <= 12 * H) return [12];
-  return [];
+export type JobSummaryKind = "night" | "morning";
+const H = 60 * 60_000;
+const IST_OFFSET = 5.5 * H;
+const istHour = (now: number) => new Date(now + IST_OFFSET).getUTCHours();
+const istDate = (ms: number) => new Date(ms + IST_OFFSET).toISOString().slice(0, 10);
+
+/** Which summary is due now: night from 10 PM to midnight, morning from 8 to 10 AM (IST). */
+export function dueJobSummary(now: number): JobSummaryKind | null {
+  const h = istHour(now);
+  if (h >= 22) return "night";
+  if (h >= 8 && h < 10) return "morning";
+  return null;
 }
 
-export const jobReminderKey = (userId: string, jobId: string, dueAt: string, offset: number) =>
-  `${userId}|${jobId}|${new Date(dueAt).toISOString()}|${offset}`;
+/** One claim per user, kind and IST day. */
+export function jobSummaryClaim(kind: JobSummaryKind, now: number): { key: string; dueAt: string } {
+  const day = istDate(now);
+  return { key: `jobsummary:${kind}`, dueAt: new Date(`${day}T${kind === "night" ? "22" : "08"}:00:00+05:30`).toISOString() };
+}
 
-export type PlannedJobReminder = { userId: string; jobId: string; dueAt: string; offset: number };
+const timeLabel = (ms: number) =>
+  new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" }).format(ms);
 
-/** Every eligible user gets every due job. Already-claimed keys are skipped. */
-export function planJobReminders(
-  jobs: { id: string; deadlineAt: string | null }[],
-  userIds: string[],
-  now: number,
-  claimed: Set<string> = new Set(),
-): PlannedJobReminder[] {
-  const out: PlannedJobReminder[] = [];
-  for (const job of jobs) {
-    for (const offset of dueJobOffsets(job.deadlineAt, now)) {
-      for (const userId of userIds) {
-        const dueAt = new Date(job.deadlineAt!).toISOString();
-        if (claimed.has(jobReminderKey(userId, job.id, dueAt, offset))) continue;
-        out.push({ userId, jobId: job.id, dueAt, offset });
-      }
-    }
+function companies(names: string[], max = 5): string {
+  const unique = [...new Set(names)];
+  return unique.length > max ? `${unique.slice(0, max).join(", ")} +${unique.length - max} more` : unique.join(", ");
+}
+
+/** The notification for a summary, or null when nothing closes (then nothing is sent). */
+export function jobSummaryMessage(kind: JobSummaryKind, jobs: DigestJob[], now: number): { title: string; body: string } | null {
+  if (kind === "night") {
+    const due = jobsForDigest(jobs, now);
+    if (!due.length) return null;
+    return { title: `${due.length} job application${due.length === 1 ? "" : "s"} closing in the next 24 hours`, body: companies(due.map((j) => j.company)) };
   }
-  return out;
+  const today = istDate(now);
+  const due = jobs
+    .filter((j) => j.deadlineAt && Date.parse(j.deadlineAt) > now && istDate(Date.parse(j.deadlineAt)) === today)
+    .sort((a, b) => Date.parse(a.deadlineAt!) - Date.parse(b.deadlineAt!) || a.company.localeCompare(b.company));
+  if (!due.length) return null;
+  const items = due.map((j) => `${j.company} ${timeLabel(Date.parse(j.deadlineAt!))}`);
+  const body = items.length > 5 ? `${items.slice(0, 5).join(", ")} +${items.length - 5} more` : items.join(", ");
+  return { title: `${due.length} application${due.length === 1 ? "" : "s"} close${due.length === 1 ? "s" : ""} today`, body };
 }
 
 /** A new posting is announced only while its deadline can still be met; date-only deadlines count until day end (IST). */
