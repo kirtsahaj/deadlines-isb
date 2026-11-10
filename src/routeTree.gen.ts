@@ -19,6 +19,7 @@ import { Route as AuthenticatedMenuRouteImport } from './routes/_authenticated/m
 import { Route as AuthenticatedPlacementsRouteImport } from './routes/_authenticated/placements'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as AuthenticatedAdminMailRouteImport } from './routes/_authenticated/admin_.mail'
+import { Route as AuthenticatedAdminPortalRouteImport } from './routes/_authenticated/admin_.portal'
 import { Route as ApiPublicBirthdayDigestRouteImport } from './routes/api/public/birthday-digest'
 import { Route as ApiPublicCoursepackRouteImport } from './routes/api/public/coursepack'
 import { Route as ApiPublicDeadlineRemindersRouteImport } from './routes/api/public/deadline-reminders'
@@ -78,6 +79,12 @@ const AuthenticatedAdminMailRoute = AuthenticatedAdminMailRouteImport.update({
   path: '/admin/mail',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminPortalRoute =
+  AuthenticatedAdminPortalRouteImport.update({
+    id: '/admin_/portal',
+    path: '/admin/portal',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicBirthdayDigestRoute = ApiPublicBirthdayDigestRouteImport.update({
   id: '/api/public/birthday-digest',
   path: '/api/public/birthday-digest',
@@ -137,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/admin/mail': typeof AuthenticatedAdminMailRoute
+  '/admin/portal': typeof AuthenticatedAdminPortalRoute
   '/api/public/birthday-digest': typeof ApiPublicBirthdayDigestRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
@@ -157,6 +165,7 @@ export interface FileRoutesByTo {
   '/placements': typeof AuthenticatedPlacementsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/admin/mail': typeof AuthenticatedAdminMailRoute
+  '/admin/portal': typeof AuthenticatedAdminPortalRoute
   '/api/public/birthday-digest': typeof ApiPublicBirthdayDigestRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
@@ -179,6 +188,7 @@ export interface FileRoutesById {
   '/_authenticated/placements': typeof AuthenticatedPlacementsRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/admin_/mail': typeof AuthenticatedAdminMailRoute
+  '/_authenticated/admin_/portal': typeof AuthenticatedAdminPortalRoute
   '/api/public/birthday-digest': typeof ApiPublicBirthdayDigestRoute
   '/api/public/coursepack': typeof ApiPublicCoursepackRoute
   '/api/public/deadline-reminders': typeof ApiPublicDeadlineRemindersRoute
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/placements'
     | '/schedule'
     | '/admin/mail'
+    | '/admin/portal'
     | '/api/public/birthday-digest'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/placements'
     | '/schedule'
     | '/admin/mail'
+    | '/admin/portal'
     | '/api/public/birthday-digest'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
@@ -242,6 +254,7 @@ export interface FileRouteTypes {
     | '/_authenticated/placements'
     | '/_authenticated/schedule'
     | '/_authenticated/admin_/mail'
+    | '/_authenticated/admin_/portal'
     | '/api/public/birthday-digest'
     | '/api/public/coursepack'
     | '/api/public/deadline-reminders'
@@ -340,6 +353,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMailRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin_/portal': {
+      id: '/_authenticated/admin_/portal'
+      path: '/admin/portal'
+      fullPath: '/admin/portal'
+      preLoaderRoute: typeof AuthenticatedAdminPortalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/birthday-digest': {
       id: '/api/public/birthday-digest'
       path: '/api/public/birthday-digest'
@@ -414,6 +434,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlacementsRoute: typeof AuthenticatedPlacementsRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedAdminMailRoute: typeof AuthenticatedAdminMailRoute
+  AuthenticatedAdminPortalRoute: typeof AuthenticatedAdminPortalRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -424,6 +445,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlacementsRoute: AuthenticatedPlacementsRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedAdminMailRoute: AuthenticatedAdminMailRoute,
+  AuthenticatedAdminPortalRoute: AuthenticatedAdminPortalRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

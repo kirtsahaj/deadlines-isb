@@ -209,3 +209,22 @@ export const getMailOptOuts = createServerFn({ method: "GET" })
     }
     return { rows: [...byEmail.values()].sort((a, b) => b.latest.localeCompare(a.latest)) };
   });
+
+/** Owner only: status and change log of the daily portal check (Admin → Portal check). */
+export const getPortalCheck = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const email = (context.claims as { email?: unknown })?.email;
+    if (!isAdminEmail(typeof email === "string" ? email : "")) throw new Error("forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [runs, changes] = await Promise.all([
+      supabaseAdmin.from("portal_check_runs").select("day, slot, ran_at, ok, error, active_count").order("ran_at", { ascending: false }).limit(20),
+      supabaseAdmin.from("portal_job_changes").select("id, created_at, action, company, role, old_deadline, new_deadline, note").order("created_at", { ascending: false }).limit(300),
+    ]);
+    if (runs.error || changes.error) throw new Error("portal_check_unavailable");
+    return {
+      tokenSaved: !!(process.env["HIRETRACK_TOKEN"] ?? "").trim(),
+      runs: runs.data ?? [],
+      changes: changes.data ?? [],
+    };
+  });

@@ -30,7 +30,7 @@ export const listJobs = createServerFn({ method: "GET" })
     await assertSchoolUser(context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [jobs, stars, setting, events] = await Promise.all([
-      supabaseAdmin.from("jobs").select("id, company, role, deadline_date, deadline_time, deadline_at, shortlist_date, jd_file_id, last_email_at, first_seen_at").limit(1000),
+      supabaseAdmin.from("jobs").select("id, company, role, deadline_date, deadline_time, deadline_at, shortlist_date, jd_file_id, last_email_at, first_seen_at").is("hidden_at", null).limit(1000),
       context.supabase.from("job_stars").select("job_id"),
       supabaseAdmin.from("user_settings").select("job_reminders").eq("user_id", context.userId).maybeSingle(),
       supabaseAdmin.from("job_events").select("job_id, sent_at").not("job_id", "is", null).limit(10000),

@@ -117,6 +117,10 @@ function AdminPage() {
         Mail opt-outs <span aria-hidden>→</span>
       </Link>
 
+      <Link to="/admin/portal" className="surface-card flex items-center justify-between p-4 text-sm font-semibold">
+        Portal check <span aria-hidden>→</span>
+      </Link>
+
       <div className="flex flex-wrap gap-2">
         <Input
           placeholder="Search name or email"

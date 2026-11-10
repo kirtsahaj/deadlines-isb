@@ -28,6 +28,7 @@ export async function readDigestJobs(now: number) {
   const { data, error } = await supabaseAdmin
     .from("jobs")
     .select("id, company, role, deadline_at, deadline_date")
+    .is("hidden_at", null)
     .or(`and(deadline_at.gt.${from},deadline_at.lte.${to}),and(deadline_at.is.null,deadline_date.gte.${from.slice(0, 10)},deadline_date.lte.${to.slice(0, 10)})`);
   if (error) throw new Error("jobs_unavailable");
   return (data ?? []).map((j) => ({ id: j.id, company: j.company, role: j.role, deadlineAt: j.deadline_at, deadlineDate: j.deadline_date }));

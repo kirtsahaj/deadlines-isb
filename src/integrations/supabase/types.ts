@@ -449,9 +449,12 @@ export type Database = {
           deadline_time: string | null
           field_sent_at: Json
           first_seen_at: string
+          hidden_at: string | null
           id: string
           jd_file_id: string | null
           last_email_at: string
+          portal_id: string | null
+          portal_seen_at: string | null
           role: string
           role_aliases: string[]
           role_keys: string[]
@@ -466,9 +469,12 @@ export type Database = {
           deadline_time?: string | null
           field_sent_at?: Json
           first_seen_at?: string
+          hidden_at?: string | null
           id?: string
           jd_file_id?: string | null
           last_email_at?: string
+          portal_id?: string | null
+          portal_seen_at?: string | null
           role: string
           role_aliases?: string[]
           role_keys?: string[]
@@ -483,14 +489,89 @@ export type Database = {
           deadline_time?: string | null
           field_sent_at?: Json
           first_seen_at?: string
+          hidden_at?: string | null
           id?: string
           jd_file_id?: string | null
           last_email_at?: string
+          portal_id?: string | null
+          portal_seen_at?: string | null
           role?: string
           role_aliases?: string[]
           role_keys?: string[]
           shortlist_date?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      portal_check_runs: {
+        Row: {
+          active_count: number | null
+          day: string
+          error: string | null
+          id: string
+          ok: boolean
+          ran_at: string
+          slot: string
+          snapshot: Json | null
+        }
+        Insert: {
+          active_count?: number | null
+          day: string
+          error?: string | null
+          id?: string
+          ok: boolean
+          ran_at?: string
+          slot: string
+          snapshot?: Json | null
+        }
+        Update: {
+          active_count?: number | null
+          day?: string
+          error?: string | null
+          id?: string
+          ok?: boolean
+          ran_at?: string
+          slot?: string
+          snapshot?: Json | null
+        }
+        Relationships: []
+      }
+      portal_job_changes: {
+        Row: {
+          action: string
+          company: string | null
+          created_at: string
+          id: string
+          job_id: string | null
+          new_deadline: string | null
+          note: string | null
+          old_deadline: string | null
+          portal_id: string | null
+          role: string | null
+        }
+        Insert: {
+          action: string
+          company?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          new_deadline?: string | null
+          note?: string | null
+          old_deadline?: string | null
+          portal_id?: string | null
+          role?: string | null
+        }
+        Update: {
+          action?: string
+          company?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          new_deadline?: string | null
+          note?: string | null
+          old_deadline?: string | null
+          portal_id?: string | null
+          role?: string | null
         }
         Relationships: []
       }
