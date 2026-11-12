@@ -1,6 +1,7 @@
 /**
- * Browser-safe Term 5 merge logic: combines the student's own eLearn rows,
- * shared section updates and outline deadlines into one card per assessment.
+ * Browser-safe Term 5 merge logic: combines the student's own eLearn rows
+ * and shared section updates into one card per assessment. Outlines only supply
+ * supporting evidence; they never create standalone deadlines or reminders.
  * Pure functions only — covered by tests.
  */
 import { deadlinePill } from "../soon";
@@ -351,33 +352,7 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
     }
   }
 
-  for (const o of outline) {
-    if (used.has(o.occurrence_id)) continue;
-    const d = outlineDate(o);
-    const undated = !d.dueAt && !d.dateOnly;
-    out.push({
-      id: `outline:${o.occurrence_id}`,
-      notifyKeys: [o.occurrence_id],
-      title: o.title,
-      courseKey: `T5:${o.course_code}`,
-      courseCode: o.course_code,
-      courseName: input.courseTitles[o.course_code] ?? o.course_code,
-      term: "T5",
-      moodleCourseId: null,
-      kind: "outline",
-      deadlineType: "due",
-      dueAt: d.dueAt,
-      dateOnly: d.dateOnly,
-      submissionStatus: "unknown",
-      confidence: o.provisional || undated ? "provisional" : "outline",
-      sources: [outlineSource(o)],
-      conflict: false,
-      provisional: o.provisional || undated,
-      remindable: !!d.dueAt && o.notification_ready,
-      otherSection: false,
-      outline: o,
-    });
-  }
+  // Outline-only assessments are intentionally hidden, including from reminder callers.
   return out;
 }
 

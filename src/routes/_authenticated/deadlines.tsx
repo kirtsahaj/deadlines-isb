@@ -232,7 +232,7 @@ function DeadlinesPage() {
               </button>
             )}
             <span>
-              {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : term5.data?.inRoster ? "Showing your Term 5 outlines and class updates" : "Connect eLearn to see your deadlines"}
+              {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : term5.data?.inRoster ? "Showing shared eLearn updates" : "Connect eLearn to see your deadlines"}
             </span>
           </p>
       </header>

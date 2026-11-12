@@ -14,14 +14,18 @@ it("does not collapse different assessment numbers or generic labels", () => {
   expect(titlesMatch("Individual Assignment", "Case report")).toBe(false);
   expect(titlesMatch("P&G India case", "Rosewood case report")).toBe(false);
 });
-it("keeps different courses, sections and far-away occurrences separate", () => {
-  expect(mergeDeadlines({ ...base, ownCourses: [{ ...base.ownCourses[0], moodle_course_id: 11057, short_name: "MKTS_PGPMOH_2026-27_T4", full_name: "Marketing" }] })).toHaveLength(2);
-  // An activity explicitly for another section is hidden; the student keeps only their own section's outline item.
-  expect(mergeDeadlines({ ...base, own: [{ ...own, title: "Procter & Gamble India (Section H)" }] }).map((i) => i.id)).toEqual(["outline:MKTS-PG-G"]);
-  expect(mergeDeadlines({ ...base, own: [{ ...own, due_at: "2026-11-20T14:05:00+05:30" }] })).toHaveLength(2);
+it("keeps eLearn rows without attaching different courses, sections or far-away outline evidence", () => {
+  const otherTerm = mergeDeadlines({ ...base, ownCourses: [{ ...base.ownCourses[0], moodle_course_id: 11057, short_name: "MKTS_PGPMOH_2026-27_T4", full_name: "Marketing" }] });
+  expect(otherTerm).toHaveLength(1);
+  expect(otherTerm[0]?.outline).toBeUndefined();
+  // An activity explicitly for another section is hidden; no outline-only fallback is shown.
+  expect(mergeDeadlines({ ...base, own: [{ ...own, title: "Procter & Gamble India (Section H)" }] }).map((i) => i.id)).toEqual([]);
+  expect(mergeDeadlines({ ...base, own: [{ ...own, due_at: "2026-11-20T14:05:00+05:30" }] })[0]?.outline).toBeUndefined();
 });
 it("leaves ambiguous matches separate instead of choosing the first", () => {
-  expect(mergeDeadlines({ ...base, outline: [outline, { ...outline, occurrence_id: "second" }] })).toHaveLength(3);
+  const rows = mergeDeadlines({ ...base, outline: [outline, { ...outline, occurrence_id: "second" }] });
+  expect(rows).toHaveLength(1);
+  expect(rows[0]?.outline).toBeUndefined();
 });
 it("preserves separate hard cutoffs and due dates", () => {
   const rows = mergeDeadlines({ ...base, own: [{ ...own, id: "cutoff", deadline_type: "cutoff" }, own] });
