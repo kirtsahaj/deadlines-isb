@@ -7,7 +7,7 @@ it("merges the screenshot's P&G/Procter and Gamble assessment and notification i
   const rows = mergeDeadlines(base);
   expect(rows).toHaveLength(1);
   expect(rows[0]?.notifyKeys).toEqual(["assignment1", "MKTS-PG-G"]);
-  expect(rows[0]?.sources).toHaveLength(2);
+  expect(rows[0]?.sources.map((s) => s.kind)).toEqual(["own_elearn"]);
 });
 it("does not collapse different assessment numbers or generic labels", () => {
   expect(titlesMatch("P&G India case 1", "Procter & Gamble India assignment 2")).toBe(false);
@@ -33,8 +33,9 @@ it("preserves separate hard cutoffs and due dates", () => {
   expect(rows.find(r => r.deadlineType === "due")?.outline?.occurrence_id).toBe("MKTS-PG-G");
   expect(rows.find(r => r.deadlineType === "cutoff")?.outline).toBeUndefined();
 });
-it("keeps visible date conflicts when the same assessment moves", () => {
+it("shows the eLearn date without an outline conflict warning when the assessment moves", () => {
   const rows = mergeDeadlines({ ...base, own: [{ ...own, due_at: "2026-10-24T14:05:00+05:30" }] });
   expect(rows).toHaveLength(1);
-  expect(rows[0]?.conflict).toBe(true);
+  expect(rows[0]?.dueAt).toBe("2026-10-24T14:05:00+05:30");
+  expect(rows[0]?.conflict).toBe(false);
 });

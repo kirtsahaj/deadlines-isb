@@ -19,7 +19,8 @@ export function sharedCourseKey(campus: Campus, code: string) {
   return campus === "MOH" ? code : `${campus}.${code}`;
 }
 
-export type Confidence = "own" | "shared" | "outline" | "provisional";
+/** Where a date came from. own/shared: fresh eLearn; *_stale/_other: older or another section; outline/provisional: prereads only. */
+export type Confidence = "own" | "own_stale" | "shared" | "shared_other" | "outline" | "provisional";
 
 export type OutlineOccurrence = {
   occurrence_id: string;
@@ -178,14 +179,6 @@ function outlineDate(o: OutlineOccurrence) {
   return { dueAt: o.date_precision === "datetime" ? o.due_at : null, dateOnly: o.date_precision === "datetime" ? null : o.date };
 }
 
-function datesConflict(dueAt: string | null, o: OutlineOccurrence): boolean {
-  if (!dueAt) return false;
-  const od = outlineDate(o);
-  if (od.dueAt) return Math.abs(new Date(dueAt).getTime() - new Date(od.dueAt).getTime()) > 60 * 60_000;
-  if (od.dateOnly) return istDate(dueAt) !== od.dateOnly;
-  return false;
-}
-
 function closeEnough(dueAt: string | null, o: OutlineOccurrence) {
   const od = outlineDate(o);
   const ref = od.dueAt ?? (od.dateOnly ? `${od.dateOnly}T12:00:00+05:30` : null);
@@ -227,16 +220,6 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
     const candidates = outline.filter((o) => !used.has(o.occurrence_id) && o.course_code === code && titlesMatch(o.title, title) && closeEnough(dueAt, o));
     return candidates.length === 1 ? candidates[0] : undefined;
   };
-
-  const outlineSource = (o: OutlineOccurrence): SourceRef => ({
-    kind: "outline",
-    ...(() => {
-      const d = outlineDate(o);
-      return { dueAt: d.dueAt, date: d.dateOnly };
-    })(),
-    observedAt: null,
-    note: o.provisional ? "Estimated from the outline and class schedule" : null,
-  });
 
   // A date only "mentioned in course text" is dropped when the same course already has a structured
   // activity with the same title and due time (e.g. a Choice activity echoed in the course page).
@@ -281,12 +264,9 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
       dueAt: row.due_at,
       dateOnly: null,
       submissionStatus: row.submission_status,
-      confidence: ownFresh ? "own" : "outline",
-      sources: [
-        { kind: "own_elearn", dueAt: row.due_at, date: null, observedAt: input.ownLastSuccessAt, note: null },
-        ...(match ? [outlineSource(match)] : []),
-      ],
-      conflict: row.conflict || (match ? datesConflict(row.due_at, match) : false),
+      confidence: ownFresh ? "own" : "own_stale",
+      sources: [{ kind: "own_elearn", dueAt: row.due_at, date: null, observedAt: input.ownLastSuccessAt, note: null }],
+      conflict: row.conflict,
       provisional: false,
       remindable: !!row.due_at && row.submission_status !== "submitted",
       otherSection: false,
@@ -331,7 +311,7 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
         dueAt: s.due_at,
         dateOnly: null,
         submissionStatus: "unknown",
-        confidence: fresh && sameSection ? "shared" : "outline",
+        confidence: fresh && sameSection ? "shared" : "shared_other",
         sources: [
           {
             kind: "shared_elearn",
@@ -340,9 +320,8 @@ export function mergeDeadlines(input: MergeInput): UnifiedDeadline[] {
             observedAt: s.last_confirmed_at,
             note: sameSection ? null : `From section ${s.contributor_section} eLearn; may differ for your section`,
           },
-          ...(match ? [outlineSource(match)] : []),
         ],
-        conflict: match ? datesConflict(s.due_at, match) : false,
+        conflict: false,
         provisional: false,
         remindable: !!s.due_at && sameSection,
         otherSection: !sameSection,

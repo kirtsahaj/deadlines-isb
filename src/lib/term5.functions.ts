@@ -49,7 +49,6 @@ export const getMyTerm5 = createServerFn({ method: "GET" })
       courseTitles: titles,
       courses,
       outline: cat.occurrences.filter((o) => codes.has(o.course_code)),
-      outlineSourceKinds: Object.fromEntries(cat.courses.map((c) => [c.course_code, sourceKind(c.primary_source_id)])),
       classes,
       courseRefs: await courseRefsFor(enrollments, campus),
       shared: await sharedFor(enrollments, campus),

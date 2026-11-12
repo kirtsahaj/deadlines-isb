@@ -102,17 +102,19 @@ describe("roster enrollment", () => {
 });
 
 describe("merging outline and eLearn", () => {
-  it("one card per assessment, keeping both sources", () => {
+  it("one card per assessment; the outline is matched quietly and never shown as a source", () => {
     const r = mergeDeadlines(base({ own: [own({})], ownLastSuccessAt: "2026-10-22T09:00:00+05:30" }));
     expect(r).toHaveLength(1);
-    expect(r[0]!.sources.map((s) => s.kind)).toEqual(["own_elearn", "outline"]);
+    expect(r[0]!.sources.map((s) => s.kind)).toEqual(["own_elearn"]);
     expect(r[0]!.confidence).toBe("own");
     expect(r[0]!.notifyKeys).toHaveLength(2);
   });
-  it("surfaces conflicting dates instead of hiding them", () => {
-    const r = mergeDeadlines(base({ own: [own({ due_at: "2026-10-23T23:59:00+05:30" })], ownLastSuccessAt: "2026-10-22T09:00:00+05:30" }));
-    expect(r).toHaveLength(1);
-    expect(r[0]!.conflict).toBe(true);
+  it("an outline date never raises a conflict warning; eLearn's own conflicts still do", () => {
+    const moved = mergeDeadlines(base({ own: [own({ due_at: "2026-10-23T23:59:00+05:30" })], ownLastSuccessAt: "2026-10-22T09:00:00+05:30" }));
+    expect(moved).toHaveLength(1);
+    expect(moved[0]!.conflict).toBe(false);
+    const flagged = mergeDeadlines(base({ own: [own({ conflict: true })], ownLastSuccessAt: "2026-10-22T09:00:00+05:30" }));
+    expect(flagged[0]!.conflict).toBe(true);
   });
   it("different assessment numbers do not attach unrelated outline evidence", () => {
     expect(titlesMatch("Case write-up 1", "Case write-up 2")).toBe(false);
@@ -124,9 +126,9 @@ describe("merging outline and eLearn", () => {
     const r = mergeDeadlines(base({ outline: [occ({ section_id: "CDMA2_H" })] }));
     expect(r).toHaveLength(0);
   });
-  it("stale own data drops to amber", () => {
+  it("stale own data is labelled as not refreshed recently, never as the outline", () => {
     const r = mergeDeadlines(base({ own: [own({})], ownLastSuccessAt: "2026-10-21T09:00:00+05:30" }));
-    expect(r[0]!.confidence).toBe("outline");
+    expect(r[0]!.confidence).toBe("own_stale");
   });
 });
 
@@ -154,7 +156,7 @@ describe("shared section updates", () => {
   it("other-section data is a labelled fallback without reminders", () => {
     const r = mergeDeadlines(base({ shared: [shared({ contributor_section: "H" })] }));
     expect(r[0]!.otherSection).toBe(true);
-    expect(r[0]!.confidence).toBe("outline");
+    expect(r[0]!.confidence).toBe("shared_other");
     expect(r[0]!.remindable).toBe(false);
   });
   it("items explicitly for another section never apply", () => {
@@ -218,17 +220,17 @@ describe("eLearn-only deadline visibility", () => {
       occ({ occurrence_id: "tbd", date_precision: "unknown", due_at: null, date: null, provisional: true }),
     ] }))).toEqual([]);
   });
-  it("keeps stale personal and shared eLearn rows even when confidence is outline", () => {
+  it("keeps stale personal and shared eLearn rows, labelled as eLearn", () => {
     const personal = mergeDeadlines(base({ own: [own({})], ownLastSuccessAt: "2026-10-01T09:00:00+05:30" }));
     const pooled = mergeDeadlines(base({ shared: [shared({ last_confirmed_at: "2026-10-01T09:00:00+05:30" })] }));
     expect(personal).toHaveLength(1);
     expect(pooled).toHaveLength(1);
     expect(personal[0]!.sources[0]!.kind).toBe("own_elearn");
     expect(pooled[0]!.sources[0]!.kind).toBe("shared_elearn");
-    expect(personal[0]!.confidence).toBe("outline");
-    expect(pooled[0]!.confidence).toBe("outline");
+    expect(personal[0]!.confidence).toBe("own_stale");
+    expect(pooled[0]!.confidence).toBe("shared_other");
   });
-  it("keeps personal and same-section shared reminders, with eLearn dates winning conflicts", () => {
+  it("keeps personal and same-section shared reminders; eLearn dates win over the outline silently", () => {
     const due_at = "2026-10-22T12:00:00+05:30";
     for (const input of [
       base({ own: [own({ due_at })], ownLastSuccessAt: "2026-10-22T09:00:00+05:30" }),
@@ -237,7 +239,7 @@ describe("eLearn-only deadline visibility", () => {
       const rows = mergeDeadlines(input);
       expect(rows).toHaveLength(1);
       expect(rows[0]!.dueAt).toBe(due_at);
-      expect(rows[0]!.conflict).toBe(true);
+      expect(rows[0]!.conflict).toBe(false);
       expect(dueForReminder(rows, NOW)).toEqual(rows);
     }
   });

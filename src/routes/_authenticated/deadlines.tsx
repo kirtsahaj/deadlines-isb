@@ -207,6 +207,13 @@ function DeadlinesPage() {
 
   const name = firstPreferredName(user?.user_metadata, profile.data?.display_name);
   const loading = connection.isLoading || term5.isLoading || (connected && deadlines.isLoading);
+  // Without eLearn only classmates' shared items show, so the page nudges clearly towards connecting.
+  const notConnected = !!connection.data && !connected;
+  const statusLine = connected
+    ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null)
+    : merged.length
+      ? `Showing ${merged.length} deadline${merged.length === 1 ? "" : "s"} shared by classmates`
+      : "Connect eLearn to see your deadlines";
 
   return (
     <div className="space-y-3">
@@ -232,12 +239,23 @@ function DeadlinesPage() {
               </button>
             )}
             <span>
-              {connected ? lastSyncedLabel(connection.data?.connected ? connection.data.lastSuccessAt : null) : term5.data?.inRoster ? "Showing shared eLearn updates" : "Connect eLearn to see your deadlines"}
+              {statusLine}
             </span>
           </p>
       </header>
 
-      <SetupNudges />
+      {notConnected && (
+        <section aria-label="Connect eLearn" className="surface-card border-primary/30 p-4">
+          <h2 className="text-base font-semibold">Connect eLearn to see all your deadlines</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Right now you only see what classmates in your section have shared, so some deadlines may be missing and you won't get reminders for them. Takes about a minute.
+          </p>
+          <Button asChild size="sm" className="mt-3">
+            <Link to="/connect">Connect eLearn</Link>
+          </Button>
+        </section>
+      )}
+      <SetupNudges hideConnect={notConnected} />
 
       {connection.data?.connected && connection.data.status === "attention" && (
         <div className="surface-card border-destructive/40 p-3 text-sm">
@@ -280,7 +298,11 @@ function DeadlinesPage() {
         <div className="surface-card p-6 text-center">
           <h2 className="text-base font-semibold">{view === "upcoming" ? "No upcoming deadlines" : "No past deadlines"}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {merged.length ? "No deadlines match your search." : "Nothing here yet."}
+            {search.trim() && merged.length
+              ? "No deadlines match your search."
+              : notConnected
+                ? "Connect eLearn so your deadlines show up here."
+                : "Nothing here yet."}
           </p>
         </div>
       ) : (
@@ -291,7 +313,6 @@ function DeadlinesPage() {
                 item={item}
                 timezone={timezone}
                 connected={connection.data ? connected : undefined}
-                outlineKind={term5.data?.outlineSourceKinds[item.courseCode] ?? null}
                 isNew={!!previouslySeen && !previouslySeen.has(item.id)}
                 onToggleDone={() => toggleDone.mutate({ keys: doneKeys(item), done: !item.done })}
               />

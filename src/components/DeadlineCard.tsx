@@ -22,14 +22,7 @@ const KIND_LABELS: Record<string, string> = {
   calendar: "Calendar",
   text: "Mentioned in text",
   choice: "Choice",
-  outline: "Deadline",
   preread: "Preread",
-};
-
-const OUTLINE_KIND: Record<string, string> = {
-  elearn_retrieved_outline: "Course outline from eLearn",
-  sharepoint_outline: "Course outline (SharePoint)",
-  atrium_fallback_outline: "Earlier Atrium outline (fallback)",
 };
 
 function formatDateOnly(date: string) {
@@ -44,13 +37,8 @@ function whenLabel(item: { dueAt: string | null; dateOnly: string | null }, time
   return "Date not announced yet";
 }
 
-function SourceLine({ source, outlineKind, timezone }: { source: SourceRef; outlineKind: string | null; timezone: string }) {
-  const name =
-    source.kind === "own_elearn"
-      ? "Your eLearn"
-      : source.kind === "shared_elearn"
-        ? "Course and section eLearn"
-        : (outlineKind && OUTLINE_KIND[outlineKind]) || "Course outline";
+function SourceLine({ source, timezone }: { source: SourceRef; timezone: string }) {
+  const name = source.kind === "own_elearn" ? "Your eLearn" : source.kind === "shared_elearn" ? "Classmates' eLearn" : "Course outline";
   return (
     <li className="rounded-lg bg-muted/60 p-3">
       <p className="font-medium">{name}</p>
@@ -67,7 +55,6 @@ export function DeadlineCard({
   item,
   timezone,
   connected,
-  outlineKind,
   isNew = false,
   onToggleDone,
 }: {
@@ -75,7 +62,6 @@ export function DeadlineCard({
   timezone: string;
   /** undefined while the eLearn connection is still loading. */
   connected: boolean | undefined;
-  outlineKind: string | null;
   /** Appeared since the student's previous visit on this device. */
   isNew?: boolean;
   /** Tick button (Assignments). Submitted items show a locked filled tick. */
@@ -114,7 +100,7 @@ export function DeadlineCard({
               title="Source details"
               aria-label={`${meta.label}. Source details for ${item.title}`}
             >
-              {/* Source at a glance: person = your eLearn, two people = classmates, document = outline. */}
+              {/* Source at a glance: person = your eLearn, two people = classmates. */}
               <SourceIcon value={item.confidence} />
             </Button>
           </DialogTrigger>
@@ -128,11 +114,11 @@ export function DeadlineCard({
             <div className="space-y-3 text-sm">
               <ul className="space-y-2">
                 {item.sources.map((s, i) => (
-                  <SourceLine key={i} source={s} outlineKind={outlineKind} timezone={timezone} />
+                  <SourceLine key={i} source={s} timezone={timezone} />
                 ))}
               </ul>
               {item.conflict && (
-                <p className="rounded-lg bg-warning/15 p-3">Sources show different dates — check eLearn.</p>
+                <p className="rounded-lg bg-warning/15 p-3">eLearn shows different dates for this — check eLearn.</p>
               )}
               {item.otherSection && (
                 <p className="rounded-lg bg-muted p-3">
@@ -140,9 +126,6 @@ export function DeadlineCard({
                 </p>
               )}
               {item.own?.text_evidence && <p className="text-muted-foreground">“{item.own.text_evidence}”</p>}
-              {item.outline && item.outline.deadline_rule !== "explicit" && !item.dateOnly && !item.dueAt && (
-                <p className="text-muted-foreground">No date in the outline yet.</p>
-              )}
               <ConnectCta connected={connected !== false} />
             </div>
           </DialogContent>

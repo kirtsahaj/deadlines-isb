@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Bell, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfirmTurnOff } from "@/components/ConfirmTurnOff";
+import { getConnectionState } from "@/lib/elearn.functions";
 import { REMINDER_SETUP_KEY, currentSubscription, disableReminders, enableReminders, pushSupport, type PushSupport } from "@/lib/pushClient";
 
 function HomeScreenSteps() {
@@ -121,6 +124,7 @@ export function ReminderSetupDialog() {
 /** Settings card. */
 export function ReminderSettings() {
   const state = useReminderState();
+  const connection = useQuery({ queryKey: ["connection-state"], queryFn: () => getConnectionState() });
   const [installed, setInstalled] = useState(false);
   useEffect(() => {
     setInstalled(window.matchMedia("(display-mode: standalone)").matches || (navigator as { standalone?: boolean }).standalone === true);
@@ -131,6 +135,12 @@ export function ReminderSettings() {
         A notification 3 hours before each course deadline, a summary of job applications closing at 10 PM and 8 AM, plus alerts for new deadlines and job postings.{" "}
         {state.support === "supported" ? (state.enabled ? "On for this device." : "Off for this device.") : "Add the app to your home screen to turn these on."}
       </p>
+      {connection.data && !connection.data.connected && (
+        <p className="rounded-lg bg-muted p-3 text-sm">
+          Without eLearn you won't get reminders for most course deadlines.{" "}
+          <Link to="/connect" className="font-medium underline">Connect eLearn</Link> to get reminders for them.
+        </p>
+      )}
       <ReminderActions state={state} />
       {state.message && <p role="status" className="text-sm text-muted-foreground">{state.message}</p>}
       {!installed && (

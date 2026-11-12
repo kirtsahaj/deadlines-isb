@@ -8,7 +8,7 @@ import { getConnectionState } from "@/lib/elearn.functions";
 type Nudge = { id: string; icon: typeof Link2; text: string; action: React.ReactNode };
 
 /** One small rotating banner for pending setup steps (eLearn, home screen); each disappears once done. Notifications live on the bells and in Menu. */
-export function SetupNudges() {
+export function SetupNudges({ hideConnect = false }: { hideConnect?: boolean }) {
   const connection = useQuery({ queryKey: ["connection-state"], queryFn: () => getConnectionState() });
   const [phone, setPhone] = useState(false);
   const [installed, setInstalled] = useState(true);
@@ -23,11 +23,11 @@ export function SetupNudges() {
 
   const nudges = useMemo(() => {
     const list: Nudge[] = [];
-    if (connection.data && !connection.data.connected) {
+    if (!hideConnect && connection.data && !connection.data.connected) {
       list.push({
         id: "connect",
         icon: Link2,
-        text: "Connect eLearn for personal updates",
+        text: "Connect eLearn to see all your deadlines",
         action: (
           <Button asChild size="sm">
             <Link to="/connect">Connect</Link>
@@ -48,7 +48,7 @@ export function SetupNudges() {
       });
     }
     return list;
-  }, [connection.data, phone, installed]);
+  }, [connection.data, phone, installed, hideConnect]);
 
   useEffect(() => {
     if (nudges.length < 2) return;
